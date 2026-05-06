@@ -26,7 +26,6 @@ Route::post('/login',[AuthController::class,'login']);
 Route::post('/register',[AuthController::class,'register']);
 Route::post('/logout',[AuthController::class,'logout']);
 
-
 /*
 |--------------------------------------------------------------------------
 | AUTH USER
@@ -47,7 +46,6 @@ Route::middleware('auth')->group(function(){
     // interaction
     Route::post('/models/{model}/star',[InteractionController::class,'star']);
     Route::post('/models/{model}/comment',[InteractionController::class,'comment']);
-    Route::get('/models/{model}/download',[InteractionController::class,'download']);
 
     // report
     Route::post('/models/{model}/report',[ReportController::class,'store']);
@@ -57,7 +55,7 @@ Route::middleware('auth')->group(function(){
     Route::post('/verify-request',[VerifyController::class,'store']);
 });
 
-
+Route::get('/models/{model}/download',[InteractionController::class,'download']);
 /*
 |--------------------------------------------------------------------------
 | ADMIN + MODERATOR PANEL

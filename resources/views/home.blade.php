@@ -26,7 +26,7 @@
     @forelse($models as $model)
     <div class="bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden hover:border-green-400 dark:hover:border-neon/40 shadow-sm hover:shadow-md dark:hover:shadow-[0_0_20px_rgba(0,255,136,0.1)] transition-all duration-300 group flex flex-col">
         
-        <a href="/models/{{ $model->id }}" class="relative w-full h-48 overflow-hidden block bg-gray-100 dark:bg-black">
+        <a href="/models/{{ $model->id }}" onclick="openModel('{{ $model->id }}', event)" class="relative w-full h-48 overflow-hidden block bg-gray-100 dark:bg-black">
             <img src="{{ $model->thumbnailUrl() }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
             @if(isset($model->category))
             <div class="absolute top-3 right-3 bg-white/90 dark:bg-black/70 backdrop-blur-md border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-md shadow-sm">

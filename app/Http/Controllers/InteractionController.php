@@ -7,6 +7,7 @@ use App\Models\Comment;
 use App\Models\Download;
 use App\Models\Model3D;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class InteractionController extends Controller
 {
@@ -14,57 +15,70 @@ class InteractionController extends Controller
     {
         $user = $r->user();
 
-        $exist = Star::where('user_id',$user->id)
-            ->where('model_id',$model->id)
-            ->first();
+        DB::beginTransaction();
 
-        if($exist){
-            $exist->delete();
-            $model->decrement('stars_count');
-        }else{
-            Star::create([
-                'user_id'=>$user->id,
-                'model_id'=>$model->id
-            ]);
-            $model->increment('stars_count');
+        try {
+            $exist = Star::where('user_id', $user->id)
+                ->where('model_id', $model->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($exist) {
+                $exist->delete();
+
+                if ($model->stars_count > 0) {
+                    $model->decrement('stars_count');
+                }
+            } else {
+                Star::create([
+                    'user_id' => $user->id,
+                    'model_id' => $model->id
+                ]);
+
+                $model->increment('stars_count');
+            }
+
+            DB::commit();
+
+            return $r->wantsJson()
+                ? response()->json(['stars' => $model->stars_count])
+                : back();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            abort(500, 'star error');
         }
-
-        return $r->wantsJson()
-            ? response()->json(['stars'=>$model->stars_count])
-            : back();
     }
 
     public function comment(Request $r, Model3D $model)
     {
         $r->validate([
-            'body'=>'required'
+            'body' => 'required'
         ]);
 
-        Comment::create([
-            'model_id'=>$model->id,
-            'user_id'=>$r->user()->id,
-            'parent_id'=>$r->parent_id,
-            'body'=>$r->body
+        $comment = Comment::create([
+            'model_id' => $model->id,
+            'user_id' => $r->user()->id,
+            'parent_id' => $r->parent_id,
+            'body' => $r->body
         ]);
+
+        $comment->load('user');
 
         return $r->wantsJson()
-            ? response()->json(['msg'=>'ok'])
+            ? response()->json($comment)
             : back();
     }
 
     public function download(Request $r, Model3D $model)
     {
         Download::create([
-            'model_id'=>$model->id,
-            'downloaded_at'=>now()
+            'model_id' => $model->id,
+            'downloaded_at' => now()
         ]);
 
         $model->increment('download_count');
 
-        return redirect(
-            config('app.supabase_url')
-            .'/storage/v1/object/public/model-assets/'
-            .$model->model_path
-        );
+        return redirect($model->modelUrl());
     }
 }

@@ -18,22 +18,22 @@ class ModelController extends Controller
 
     public function index(Request $r)
     {
-        $q = Model3D::with(['user','category','tags']);
+        $q = Model3D::with(['user', 'category', 'tags']);
 
-        if($r->search){
-            $q->where('title','like','%'.$r->search.'%');
+        if ($r->search) {
+            $q->where('title', 'like', '%' . $r->search . '%');
         }
 
-        if($r->category){
-            $q->where('category_id',$r->category);
+        if ($r->category) {
+            $q->where('category_id', $r->category);
         }
 
-        if($r->tag){
-            $q->whereHas('tags',fn($t)=>$t->where('slug',$r->tag));
+        if ($r->tag) {
+            $q->whereHas('tags', fn($t) => $t->where('slug', $r->tag));
         }
 
         // filter my_models
-        if($r->filter == 'my_models' && Auth::check()){
+        if ($r->filter == 'my_models' && Auth::check()) {
             $q->where('user_id', Auth::id());
         }
 
@@ -41,53 +41,53 @@ class ModelController extends Controller
 
         return $r->wantsJson()
             ? response()->json($models)
-            : view('home',compact('models'));
+            : view('home', compact('models'));
     }
 
     public function store(Request $r)
     {
         $r->validate([
-            'title'=>'required',
-            'model'=>'required|file|mimes:glb',
-            'thumbnail'=>'required|image'
+            'title' => 'required',
+            'model' => 'required|file|mimes:glb',
+            'thumbnail' => 'required|image'
         ]);
 
         $user = $r->user();
 
         // limit upload user basic
-        if(!$user->isVerifiedUploader()){
-            $count = Model3D::where('user_id',$user->id)
-                ->whereMonth('created_at',now()->month)
+        if (!$user->isVerifiedUploader()) {
+            $count = Model3D::where('user_id', $user->id)
+                ->whereMonth('created_at', now()->month)
                 ->count();
 
-            if($count >= 5){
-                abort(403,'limit');
+            if ($count >= 5) {
+                abort(403, 'limit');
             }
         }
 
         // upload file
-        $modelPath = SupabaseStorage::uploadModel($user->id,$r->file('model'));
-        $thumbPath = SupabaseStorage::uploadThumbnail($user->id,$r->file('thumbnail'));
+        $modelPath = SupabaseStorage::uploadModel($user->id, $r->file('model'));
+        $thumbPath = SupabaseStorage::uploadThumbnail($user->id, $r->file('thumbnail'));
 
         // create model
         $model = Model3D::create([
-            'user_id'=>$user->id,
-            'category_id'=>$r->category_id,
-            'title'=>$r->title,
-            'description'=>$r->description,
-            'model_path'=>$modelPath,
-            'thumbnail_path'=>$thumbPath
+            'user_id' => $user->id,
+            'category_id' => $r->category_id,
+            'title' => $r->title,
+            'description' => $r->description,
+            'model_path' => $modelPath,
+            'thumbnail_path' => $thumbPath
         ]);
 
         // handle tags
-        if($r->tags){
+        if ($r->tags) {
             $tagNames = explode(',', $r->tags);
             $tagIds = [];
 
-            foreach($tagNames as $name){
+            foreach ($tagNames as $name) {
                 $name = trim(strtolower($name));
 
-                if(!$name) continue;
+                if (!$name) continue;
 
                 $tag = Tag::firstOrCreate(
                     ['slug' => Str::slug($name)],
@@ -110,29 +110,48 @@ class ModelController extends Controller
 
     public function show(Request $r, Model3D $model)
     {
-        $model->load(['user','tags','comments.user']);
+        // PERBAIKAN: Menambahkan withCount('models') ke relasi user
+        // agar jumlah model yang diupload user bisa terhitung dan tampil di UI.
+        $model->load([
+            'tags', 
+            'category',
+            'user' => function($query) {
+                $query->withCount('models');
+            }
+        ]);
 
+        // TRACK VIEW
         ModelView::create([
-            'model_id'=>$model->id,
-            'user_id'=>$r->user()?->id,
-            'viewed_at'=>now()
+            'model_id' => $model->id,
+            'user_id' => $r->user()?->id,
+            'viewed_at' => now()
         ]);
 
         $model->increment('view_count');
 
-        return $r->wantsJson()
-            ? response()->json($model)
-            : view('model.show',compact('model'));
+        $recommendations = Model3D::where('category_id', $model->category_id)
+            ->where('id', '!=', $model->id)
+            ->inRandomOrder()
+            ->limit(5)
+            ->get();
+
+        // PERBAIKAN: Langsung lempar ke view 'partial' tanpa dibungkus layout modal tambahan.
+        // Ini bikin respons API jauh lebih cepat pas buka modal.
+        if ($r->partial) {
+            return view('model.partial', compact('model', 'recommendations'));
+        }
+
+        return view('model.show', compact('model', 'recommendations'));
     }
 
     public function destroy(Request $r, Model3D $model)
     {
-        $this->authorize('delete',$model);
+        $this->authorize('delete', $model);
 
         $model->delete();
 
         return $r->wantsJson()
-            ? response()->json(['msg'=>'deleted'])
+            ? response()->json(['msg' => 'deleted'])
             : back();
     }
 }

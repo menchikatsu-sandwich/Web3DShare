@@ -23,7 +23,7 @@ class AuthController extends Controller
             'password'=>bcrypt($r->password)
         ]);
 
-        Auth::login($user); // INI PENTING ANJING
+        Auth::login($user);
 
         return $r->wantsJson()
             ? response()->json($user)
