@@ -4,6 +4,7 @@
     <title>Web3DShare</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://ui-avatars.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -114,7 +115,7 @@
     </div>
 </div>
 
-<script>
+<!-- <script>
 // --- CORE LOGIC ---
 function toggleSidebar(){ const s = document.getElementById('sidebar'); if(s) s.classList.toggle('collapsed'); }
 function toggleMenu(){ document.getElementById('menu').classList.toggle('hidden'); }
@@ -195,6 +196,252 @@ window.addEventListener('popstate', async (e) => {
     if (modals.length > stack.length) { modals[modals.length - 1].remove(); stack.pop(); } 
     else { openModel(e.state.id); }
 });
+</script> -->
+
+<script>
+function toggleSidebar(){ const s = document.getElementById('sidebar'); if(s) s.classList.toggle('collapsed'); }
+function toggleMenu(){ document.getElementById('menu').classList.toggle('hidden'); }
+window.addEventListener('click', function(e) {
+    const menu = document.getElementById('menu');
+    const isClickedOnProfileImg = e.target.closest('img[onclick="toggleMenu()"]');
+    if (menu && !menu.contains(e.target) && !isClickedOnProfileImg) menu.classList.add('hidden');
+});
+
+const themeToggleBtn = document.getElementById('theme-toggle');
+function toggleThemeLogic() {
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('color-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+}
+themeToggleBtn.addEventListener('click', function() {
+    if (!document.startViewTransition) { toggleThemeLogic(); return; }
+    const transition = document.startViewTransition(() => { toggleThemeLogic(); });
+    transition.ready.then(() => {
+        const endRadius = Math.hypot(window.innerWidth, window.innerHeight);
+        document.documentElement.animate({ clipPath: [ `circle(0px at 100% 0%)`, `circle(${endRadius}px at 100% 0%)` ] }, { duration: 1000, easing: 'ease-in-out', pseudoElement: '::view-transition-new(root)' });
+    });
+});
+
+let modalOpen = false;
+let isInternalNavigation = false;
+
+// 1. Fungsi Utama Buka Modal
+async function openModel(id, event) {
+    if (event) event.preventDefault();
+    const url = `/models/${id}`;
+    
+    // Jika buka model baru saat modal sudah ada (tumpukan)
+    if (modalOpen && history.state) {
+        const currentState = history.state;
+        // Matikan status 'Final' di state sebelumnya agar saat Forward dari Home tidak ke sini
+        history.replaceState({ ...currentState, isFinal: false }, '', window.location.href);
+    }
+    loadModal(url, true);
+}
+
+// 2. Load Konten (Partial)
+function loadModal(url, pushState = true) {
+    showLoadingState();
+
+    document.body.style.cursor = 'wait';
+    fetch(`${url}?partial=1`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(res => res.text())
+    .then(html => {
+        renderModal(html);
+        if (pushState) {
+            const currentDepth = (history.state && history.state.depth) ? history.state.depth : 0;
+            history.pushState({ 
+                isModal: true, 
+                depth: currentDepth + 1,
+                isFinal: true  // Ini adalah titik terbaru/terakhir
+            }, '', url);
+        }
+    })
+    .finally(() => { document.body.style.cursor = 'default'; });
+}
+
+function showLoadingState() {
+    let wrapper = document.querySelector('.modal-wrapper');
+    if(!wrapper) {
+        wrapper = document.createElement('div');
+        wrapper.className = "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm modal-wrapper";
+        
+        // TAMBAHKAN BARIS INI:
+        wrapper.onclick = closeAll; 
+        
+        document.body.appendChild(wrapper);
+    }
+    wrapper.innerHTML = `
+        <div class="relative w-full max-w-[1400px] h-[90vh] bg-white dark:bg-darkPanel rounded-2xl flex items-center justify-center" 
+             onclick="event.stopPropagation()">
+            <div class="w-12 h-12 border-4 border-neon border-t-transparent rounded-full animate-spin"></div>
+        </div>`;
+    document.body.style.overflow = 'hidden';
+}
+
+function renderModal(html) {
+    let wrapper = document.querySelector('.modal-wrapper');
+    if(!wrapper) {
+        wrapper = document.createElement('div');
+        wrapper.className = "fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 lg:p-10 bg-black/70 backdrop-blur-sm modal-wrapper";
+        wrapper.onclick = closeAll; 
+        document.body.appendChild(wrapper);
+    }
+    wrapper.innerHTML = `<div class="relative w-full max-w-[1400px] h-[90vh] sm:h-[85vh] bg-white dark:bg-darkPanel rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-modal-up flex flex-col" onclick="event.stopPropagation()">${html}</div>`;
+    document.body.style.overflow = 'hidden'; 
+    modalOpen = true;
+}
+
+// 3. Tombol Silang (Back 1 Langkah)
+function closeTop() {
+    if (!modalOpen) return;
+    isInternalNavigation = true;
+
+    const currentDepth = (history.state && history.state.depth) ? history.state.depth : 1;
+
+    if (currentDepth > 1) {
+        history.back();
+        
+        // Kita gunakan event 'popstate' atau timeout untuk me-replace state tujuan
+        setTimeout(() => {
+            if (history.state) {
+                // Kunci state A sebagai Final yang baru
+                history.replaceState({ ...history.state, isFinal: true }, '', window.location.href);
+                // Pastikan flag dimatikan setelah replace selesai
+                isInternalNavigation = false;
+            }
+        }, 100); // Naikkan sedikit ke 100ms agar lebih stabil di beberapa browser
+    } else {
+        closeAll();
+    }
+}
+
+// 4. Klik Backdrop (Back ke Home)
+function closeAll(e) {
+    if (e && e.target !== e.currentTarget) return;
+    
+    if (modalOpen) {
+        // Hapus modal secara instan agar tidak menunggu proses history
+        const wrapper = document.querySelector('.modal-wrapper');
+        if (wrapper) wrapper.remove();
+        
+        document.body.style.overflow = '';
+        modalOpen = false;
+
+        const depth = (history.state && history.state.depth) ? history.state.depth : 1;
+        isInternalNavigation = true;
+        history.go(-depth); 
+    }
+}
+// 5. POPSTATE HANDLER
+window.addEventListener('popstate', function(event) {
+    const path = window.location.pathname;
+    const state = event.state;
+    const isModelPath = path.startsWith('/models');
+    const isFullPage = !!document.getElementById('model-root');
+
+    // A. KEMBALI KE HOME
+    if (!isModelPath || path === '/' || path === '') {
+        const wrapper = document.querySelector('.modal-wrapper');
+        if(wrapper) wrapper.remove();
+        
+        document.body.style.overflow = '';
+        modalOpen = false;
+        isInternalNavigation = false;
+
+        const homeExists = document.querySelector('.home-grid') || document.getElementById('home-content');
+        if (!homeExists) window.location.href = '/'; 
+        return;
+    }
+
+    // B. NAVIGASI SAAT MODAL TERBUKA (Internal/Back Browser)
+    if (modalOpen) {
+        if (!isInternalNavigation) {
+            // Ini jika user tekan Back browser saat pop-up buka
+            isInternalNavigation = true;
+            const backDepth = (state && state.depth) ? state.depth : 1;
+            history.go(-backDepth);
+        } else {
+            // Navigasi antar pop-up (hasil closeTop)
+            loadModal(path, false);
+            isInternalNavigation = false;
+        }
+        return;
+    }
+
+    // C. NAVIGASI SAAT DI HALAMAN FULL PAGE
+    if (isFullPage) {
+        if (state && state.depth >= 1) {
+            // Ambil alih status Final agar Forward dari Home nantinya berhenti di sini
+            if (state.isFinal === false) {
+                history.replaceState({ ...state, isFinal: true }, '', path);
+            }
+            loadModelContentSPA(path);
+        } else {
+            window.location.href = path;
+        }
+        return;
+    }
+
+    // D. NAVIGASI DARI HOME (FORWARD KE MODEL)
+    if (!modalOpen && !isFullPage) {
+        if (state && state.isModal) {
+            if (state.isFinal === false) {
+                history.forward(); // Masih ada state Final di depan, lewati!
+            } else {
+                // Tentukan: Jadi Pop-up atau Full Page?
+                if (state.depth > 1) {
+                    window.location.href = path; // Tumpukan -> Full Page
+                } else {
+                    loadModal(path, false); // Tunggal -> Pop-up
+                }
+            }
+        } else {
+            window.location.href = path;
+        }
+    }
+});
+
+function loadModelContentSPA(url) {
+    fetch(`${url}?partial=1`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(res => res.text())
+    .then(html => {
+        const container = document.getElementById('model-root');
+        if (container) {
+            container.innerHTML = html;
+            window.scrollTo(0, 0);
+        }
+    });
+}
+
+function handleModelClick(id, event) {
+    // Cek apakah kita di halaman Full Page (mencari elemen model-root)
+    const isFullPage = !!document.getElementById('model-root');
+    const url = `/models/${id}`;
+
+    if (isFullPage) {
+        // JIKA DI FULL PAGE: Jangan buka modal, tapi navigasi antar halaman (AJAX)
+        if (event) event.preventDefault();
+        
+        // Update URL di browser
+        const currentDepth = (history.state && history.state.depth) ? history.state.depth : 1;
+        history.pushState({ isModal: false, depth: currentDepth + 1, isFinal: true }, '', url);
+        
+        // Panggil fungsi loader Full Page yang sudah kita buat sebelumnya
+        if (typeof loadModelContentSPA === 'function') {
+            loadModelContentSPA(url);
+        } else {
+            window.location.href = url; // Fallback jika fungsi AJAX tidak ada
+        }
+    } else {
+        showLoadingState();
+        // JIKA DI HOME: Panggil fungsi openModel yang membuka Pop-up
+        if (typeof openModel === 'function') {
+            openModel(id, event);
+        } else {
+            window.location.href = url;
+        }
+    }
+}
 </script>
 </body>
 </html>

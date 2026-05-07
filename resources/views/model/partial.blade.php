@@ -3,7 +3,7 @@
     <div class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden">
         
         <div class="w-full h-[50vh] lg:h-[60vh] bg-gray-100 dark:bg-black relative group flex-shrink-0">
-            <model-viewer src="{{ $model->modelUrl() }}" camera-controls auto-rotate shadow-intensity="1" class="w-full h-full outline-none"></model-viewer>
+            <model-viewer src="{{ $model->modelUrl() }}" loading="lazy" camera-controls auto-rotate shadow-intensity="1" class="w-full h-full outline-none"></model-viewer>
         </div>
 
         <div class="p-6 lg:p-8 flex flex-col gap-8">
@@ -41,7 +41,7 @@
             </div>
 
             <div class="flex items-center gap-4 py-2">
-                <img src="{{ $model->user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name='.urlencode($model->user->nickname ?? $model->user->username).'&background=e5e7eb&color=1f2937' }}" 
+                <img loading="lazy" src="{{ $model->user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name='.urlencode($model->user->nickname ?? $model->user->username).'&background=e5e7eb&color=1f2937' }}" 
                      class="w-12 h-12 rounded-full object-cover ring-2 ring-green-600 dark:ring-neon">
                 <div>
                     <p class="font-bold text-gray-900 dark:text-white leading-none">{{ $model->user->nickname ?? $model->user->username }}</p>
@@ -103,14 +103,14 @@
 
         <div class="p-4 overflow-y-auto flex-1 space-y-4">
             @forelse($recommendations as $rec)
-            <a href="/models/{{ $rec->id }}" onclick="openModel( '{{ $rec->id }}' , event)" class="group flex flex-col bg-white dark:bg-darkPanel rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:border-green-400 dark:hover:border-neon/40 shadow-sm hover:shadow-md transition-all">
-                <div class="w-full h-32 bg-gray-200 dark:bg-black relative overflow-hidden">
-                    <img src="{{ $rec->thumbnailUrl() }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                </div>
-                <div class="p-3 text-center">
-                    <p class="font-semibold text-sm text-gray-800 dark:text-gray-200 truncate group-hover:text-green-600 dark:group-hover:text-neon transition-colors">{{ $rec->title }}</p>
-                    <p class="text-[10px] uppercase font-bold tracking-wider text-gray-400 mt-1 truncate">{{ $rec->category->name ?? 'Category' }}</p>
-                </div>
+            <a href="/models/{{ $rec->id }}" onclick="handleModelClick('{{ $rec->id }}', event)" class="group flex flex-col bg-white dark:bg-darkPanel rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:border-green-400 dark:hover:border-neon/40 shadow-sm hover:shadow-md transition-all">
+             <div class="w-full h-32 bg-gray-200 dark:bg-black relative overflow-hidden">
+                 <img src="{{ $rec->thumbnailUrl() }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+             </div>
+             <div class="p-3 text-center">
+                 <p class="font-semibold text-sm text-gray-800 dark:text-gray-200 truncate group-hover:text-green-600 dark:group-hover:text-neon transition-colors">{{ $rec->title }}</p>
+                 <p class="text-[10px] uppercase font-bold tracking-wider text-gray-400 mt-1 truncate">{{ $rec->category->name ?? 'Category' }}</p>
+             </div>
             </a>
             @empty
             <p class="text-center text-xs text-gray-400 py-10">No similar models found.</p>

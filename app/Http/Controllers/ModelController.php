@@ -129,15 +129,22 @@ class ModelController extends Controller
 
         $model->increment('view_count');
 
+        // $recommendations = Model3D::where('category_id', $model->category_id)
+        //     ->where('id', '!=', $model->id)
+        //     ->inRandomOrder()
+        //     ->limit(5)
+        //     ->get();
+
         $recommendations = Model3D::where('category_id', $model->category_id)
-            ->where('id', '!=', $model->id)
-            ->inRandomOrder()
-            ->limit(5)
-            ->get();
+        ->where('id', '!=', $model->id)
+        ->latest() // Lebih cepat dari inRandomOrder
+        ->limit(5)
+        ->select('id', 'title', 'thumbnail_path') // Ambil yang perlu saja
+        ->get();
 
         // PERBAIKAN: Langsung lempar ke view 'partial' tanpa dibungkus layout modal tambahan.
         // Ini bikin respons API jauh lebih cepat pas buka modal.
-        if ($r->partial) {
+        if ($r->ajax()) {
             return view('model.partial', compact('model', 'recommendations'));
         }
 

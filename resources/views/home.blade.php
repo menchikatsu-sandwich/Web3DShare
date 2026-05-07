@@ -43,7 +43,7 @@
             </a>
 
             <div class="flex items-center gap-3 mt-auto mb-4">
-                <img src="{{ $model->user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name=' . urlencode($model->user->nickname ?? $model->user->username) . '&background=e5e7eb&color=1f2937' }}"
+                <img loading="lazy" src="{{ $model->user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name=' . urlencode($model->user->nickname ?? $model->user->username) . '&background=e5e7eb&color=1f2937' }}"
                      class="w-7 h-7 rounded-full object-cover ring-2 ring-transparent group-hover:ring-green-300 dark:group-hover:ring-neon/30 transition-all">
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-gray-200 transition-colors truncate cursor-pointer">
                     {{ $model->user->nickname ?? $model->user->username }}
