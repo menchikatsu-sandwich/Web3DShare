@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Gate; // Tambahkan ini
+use App\Models\User; // Tambahkan ini
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -11,12 +13,20 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
+    ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->booting(function () { // Tambahkan logika Gate di sini
+        Gate::define('admin', function (User $user) {
+            return $user->role === 'admin';
+        });
+        Gate::define('moderator', function (User $user) {
+            return in_array($user->role, ['admin', 'moderator']);
+        });
+    })
+    ->create();

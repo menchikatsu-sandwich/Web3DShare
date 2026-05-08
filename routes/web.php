@@ -87,6 +87,7 @@ Route::middleware(['auth','role:admin'])->group(function(){
 
     // user management
     Route::post('/admin/promote/{id}',[AdminController::class,'promote']);
+    Route::post('/admin/demote/{id}',[AdminController::class,'demote']);
     Route::delete('/admin/delete-user/{id}',[AdminController::class,'deleteUser']);
 
     // category

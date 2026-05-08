@@ -45,6 +45,15 @@ class AdminController extends Controller
         return back();
     }
 
+    public function demote($id)
+    {
+        $user = User::findOrFail($id);
+        $user->role = 'user';
+        $user->save();
+
+        return back();
+    }
+
     public function deleteUser($id)
     {
         $user = User::findOrFail($id);
@@ -74,5 +83,20 @@ class AdminController extends Controller
     {
         Category::findOrFail($id)->delete();
         return back();
+    }
+
+    public function reports()
+    {
+        return Report::with('model3d')->latest()->get();
+    }
+
+    public function resolveReport(Request $r, Report $report)
+    {
+        $report->update([
+            'report_status'=>'resolved',
+            'reviewed_by'=>$r->user()->id
+        ]);
+
+        return response()->json(['msg'=>'done']);
     }
 }

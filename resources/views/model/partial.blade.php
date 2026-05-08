@@ -37,6 +37,19 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                         Download ({{ $model->download_count }})
                     </a>
+
+                    @can('moderator')
+                    <form method="POST" action="/admin/delete-model/{{ $model->id }}" onsubmit="return confirm('Yakin ingin menghapus model ini secara permanen?')">
+                        @csrf 
+                        @method('DELETE')
+                        <button type="submit" class="flex items-center gap-2 px-6 py-3 bg-red-100 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-500 hover:bg-red-600 dark:hover:bg-red-600 hover:text-white dark:hover:text-white hover:border-red-600 dark:hover:border-red-600 rounded-xl font-bold transition-all duration-300 shadow-sm hover:shadow-red-500/20 active:scale-95">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                            </svg>
+                            Delete
+                        </button>
+                    </form>
+                    @endcan
                 </div>
             </div>
 
@@ -47,6 +60,11 @@
                     <p class="font-bold text-gray-900 dark:text-white leading-none">{{ $model->user->nickname ?? $model->user->username }}</p>
                     <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mt-1.5">{{ $model->user->models_count ?? 0 }} Models Published</p>
                 </div>
+                @if($model->user->upload_tier === 'verified')
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 flex-shrink-0 text-green-500 dark:text-neon" title="Verified Creator">
+                        <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
+                    </svg>
+                @endif
             </div>
 
             <div class="space-y-3">
@@ -92,6 +110,11 @@
         </div>
     </div>
 
+    @php
+    $isFromPanel = Str::contains(request()->header('referer'), 'panel');
+    @endphp
+
+    @if(!$isFromPanel)
     <div class="w-full lg:w-80 flex-shrink-0 bg-gray-50 dark:bg-[#0c0c0e] border-l border-gray-200 dark:border-gray-800 flex flex-col relative">
         
         <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between sticky top-0 bg-gray-50 dark:bg-[#0c0c0e] z-10">
@@ -118,5 +141,5 @@
         </div>
 
     </div>
-
+    @endif
 </div>

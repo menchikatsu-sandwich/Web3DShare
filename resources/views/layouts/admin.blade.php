@@ -5,6 +5,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -160,6 +161,117 @@ themeToggleBtn.addEventListener('click', function() {
         );
     });
 });
+
+let modalOpen = false;
+let isInternalNavigation = false;
+
+// 1. Fungsi Utama Buka Modal
+async function openModel(id, event) {
+    if (event) event.preventDefault();
+    const url = `/models/${id}`;
+    
+    // Jika buka model baru saat modal sudah ada (tumpukan)
+    if (modalOpen && history.state) {
+        const currentState = history.state;
+        // Matikan status 'Final' di state sebelumnya agar saat Forward dari Home tidak ke sini
+        history.replaceState({ ...currentState, isFinal: false }, '', window.location.href);
+    }
+    loadModal(url, true);
+}
+
+// 2. Load Konten (Partial)
+function loadModal(url, pushState = true) {
+    showLoadingState();
+
+    document.body.style.cursor = 'wait';
+    fetch(`${url}?partial=1`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(res => res.text())
+    .then(html => {
+        renderModal(html);
+        if (pushState) {
+            const currentDepth = (history.state && history.state.depth) ? history.state.depth : 0;
+            history.pushState({ 
+                isModal: true, 
+                depth: currentDepth + 1,
+                isFinal: true  // Ini adalah titik terbaru/terakhir
+            }, '', url);
+        }
+    })
+    .finally(() => { document.body.style.cursor = 'default'; });
+}
+
+function showLoadingState() {
+    let wrapper = document.querySelector('.modal-wrapper');
+    if(!wrapper) {
+        wrapper = document.createElement('div');
+        wrapper.className = "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm modal-wrapper";
+        
+        // TAMBAHKAN BARIS INI:
+        wrapper.onclick = closeAll; 
+        
+        document.body.appendChild(wrapper);
+    }
+    wrapper.innerHTML = `
+        <div class="relative w-full max-w-[1400px] h-[90vh] bg-white dark:bg-darkPanel rounded-2xl flex items-center justify-center" 
+             onclick="event.stopPropagation()">
+            <div class="w-12 h-12 border-4 border-neon border-t-transparent rounded-full animate-spin"></div>
+        </div>`;
+    document.body.style.overflow = 'hidden';
+}
+
+function renderModal(html) {
+    let wrapper = document.querySelector('.modal-wrapper');
+    if(!wrapper) {
+        wrapper = document.createElement('div');
+        wrapper.className = "fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 lg:p-10 bg-black/70 backdrop-blur-sm modal-wrapper";
+        wrapper.onclick = closeAll; 
+        document.body.appendChild(wrapper);
+    }
+    wrapper.innerHTML = `<div class="relative w-full max-w-[1400px] h-[90vh] sm:h-[85vh] bg-white dark:bg-darkPanel rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-modal-up flex flex-col" onclick="event.stopPropagation()">${html}</div>`;
+    document.body.style.overflow = 'hidden'; 
+    modalOpen = true;
+}
+
+function closeTop() {
+    if (!modalOpen) return;
+    isInternalNavigation = true;
+
+    const currentDepth = (history.state && history.state.depth) ? history.state.depth : 1;
+
+    if (currentDepth > 1) {
+        history.back();
+        
+        // Kita gunakan event 'popstate' atau timeout untuk me-replace state tujuan
+        setTimeout(() => {
+            if (history.state) {
+                // Kunci state A sebagai Final yang baru
+                history.replaceState({ ...history.state, isFinal: true }, '', window.location.href);
+                // Pastikan flag dimatikan setelah replace selesai
+                isInternalNavigation = false;
+            }
+        }, 100); // Naikkan sedikit ke 100ms agar lebih stabil di beberapa browser
+    } else {
+        closeAll();
+    }
+}
+
+function closeAll(e) {
+    if (e && e.target !== e.currentTarget) return;
+    
+    if (modalOpen) {
+        // Hapus modal secara instan agar tidak menunggu proses history
+        const wrapper = document.querySelector('.modal-wrapper');
+        if (wrapper) wrapper.remove();
+        
+        document.body.style.overflow = '';
+        modalOpen = false;
+
+        const depth = (history.state && history.state.depth) ? history.state.depth : 1;
+        isInternalNavigation = true;
+        history.go(-depth); 
+    }
+}
+
 </script>
 
 </body>

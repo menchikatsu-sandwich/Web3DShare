@@ -102,6 +102,30 @@ class SupabaseStorage
         return self::supabaseUpload($path, $file);
     }
 
+    public static function updateThumbnail($model, $file)
+    {
+        $userId = $model->user_id;
+    
+        // 1. Hapus file lama jika ada di database
+        if ($model->thumbnail_path) {
+            // Hapus path yang tersimpan di kolom thumbnail_path
+            self::supabaseDelete($model->thumbnail_path);
+        }
+    
+        // 2. Generate path baru yang unik
+        $path = self::thumbPath($userId, $file);
+    
+        // 3. Upload file baru
+        $uploadStatus = self::supabaseUpload($path, $file);
+    
+        if ($uploadStatus) {
+            // 4. Update path baru ke database agar sinkron
+            $model->update(['thumbnail_path' => $path]);
+        }
+    
+        return $uploadStatus;
+    }
+
     public static function getModelUrl($path)
     {
         return self::publicUrl($path);
