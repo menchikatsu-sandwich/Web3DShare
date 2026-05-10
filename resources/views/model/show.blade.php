@@ -12,6 +12,11 @@
     .is-full-page #close-modal-btn {
         display: none !important;
     }
+    
+    /* Munculkan tombol Back to Explore (flex karena dia butuh align-items-center) */
+    .is-full-page #back-to-explore-btn {
+        display: flex !important;
+    }
 </style>
 
 @endsection
