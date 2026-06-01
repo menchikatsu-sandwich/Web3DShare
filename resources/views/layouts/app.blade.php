@@ -97,7 +97,24 @@
                     <h1 class="text-green-600 dark:text-neon font-bold text-2xl tracking-wide">Web3DShare</h1>
                 </a>
                 <div class="ml-4 hidden sm:block">
-                    <input type="text" placeholder="Search models..." class="bg-gray-50 dark:bg-gray-900/80 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 w-64 lg:w-80 rounded-xl focus:outline-none focus:border-green-500 dark:focus:border-neon focus:ring-1 focus:ring-green-500 dark:focus:ring-neon transition-all placeholder-gray-500">
+                    <form action="/" method="GET" id="nav-search-form">
+                        @if(request('filter') == 'my_models')
+                            <input type="hidden" name="filter" value="my_models">
+                        @endif
+                        
+                        @if(request('sort'))
+                            <input type="hidden" name="sort" value="{{ request('sort') }}">
+                        @endif
+                        @if(request('timeframe'))
+                            <input type="hidden" name="timeframe" value="{{ request('timeframe') }}">
+                        @endif
+
+                        <div class="relative">
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search models..." 
+                                class="bg-gray-50 dark:bg-gray-900/80 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 w-64 lg:w-80 rounded-xl focus:outline-none focus:border-green-500 dark:focus:border-neon focus:ring-1 focus:ring-green-500 dark:focus:ring-neon transition-all placeholder-gray-500">
+                            <button type="submit" class="hidden">Search</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -207,7 +224,10 @@
                 });
             });
         });
+</script>
 
+//script alur pop up modal
+<script>
         let modalOpen = false;
         let isInternalNavigation = false;
 
@@ -452,7 +472,66 @@
                 }
             }
         }
-    </script>
+</script> 
+
+//script untuk fitur copy url, toggle form reply, dan toggle tampilan list balasan
+<script>
+// 1. Amankan Fungsi Copy URL
+window.copyModelUrl = function(url, buttonEl) {
+    navigator.clipboard.writeText(url).then(() => {
+        const textSpan = buttonEl.querySelector('.share-text');
+        const originalText = textSpan ? textSpan.innerText : 'Share';
+        
+        if (textSpan) textSpan.innerText = 'Copied!';
+        buttonEl.classList.remove('border-gray-200', 'dark:border-gray-800');
+        buttonEl.classList.add('border-green-500', 'text-green-500', 'dark:text-neon', 'dark:border-neon');
+        
+        setTimeout(() => {
+            if (textSpan) textSpan.innerText = originalText;
+            buttonEl.classList.add('border-gray-200', 'dark:border-gray-800');
+            buttonEl.classList.remove('border-green-500', 'text-green-500', 'dark:text-neon', 'dark:border-neon');
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy text: ', err);
+    });
+};
+
+// 2. Amankan Fungsi Toggle Form Reply
+window.toggleReplyForm = function(commentId) {
+    const form = document.getElementById(`reply-form-${commentId}`);
+    if (form) {
+        form.classList.toggle('hidden');
+        if (!form.classList.contains('hidden')) {
+            const textarea = form.querySelector('textarea');
+            if (textarea) textarea.focus();
+        }
+    }
+};
+
+// 3. Amankan Fungsi Toggle Tampilan List Balasan
+window.toggleRepliesDisplay = function(commentId) {
+    const container = document.getElementById(`replies-container-${commentId}`);
+    const btn = document.getElementById(`toggle-btn-${commentId}`);
+    
+    if (container && btn) {
+        const btnText = btn.querySelector('span');
+        const svgIcon = btn.querySelector('svg');
+
+        container.classList.toggle('hidden');
+        
+        if (container.classList.contains('hidden')) {
+            if (btnText) btnText.innerText = 'Show Replies';
+            if (svgIcon) svgIcon.style.transform = 'rotate(0deg)';
+        } else {
+            if (btnText) btnText.innerText = 'Hide Replies';
+            if (svgIcon) {
+                svgIcon.style.transform = 'rotate(180deg)';
+                svgIcon.style.transition = 'transform 0.2s';
+            }
+        }
+    }
+};
+</script>
 </body>
 
 </html>

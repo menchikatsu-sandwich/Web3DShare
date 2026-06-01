@@ -12,7 +12,13 @@
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white leading-tight flex-1">{{ $model->title }}</h1>
 
                 <div class="flex items-center gap-3 flex-wrap lg:justify-end">
-                    <form method="POST" action="/models/{{ $model->id }}/report">
+                   <button type="button" 
+                            onclick="copyModelUrl('{{ url('/models/' . $model->id) }}', this)"
+                            class="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-800 text-sm font-medium bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-neon hover:border-green-200 dark:hover:border-neon/30 hover:bg-green-50/50 dark:hover:bg-neon/5 transition-all shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
+                        <span class="share-text">Share</span>
+                    </button>
+                                        <form method="POST" action="/models/{{ $model->id }}/report">
                         @csrf
                         <button class="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-500 hover:text-red-500 hover:border-red-200 dark:hover:border-red-500/30 transition-colors" title="Report Model">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -84,37 +90,71 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-2 ml-1">Category</span>
-                    <span class="inline-block px-3 py-1.5 bg-green-50 dark:bg-neon/10 text-green-700 dark:text-neon text-xs font-semibold rounded-md border border-green-200 dark:border-neon/20">
+                @if(isset($model->category))
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Category:</span>
+                    <a href="/?category={{ $model->category_id }}" 
+                    class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-green-100 dark:hover:bg-neon/20 hover:text-green-600 dark:hover:text-neon transition-colors shadow-sm">
                         {{ $model->category->name }}
-                    </span>
+                    </a>
                 </div>
+                @endif
 
-                <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-2 ml-1">Tags</span>
-                    <div class="flex flex-wrap gap-2">
-                        @forelse($model->tags as $tag)
-                        <span class="px-3 py-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md border border-gray-200 dark:border-gray-700 shadow-sm">
-                            {{ $tag->name }}
-                        </span>
-                        @empty
-                        <span class="text-xs text-gray-500 italic">No tags</span>
-                        @endforelse
-                    </div>
+                @if($model->tags && $model->tags->count() > 0)
+                <div class="flex flex-wrap items-center gap-2 mt-3">
+                    <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Tags:</span>
+                    @foreach($model->tags as $tag)
+                        <a href="/?tag={{ $tag->slug }}" 
+                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-50 dark:bg-gray-900/60 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:border-green-400 dark:hover:border-neon/40 hover:text-green-600 dark:hover:text-neon transition-all shadow-sm">
+                            <span class="text-gray-400">#</span>{{ $tag->name }}
+                        </a>
+                    @endforeach
                 </div>
+                @endif
             </div>
 
-            <div class="mt-4 pt-8 border-t border-gray-100 dark:border-gray-800">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Comments</h3>
-                    <span class="text-xs text-gray-500 font-medium">0 Comments</span>
+            <div class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800/60">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-green-500 dark:text-neon"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.222 3.419.169A1.751 1.751 0 0 1 10.5 18v2.25a2.25 2.25 0 0 0 3.935 1.507l2.812-2.812A1.75 1.75 0 0 0 18.5 17.75c1.002-.012 1.996-.143 2.96-.39a1.75 1.75 0 0 0 1.29-1.666V8.25a1.75 1.75 0 0 0-1.75-1.75h-3.536a4.466 4.466 0 0 1-.52-.805 4.75 4.75 0 0 0-7.38 0c-.15.244-.325.513-.52.805H3.75A1.75 1.75 0 0 0 2 8.25v3.76Z" /></svg>
+                    Comments ({{ $model->comments ? $model->comments->count() : 0 }})
+                </h3>
+
+                @auth
+                <!-- Form Utama: Untuk Komentar Level Paling Atas (Parent Null) -->
+                <form action="/models/{{ $model->id }}/comment" method="POST" class="mb-8">
+                    @csrf
+                    <div class="w-full bg-gray-50 dark:bg-black/30 border border-gray-200 dark:border-gray-800 rounded-xl focus-within:border-green-500 dark:focus-within:border-neon transition-all p-2">
+                        <textarea name="body" rows="3" required placeholder="Write a constructive comment..." 
+                            class="w-full bg-transparent border-0 resize-none outline-none focus:ring-0 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"></textarea>
+                        <div class="flex justify-end pt-2 border-t border-gray-200/60 dark:border-gray-800/50">
+                            <button type="submit" class="bg-green-500 dark:bg-neon hover:bg-green-600 dark:hover:bg-[#00cc6a] text-white dark:text-black font-semibold text-xs px-4 py-2 rounded-lg shadow-sm transition-all">
+                                Post Comment
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                @else
+                <div class="mb-8 p-4 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 rounded-xl text-center text-sm text-gray-500">
+                    Please <a href="/login" class="text-green-600 dark:text-neon font-semibold hover:underline">login</a> to participate in the discussion.
                 </div>
-                <div class="text-center py-12 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-darkBg/30 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mx-auto mb-3 opacity-20">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.172 0 0012 3c-3.992 0-7.342.233-8.914.467-1.584.233-2.707 1.626-2.707 3.228v4.02z" />
-                    </svg>
-                    <p class="text-sm">Comments are coming soon...</p>
+                @endauth
+
+                <!-- Daftar List Komentar Terstruktur -->
+                <div class="space-y-4 max-h-[550px] overflow-y-auto pr-2">
+                    @php
+                        $allComments = $model->comments ?? collect();
+                    @endphp
+
+                    @forelse($allComments->where('parent_id', null) as $comment)
+                        <div class="space-y-2 border-b border-gray-100 dark:border-gray-800/40 pb-4 last:border-0">
+                            {{-- Memanggil komponen sub-view dengan melemparkan data yang dibutuhkan secara berantai --}}
+                            @include('model.comment-item', ['comment' => $comment, 'allComments' => $allComments, 'modelId' => $model->id])
+                        </div>
+                    @empty
+                    <div class="text-center py-8 text-gray-400 dark:text-gray-600 text-sm">
+                        No comments yet. Be the first to share your thoughts!
+                    </div>
+                    @endforelse
                 </div>
             </div>
 

@@ -22,6 +22,73 @@
     @endif
 </div>
 
+<form action="{{ url()->current() }}" method="GET" class="mb-8 bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-800 rounded-2xl p-4 flex flex-wrap gap-4 items-center justify-end shadow-sm">
+    @if(request('filter') == 'my_models')
+        <input type="hidden" name="filter" value="my_models">
+    @endif
+    @if(request('search'))
+        <input type="hidden" name="search" value="{{ request('search') }}">
+    @endif
+
+    @if(request('category'))
+        <input type="hidden" name="category" value="{{ request('category') }}">
+    @endif
+    @if(request('tag'))
+        <input type="hidden" name="tag" value="{{ request('tag') }}">
+    @endif
+
+    <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto items-center">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <span class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider hidden sm:inline">Sort</span>
+            <select name="sort" onchange="this.form.submit()" 
+                class="w-full sm:w-44 px-3 py-2 text-sm bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 rounded-xl focus:outline-none focus:border-green-500 dark:focus:border-neon cursor-pointer transition-all">
+                <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Latest Uploads</option>
+                <option value="top_downloads" {{ request('sort') == 'top_downloads' ? 'selected' : '' }}>Top Downloads</option>
+                <option value="top_views" {{ request('sort') == 'top_views' ? 'selected' : '' }}>Top Views</option>
+                <option value="top_stars" {{ request('sort') == 'top_stars' ? 'selected' : '' }}>Top Stars</option>
+            </select>
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <span class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider hidden sm:inline">Time</span>
+            <select name="timeframe" onchange="this.form.submit()" 
+                class="w-full sm:w-40 px-3 py-2 text-sm bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 rounded-xl focus:outline-none focus:border-green-500 dark:focus:border-neon cursor-pointer transition-all">
+                <option value="all_time" {{ request('timeframe') == 'all_time' ? 'selected' : '' }}>All Time</option>
+                <option value="this_month" {{ request('timeframe') == 'this_month' ? 'selected' : '' }}>This Month</option>
+                <option value="this_week" {{ request('timeframe') == 'this_week' ? 'selected' : '' }}>This Week</option>
+            </select>
+        </div>
+    </div>
+</form>
+
+@if(request('category') || request('tag') || request('search'))
+<div class="mb-4 flex flex-wrap gap-2 items-center">
+    <span class="text-xs text-gray-400 font-medium">Active filters:</span>
+    
+    @if(request('search'))
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+            Search: "{{ request('search') }}"
+        </span>
+    @endif
+
+    @if(request('category'))
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-green-50 dark:bg-neon/10 text-green-700 dark:text-neon border border-green-200 dark:border-neon/20">
+            Category Filter
+        </span>
+    @endif
+
+    @if(request('tag'))
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20">
+            Tag: #{{ request('tag') }}
+        </span>
+    @endif
+
+    <a href="/" class="text-xs font-bold text-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors ml-2">
+        Clear All X
+    </a>
+</div>
+@endif
+
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     @forelse($models as $model)
     <div class="bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden hover:border-green-400 dark:hover:border-neon/40 shadow-sm hover:shadow-md dark:hover:shadow-[0_0_20px_rgba(0,255,136,0.1)] transition-all duration-300 group flex flex-col">
@@ -84,5 +151,9 @@
         @endif
     </div>
     @endforelse
+</div>
+
+<div class="mt-10">
+    {{ $models->appends(request()->query())->links() }}
 </div>
 @endsection

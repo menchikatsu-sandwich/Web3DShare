@@ -56,42 +56,44 @@ Route::middleware('auth')->group(function(){
 });
 
 Route::get('/models/{model}/download',[InteractionController::class,'download']);
+
 /*
 |--------------------------------------------------------------------------
-| ADMIN + MODERATOR PANEL
+| ADMIN + MODERATOR PANEL (Hanya Admin & Moderator yang Bisa Masuk)
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->group(function(){
+// PERBAIKAN: Bungkus dengan auth DAN validasi role agar user biasa otomatis tertendang (403)
+Route::middleware(['auth', 'role:admin,moderator'])->group(function(){
 
-    // panel utama (admin & moderator bisa akses)
-    Route::get('/panel',[AdminController::class,'index']);
+    // panel utama (hanya admin & moderator yang bisa akses via URL)
+    Route::get('/panel', [AdminController::class, 'index']);
 
     // MODEL moderation
-    Route::delete('/admin/delete-model/{id}',[AdminController::class,'deleteModel']);
+    Route::delete('/admin/delete-model/{id}', [AdminController::class, 'deleteModel']);
 
     // VERIFY (moderator + admin)
-    Route::post('/verify/{id}/approve',[VerifyController::class,'approve']);
-    Route::post('/verify/{id}/reject',[VerifyController::class,'reject']);
+    Route::post('/verify/{id}/approve', [VerifyController::class, 'approve']);
+    Route::post('/verify/{id}/reject', [VerifyController::class, 'reject']);
 
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN ONLY
+| ADMIN ONLY (Khusus Admin, Moderator pun Tidak Bisa)
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth','role:admin'])->group(function(){
+Route::middleware(['auth', 'role:admin'])->group(function(){
 
     // user management
-    Route::post('/admin/promote/{id}',[AdminController::class,'promote']);
-    Route::post('/admin/demote/{id}',[AdminController::class,'demote']);
-    Route::delete('/admin/delete-user/{id}',[AdminController::class,'deleteUser']);
+    Route::post('/admin/promote/{id}', [AdminController::class, 'promote']);
+    Route::post('/admin/demote/{id}', [AdminController::class, 'demote']);
+    Route::delete('/admin/delete-user/{id}', [AdminController::class, 'deleteUser']);
 
     // category
-    Route::post('/admin/category',[AdminController::class,'storeCategory']);
-    Route::delete('/admin/category/{id}',[AdminController::class,'deleteCategory']);
+    Route::post('/admin/category', [AdminController::class, 'storeCategory']);
+    Route::delete('/admin/category/{id}', [AdminController::class, 'deleteCategory']);
 
 });
