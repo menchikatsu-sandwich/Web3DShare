@@ -70,6 +70,52 @@ class InteractionController extends Controller
             : back();
     }
 
+    public function deleteComment(Request $r, Comment $comment)
+    {
+        $user = $r->user();
+
+        // Cek Hak Akses: Apakah dia admin, moderator, atau pemilik komentar tersebut
+        // Sesuaikan properti 'role' dengan kolom yang ada di database User kamu
+        $isAdminOrMod = $user && in_array($user->role, ['admin', 'moderator']);
+        $isOwner = $user && $user->id === $comment->user_id;
+
+        if (!$isOwner && !$isAdminOrMod) {
+            abort(403, 'Anda tidak memiliki akses untuk menghapus komentar ini.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Fungsi pembantu untuk menghapus replies secara rekursif/berantai
+            $this->deleteRepliesRecursively($comment->id);
+
+            // Hapus komentar utama
+            $comment->delete();
+
+            DB::commit();
+
+            return $r->wantsJson()
+                ? response()->json(['success' => true, 'message' => 'Komentar dan balasannya berhasil dihapus.'])
+                : back()->with('success', 'Komentar berhasil dihapus.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            abort(500, 'Gagal menghapus komentar');
+        }
+    }
+
+    // Fungsi pembantu rekursif untuk menjamin semua sub-reply terdalam ikut terhapus
+    private function deleteRepliesRecursively($parentId)
+    {
+        $replies = Comment::where('parent_id', $parentId)->get();
+        
+        foreach ($replies as $reply) {
+            // Cari lagi apakah sub-reply ini punya anak lagi di bawahnya
+            $this->deleteRepliesRecursively($reply->id);
+            // Hapus sub-reply tersebut
+            $reply->delete();
+        }
+    }
+
     public function download(Request $r, Model3D $model)
     {
         Download::create([

@@ -7,11 +7,12 @@ use App\Models\ModelView;
 use App\Models\Download;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Services\SupabaseStorage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon; // <-- Pastikan tambahkan ini di paling atas file jika belum ada
+use Carbon\Carbon; 
 
 class ModelController extends Controller
 {
@@ -22,15 +23,23 @@ class ModelController extends Controller
         // 1. Inisialisasi query dasar beserta relasinya
         $q = Model3D::with(['user', 'category', 'tags']);
 
-        // 2. Fitur Pencarian (Search) dari Navbar
+        // 2. Fitur Pencarian (Search) - SEKARANG CASE INSENSITIVE & BISA CARI CREATOR/TAGS
         if ($r->filled('search')) {
-            $search = $r->search;
+            // Kita ubah keyword menjadi huruf kecil semua untuk keamanan case-insensitive
+            $search = strtolower($r->search);
+            
             $q->where(function($subQuery) use ($search) {
-                $subQuery->where('title', 'like', '%' . $search . '%')
-                         ->orWhere('description', 'like', '%' . $search . '%')
-                         ->orWhereHas('tags', function($tagQuery) use ($search) {
-                             $tagQuery->where('name', 'like', '%' . $search . '%');
-                         });
+                $subQuery->where(DB::raw('LOWER(title)'), 'like', '%' . $search . '%')
+                        ->orWhere(DB::raw('LOWER(description)'), 'like', '%' . $search . '%')
+                        // TAMBAHAN: Cari berdasarkan Nama Creator (Username atau Nickname)
+                        ->orWhereHas('user', function($userQuery) use ($search) {
+                            $userQuery->where(DB::raw('LOWER(username)'), 'like', '%' . $search . '%')
+                                    ->orWhere(DB::raw('LOWER(nickname)'), 'like', '%' . $search . '%');
+                        })
+                        // Cari berdasarkan Tag
+                        ->orWhereHas('tags', function($tagQuery) use ($search) {
+                            $tagQuery->where(DB::raw('LOWER(name)'), 'like', '%' . $search . '%');
+                        });
             });
         }
 
@@ -40,16 +49,16 @@ class ModelController extends Controller
         }
 
         if ($r->tag) {
+            // KOREKSI: Hanya cari berdasarkan 'slug' karena data yang dikirim dari front-end berupa teks slug.
+            // Ini mencegah error "invalid input syntax for type bigint" di PostgreSQL.
             $q->whereHas('tags', fn($t) => $t->where('slug', $r->tag));
         }
-
         // 4. Filter My Models vs Explore Umum
         if ($r->filter == 'my_models' && Auth::check()) {
             $q->where('user_id', Auth::id());
         }
 
         // 5. Filter Timeframe (Rentang Waktu: This Month, This Week)
-        // Kita menyaring kolom `created_at` pada tabel model
         if ($r->filled('timeframe') && $r->timeframe !== 'all_time') {
             if ($r->timeframe === 'this_month') {
                 $q->where('created_at', '>=', Carbon::now()->startOfMonth());
@@ -59,34 +68,35 @@ class ModelController extends Controller
         }
 
         // 6. Fitur Sorting (Urutan Data: Top Views, Downloads, Stars)
-        $sort = $r->get('sort', 'latest'); // Default ke 'latest' jika tidak dipilih
+        $sort = $r->get('sort', 'latest');
         
         switch ($sort) {
             case 'top_downloads':
-                // Mengurutkan berdasarkan kolom download_count terbanyak
                 $q->orderBy('download_count', 'desc');
                 break;
             case 'top_views':
-                // Mengurutkan berdasarkan kolom view_count terbanyak
                 $q->orderBy('view_count', 'desc');
                 break;
             case 'top_stars':
-                // Mengurutkan berdasarkan kolom stars_count terbanyak
                 $q->orderBy('stars_count', 'desc');
                 break;
             case 'latest':
             default:
-                // Mengurutkan dari yang paling baru diupload
                 $q->latest();
                 break;
         }
 
-        // 7. Pagination (Menampilkan 12 data per halaman)
-        $models = $q->paginate(12);
+        // 7. Pagination & Menjaga agar Query String di URL tidak hilang saat pindah halaman
+        $models = $q->paginate(12)->withQueryString();
 
+        // TAMBAHAN: Ambil data Kategori & Tags dari database agar bisa doloop di view 'home'
+        $categories = \App\Models\Category::all();
+        $tags = \App\Models\Tag::limit(10)->get(); // Ambil 10 tag untuk dipasang di bagian "Popular Tags"
+
+        // 8. Return data sesuai format request
         return $r->wantsJson()
             ? response()->json($models)
-            : view('home', compact('models'));
+            : view('home', compact('models', 'categories', 'tags'));
     }
 
     public function store(Request $r)

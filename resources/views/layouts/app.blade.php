@@ -97,23 +97,33 @@
                     <h1 class="text-green-600 dark:text-neon font-bold text-2xl tracking-wide">Web3DShare</h1>
                 </a>
                 <div class="ml-4 hidden sm:block">
-                    <form action="/" method="GET" id="nav-search-form">
-                        @if(request('filter') == 'my_models')
-                            <input type="hidden" name="filter" value="my_models">
+                    <form action="/" method="GET" class="relative flex-1 max-w-md hidden sm:block">
+                        @if(request('category'))
+                            <input type="hidden" name="category" value="{{ request('category') }}">
                         @endif
-                        
+                        @if(request('tag'))
+                            <input type="hidden" name="tag" value="{{ request('tag') }}">
+                        @endif
                         @if(request('sort'))
                             <input type="hidden" name="sort" value="{{ request('sort') }}">
                         @endif
                         @if(request('timeframe'))
                             <input type="hidden" name="timeframe" value="{{ request('timeframe') }}">
                         @endif
+                        @if(request('filter'))
+                            <input type="hidden" name="filter" value="{{ request('filter') }}">
+                        @endif
 
-                        <div class="relative">
-                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search models..." 
-                                class="bg-gray-50 dark:bg-gray-900/80 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 w-64 lg:w-80 rounded-xl focus:outline-none focus:border-green-500 dark:focus:border-neon focus:ring-1 focus:ring-green-500 dark:focus:ring-neon transition-all placeholder-gray-500">
-                            <button type="submit" class="hidden">Search</button>
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
                         </div>
+                        <input type="text" 
+                            name="search" 
+                            value="{{ request('search') }}"
+                            placeholder="Search models, creators, or tags..." 
+                            class="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-darkPanel text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 dark:focus:border-neon text-sm transition-all">
                     </form>
                 </div>
             </div>
@@ -230,11 +240,18 @@
 <script>
         let modalOpen = false;
         let isInternalNavigation = false;
+        // TAMBAHAN SIMPEL: Variabel global untuk menyimpan filter aktif dari halaman home
+        let activeFilters = window.location.search || ''; 
 
         // 1. Fungsi Utama Buka Modal
         async function openModel(id, event) {
             if (event) event.preventDefault();
             const url = `/models/${id}`;
+
+            // Jika buka dari Home pertama kali, kunci/ingat filter yang sedang aktif saat ini
+            if (!modalOpen) {
+                activeFilters = window.location.search || '';
+            }
 
             // Jika buka model baru saat modal sudah ada (tumpukan)
             if (modalOpen && history.state) {
@@ -348,9 +365,16 @@
 
                 const depth = (history.state && history.state.depth) ? history.state.depth : 1;
                 isInternalNavigation = true;
+                
+                // Tambahkan filter aktif saat ini ke State Home sebelum kembali mundur lewat history.go()
+                // Agar sewaktu mundur ke belakang, popstate mengenali query filternya
+                const targetUrl = '/' + activeFilters;
+                history.replaceState(null, '', targetUrl);
+                
                 history.go(-depth);
             }
         }
+        
         // 5. POPSTATE HANDLER
         window.addEventListener('popstate', function(event) {
             const path = window.location.pathname;
@@ -368,7 +392,16 @@
                 isInternalNavigation = false;
 
                 const homeExists = document.querySelector('.home-grid') || document.getElementById('home-content');
-                if (!homeExists) window.location.href = '/';
+                
+                // TAMBAHAN KOREKSI: Gunakan activeFilters agar saat fallback redirect tidak kehilangan filter anakan
+                if (!homeExists) {
+                    window.location.href = '/' + activeFilters;
+                } else {
+                    // Jika halaman home-grid-nya ada di belakang, paksa sinkronisasi URL agar filternya muncul di address bar
+                    if (window.location.search !== activeFilters) {
+                        history.replaceState(null, '', '/' + activeFilters);
+                    }
+                }
                 return;
             }
 
@@ -463,6 +496,9 @@
                     window.location.href = url; // Fallback jika fungsi AJAX tidak ada
                 }
             } else {
+                // TAMBAHAN KOREKSI: Kunci filter di sini sebelum animasi modal loading muncul
+                activeFilters = window.location.search || '';
+                
                 showLoadingState();
                 // JIKA DI HOME: Panggil fungsi openModel yang membuka Pop-up
                 if (typeof openModel === 'function') {
@@ -472,7 +508,7 @@
                 }
             }
         }
-</script> 
+</script>
 
 //script untuk fitur copy url, toggle form reply, dan toggle tampilan list balasan
 <script>

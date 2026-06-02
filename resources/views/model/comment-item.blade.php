@@ -21,13 +21,13 @@
         </p>
 
         <!-- Aksi di Bawah Komentar -->
-        <div class="flex items-center gap-4 mt-2">
+        <div class="flex items-center gap-4 mt-2.5 flex-wrap">
             @auth
             <button type="button" 
                     onclick="toggleReplyForm('{{ $comment->id }}')"
-                    class="text-[11px] font-bold text-gray-400 hover:text-green-500 dark:hover:text-neon flex items-center gap-1">
+                    class="text-[11px] font-bold text-gray-400 hover:text-green-500 dark:hover:text-neon transition-colors flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" /></svg>
-                <span>Reply</span>
+                Reply
             </button>
             @endauth
 
@@ -40,6 +40,20 @@
                 <span>Show Replies ({{ $allComments->where('parent_id', $comment->id)->count() }})</span>
             </button>
             @endif
+
+            @auth
+                @if(auth()->id() === $comment->user_id || in_array(auth()->user()->role, ['admin', 'moderator']))
+                <form action="/comments/{{ $comment->id }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus komentar ini? Semua balasan di bawahnya juga akan ikut terhapus secara permanen.')" class="inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" 
+                            class="text-[11px] font-bold text-red-400 hover:text-red-600 dark:text-red-500/80 dark:hover:text-red-400 transition-colors flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.34 6.6m-4.77 0L9 9m11.11-8.8a1 1 0 0 0-1-1H5.82a1 1 0 0 0-1 1M4.77 5h14.46M15 11v6.5m-6-6.5V17.5" /></svg>
+                        Delete
+                    </button>
+                </form>
+                @endif
+            @endauth
         </div>
 
         <!-- Form Reply (Disisipkan pas di dalam hirarki agar posisinya presisi & tidak renggang) -->

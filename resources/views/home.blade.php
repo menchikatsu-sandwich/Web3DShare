@@ -61,7 +61,50 @@
     </div>
 </form>
 
-@if(request('category') || request('tag') || request('search'))
+<div class="my-6 space-y-4">
+    <div class="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar" style="scrollbar-width: none; -ms-overflow-style: none;">
+        <style>
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+        </style>
+        
+        <a href="{{ request()->fullUrlWithQuery(['category' => null]) }}" 
+           class="px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 {{ !request('category') ? 'bg-green-500 text-white dark:bg-neon dark:text-black shadow-md' : 'bg-gray-100 dark:bg-darkPanel/60 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 border border-gray-200/50 dark:border-gray-800/50' }}">
+            All Categories
+        </a>
+        
+        @foreach($categories as $cat)
+        <a href="{{ request()->fullUrlWithQuery(['category' => $cat->id]) }}" 
+           class="px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 {{ request('category') == $cat->id ? 'bg-green-500 text-white dark:bg-neon dark:text-black shadow-md' : 'bg-gray-100 dark:bg-darkPanel/60 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 border border-gray-200/50 dark:border-gray-800/50' }}">
+            {{ $cat->name }}
+        </a>
+        @endforeach
+    </div>
+
+    @if(isset($tags) && $tags->count() > 0)
+    <div class="flex flex-wrap items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+        <span class="font-medium mr-1 flex items-center gap-1 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581a1.43 1.43 0 0 0 2.022 0l4.318-4.318a1.43 1.43 0 0 0 0-2.022L10.15 3.659a2.25 2.25 0 0 0-1.591-.659Zm-2.318 5.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" /></svg>
+            Popular Tags:
+        </span>
+        
+        @foreach($tags as $t)
+        <a href="{{ request()->fullUrlWithQuery(['tag' => $t->slug]) }}" 
+           class="px-2.5 py-0.5 rounded-md border text-[11px] font-medium transition-all {{ request('tag') == $t->slug ? 'border-green-500 bg-green-50/50 text-green-600 dark:border-neon dark:bg-neon/10 dark:text-neon' : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 bg-gray-50/30 dark:bg-darkPanel/30' }}">
+            #{{ $t->name }}
+        </a>
+        @endforeach
+        
+        @if(request('tag') || request('category') || request('search'))
+        <a href="/" class="ml-2 text-[11px] font-bold text-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors flex items-center gap-0.5">
+            ✕ Clear Filters
+        </a>
+        @endif
+    </div>
+    @endif
+</div>
+
+{{-- Tampilan Clear Lama --}}
+{{-- @if(request('category') || request('tag') || request('search'))
 <div class="mb-4 flex flex-wrap gap-2 items-center">
     <span class="text-xs text-gray-400 font-medium">Active filters:</span>
     
@@ -87,7 +130,7 @@
         Clear All X
     </a>
 </div>
-@endif
+@endif --}}
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     @forelse($models as $model)

@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function(){
     // interaction
     Route::post('/models/{model}/star',[InteractionController::class,'star']);
     Route::post('/models/{model}/comment',[InteractionController::class,'comment']);
+    Route::delete('/comments/{comment}', [InteractionController::class, 'deleteComment']);
 
     // report
     Route::post('/models/{model}/report',[ReportController::class,'store']);
