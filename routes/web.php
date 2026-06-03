@@ -77,6 +77,10 @@ Route::middleware(['auth', 'role:admin,moderator'])->group(function(){
     Route::post('/verify/{id}/approve', [VerifyController::class, 'approve']);
     Route::post('/verify/{id}/reject', [VerifyController::class, 'reject']);
 
+     // category
+    Route::post('/admin/category', [AdminController::class, 'storeCategory']);
+    Route::delete('/admin/category/{id}', [AdminController::class, 'deleteCategory']);
+
 });
 
 
@@ -93,8 +97,6 @@ Route::middleware(['auth', 'role:admin'])->group(function(){
     Route::post('/admin/demote/{id}', [AdminController::class, 'demote']);
     Route::delete('/admin/delete-user/{id}', [AdminController::class, 'deleteUser']);
 
-    // category
-    Route::post('/admin/category', [AdminController::class, 'storeCategory']);
-    Route::delete('/admin/category/{id}', [AdminController::class, 'deleteCategory']);
+   
 
 });
