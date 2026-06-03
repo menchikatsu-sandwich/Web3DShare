@@ -39,9 +39,9 @@ class SupabaseStorage
 
     private static function supabaseUpload($path, $file)
     {
-        $bucket     = env('AWS_BUCKET');
-        $url        = env('SUPABASE_URL');
-        $serviceKey = env('SUPABASE_SERVICE_ROLE_KEY');
+        $bucket = env('AWS_BUCKET');
+        $url = env('SUPABASE_URL');
+        $serviceKey = env('SUPABASE_SECRET_KEY') ?: env('SUPABASE_SERVICE_ROLE_KEY');
 
         if (!$bucket || !$url || !$serviceKey) {
             throw new \Exception('Supabase configuration missing');
@@ -57,6 +57,7 @@ class SupabaseStorage
             : ($file->getClientMimeType() ?: 'application/octet-stream');
 
         $response = Http::withHeaders([
+            'apikey'        => $serviceKey,
             'Authorization' => 'Bearer ' . $serviceKey,
             'Content-Type'  => $mimeType,
             'x-upsert'      => 'true',
@@ -76,11 +77,12 @@ class SupabaseStorage
     {
         if (!$path) return;
 
-        $bucket     = env('AWS_BUCKET');
-        $url        = env('SUPABASE_URL');
-        $serviceKey = env('SUPABASE_SERVICE_ROLE_KEY');
+        $bucket = env('AWS_BUCKET');
+        $url = env('SUPABASE_URL');
+        $serviceKey = env('SUPABASE_SECRET_KEY') ?: env('SUPABASE_SERVICE_ROLE_KEY');
 
         Http::withHeaders([
+            'apikey'        => $serviceKey,
             'Authorization' => 'Bearer ' . $serviceKey,
         ])->delete("{$url}/storage/v1/object/{$bucket}/{$path}");
     }
