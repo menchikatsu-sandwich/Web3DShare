@@ -68,10 +68,12 @@
                     <div class="min-w-0">
                         <h1 class="text-3xl font-bold text-gray-900 dark:text-white leading-tight">{{ $model->title }}</h1>
                         <div class="flex items-center gap-3 mt-3">
-                            <img loading="lazy" src="{{ $model->user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name='.urlencode($model->user->nickname ?? $model->user->username).'&background=e5e7eb&color=1f2937' }}"
-                                class="w-10 h-10 rounded-full object-cover ring-2 ring-green-600 dark:ring-neon">
+                            <a href="/creators/{{ $model->user->username }}" class="flex-shrink-0">
+                                <img loading="lazy" src="{{ $model->user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name='.urlencode($model->user->nickname ?? $model->user->username).'&background=e5e7eb&color=1f2937' }}"
+                                    class="w-10 h-10 rounded-full object-cover ring-2 ring-green-600 dark:ring-neon">
+                            </a>
                             <div class="min-w-0">
-                                <p class="font-bold text-gray-900 dark:text-white leading-none truncate">{{ $model->user->nickname ?? $model->user->username }}</p>
+                                <a href="/creators/{{ $model->user->username }}" class="block font-bold text-gray-900 dark:text-white hover:text-green-600 dark:hover:text-neon leading-none truncate">{{ $model->user->nickname ?? $model->user->username }}</a>
                                 <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mt-1.5">{{ $model->user->models_count ?? 0 }} Models Published</p>
                             </div>
                             @if($model->user->upload_tier === 'verified')

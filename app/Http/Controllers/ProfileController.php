@@ -3,10 +3,40 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use App\Services\SupabaseStorage;
 
 class ProfileController extends Controller
 {
+    public function creator(User $user)
+    {
+        $stats = [
+            'models' => $user->models()->count(),
+            'views' => $user->models()->sum('view_count'),
+            'stars' => $user->models()->sum('stars_count'),
+            'downloads' => $user->models()->sum('download_count'),
+        ];
+
+        $models = $user->models()
+            ->select([
+                'id',
+                'user_id',
+                'category_id',
+                'title',
+                'thumbnail_path',
+                'download_count',
+                'stars_count',
+                'view_count',
+                'created_at',
+            ])
+            ->with(['category:id,name', 'user:id,username,nickname,upload_tier,profile_image_path'])
+            ->latest()
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('creator.show', compact('user', 'stats', 'models'));
+    }
+
     public function show(Request $r)
     {
         return $r->wantsJson()

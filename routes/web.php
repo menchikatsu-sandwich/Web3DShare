@@ -17,6 +17,7 @@ use App\Http\Controllers\AdminController;
 */
 
 Route::get('/', [ModelController::class,'index']);
+Route::get('/creators/{user:username}', [ProfileController::class, 'creator']);
 Route::get('/models/{model}', [ModelController::class,'show']);
 
 Route::view('/login','auth.login')->name('login');

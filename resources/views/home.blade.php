@@ -144,13 +144,15 @@
             </a>
 
             <div class="flex items-center gap-3 mt-auto mb-4">
-                <img loading="lazy" src="{{ $model->user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name=' . urlencode($model->user->nickname ?? $model->user->username) . '&background=e5e7eb&color=1f2937' }}"
-                     class="w-7 h-7 rounded-full object-cover ring-2 ring-transparent group-hover:ring-green-300 dark:group-hover:ring-neon/30 transition-all">
+                <a href="/creators/{{ $model->user->username }}" class="flex-shrink-0">
+                    <img loading="lazy" src="{{ $model->user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name=' . urlencode($model->user->nickname ?? $model->user->username) . '&background=e5e7eb&color=1f2937' }}"
+                         class="w-7 h-7 rounded-full object-cover ring-2 ring-transparent group-hover:ring-green-300 dark:group-hover:ring-neon/30 transition-all">
+                </a>
                 
                 <div class="flex items-center gap-1.5 min-w-0">
-                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-gray-200 transition-colors truncate cursor-pointer" title="{{ $model->user->nickname ?? $model->user->username }}">
+                    <a href="/creators/{{ $model->user->username }}" class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-gray-200 transition-colors truncate" title="{{ $model->user->nickname ?? $model->user->username }}">
                         {{ $model->user->nickname ?? $model->user->username }}
-                    </span>
+                    </a>
                     
                     @if($model->user->upload_tier === 'verified')
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 flex-shrink-0 text-green-500 dark:text-neon" title="Verified Creator">
