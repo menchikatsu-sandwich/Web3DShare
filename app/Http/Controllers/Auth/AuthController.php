@@ -12,9 +12,9 @@ class AuthController extends Controller
     public function register(Request $r)
     {
         $r->validate([
-            'username'=>'required|unique:users',
-            'email'=>'required|email|unique:users',
-            'password'=>'required|min:6'
+            'username' => ['required', 'string', 'max:50', 'regex:/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]+$/', 'unique:users,username'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:6']
         ]);
 
         $user = User::create([
@@ -27,15 +27,26 @@ class AuthController extends Controller
 
         return $r->wantsJson()
             ? response()->json($user)
-            : redirect('/');
+            : redirect('/')->with('success', 'Account created. Welcome to Web3DShare.');
     }
 
     public function login(Request $r)
     {
+        $r->validate([
+            'email' => ['required', 'string'],
+            'password' => ['required', 'string'],
+        ]);
+
         $loginField = filter_var($r->input('email'), FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
     
         if (!Auth::attempt([$loginField => $r->input('email'), 'password' => $r->input('password')])) {
-            return back()->withErrors(['login' => 'salah']);
+            if ($r->wantsJson()) {
+                return response()->json(['error' => 'Email/username or password is incorrect.'], 401);
+            }
+
+            return back()
+                ->withErrors(['login' => 'Email/username or password is incorrect.'])
+                ->withInput($r->only('email'));
         }
     
         $r->session()->regenerate();
@@ -53,7 +64,7 @@ class AuthController extends Controller
     
         return $r->wantsJson()
             ? response()->json(['msg' => 'ok', 'redirect' => $redirectUrl])
-            : redirect($redirectUrl);
+            : redirect($redirectUrl)->with('success', 'Logged in successfully.');
     }
 
     public function logout(Request $r)
@@ -62,7 +73,7 @@ class AuthController extends Controller
         $r->session()->invalidate();
         $r->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')->with('success', 'Logged out successfully.');
     }
 }
 

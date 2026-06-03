@@ -3,31 +3,14 @@
 
 <head>
     <title>Web3DShare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://ui-avatars.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif']
-                    },
-                    colors: {
-                        neon: '#00ff88',
-                        darkBg: '#09090b',
-                        darkPanel: '#111113'
-                    }
-                }
-            }
-        }
-    </script>
-
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('head')
 
     <script>
         if (localStorage.getItem('color-theme') === 'light') {
@@ -84,6 +67,33 @@
 </head>
 
 <body class="bg-gray-100 dark:bg-darkBg text-gray-800 dark:text-gray-200 font-sans antialiased transition-colors duration-300">
+
+    @if(session('success') || session('error') || $errors->any())
+        <div class="fixed top-24 right-4 z-[200] w-[calc(100vw-2rem)] max-w-md space-y-3 pointer-events-none">
+            @if(session('success'))
+                <div class="pointer-events-auto bg-green-50 dark:bg-green-950/95 border border-green-300 dark:border-neon/40 text-green-800 dark:text-neon px-4 py-3 rounded-xl text-sm font-medium shadow-xl">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="pointer-events-auto bg-red-50 dark:bg-red-950/95 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-xl text-sm font-medium shadow-xl">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="pointer-events-auto bg-red-50 dark:bg-red-950/95 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-xl text-sm shadow-xl">
+                    <p class="font-semibold mb-1">Please fix the following:</p>
+                    <ul class="list-disc ml-5 space-y-0.5">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+        </div>
+    @endif
 
     <div class="flex flex-col min-h-screen">
         <nav class="flex items-center justify-between px-6 py-4 bg-white dark:bg-darkPanel border-b border-gray-200 dark:border-neon/10 shadow-sm sticky top-0 z-50 transition-colors duration-300">
@@ -185,11 +195,15 @@
             @endauth
 
             <main class="flex-1 p-6 lg:p-8 overflow-y-auto flex flex-col">
-                <div class="flex-1">@yield('content')</div>
+                <div class="flex-1">
+                    @yield('content')
+                </div>
 
-                <footer class="mt-auto pt-10 pb-4 border-t border-gray-200 dark:border-gray-800 text-center">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">&copy; 2026 Web3DShare. All rights reserved.</p>
-                </footer>
+                @unless(request()->is('models/*'))
+                    <footer class="mt-auto pt-10 pb-4 border-t border-gray-200 dark:border-gray-800 text-center">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">&copy; 2026 Web3DShare. All rights reserved.</p>
+                    </footer>
+                @endunless
             </main>
         </div>
     </div>
@@ -236,7 +250,6 @@
         });
 </script>
 
-//script alur pop up modal
 <script>
         let modalOpen = false;
         let isInternalNavigation = false;
@@ -270,11 +283,11 @@
             showLoadingState();
 
             document.body.style.cursor = 'wait';
-            fetch(`${url}?partial=1`, {
+            ensureModelViewerLoaded().then(() => fetch(`${url}?partial=1`, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
-                })
+                }))
                 .then(res => res.text())
                 .then(html => {
                     renderModal(html);
@@ -290,6 +303,26 @@
                 .finally(() => {
                     document.body.style.cursor = 'default';
                 });
+        }
+
+        function ensureModelViewerLoaded() {
+            if (customElements.get('model-viewer')) {
+                return Promise.resolve();
+            }
+
+            const existing = document.querySelector('script[data-model-viewer]');
+            if (existing) {
+                return new Promise(resolve => existing.addEventListener('load', resolve, { once: true }));
+            }
+
+            return new Promise(resolve => {
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js';
+                script.dataset.modelViewer = 'true';
+                script.addEventListener('load', resolve, { once: true });
+                document.head.appendChild(script);
+            });
         }
 
         function showLoadingState() {
@@ -457,11 +490,11 @@
         });
 
         function loadModelContentSPA(url) {
-            fetch(`${url}?partial=1`, {
+            ensureModelViewerLoaded().then(() => fetch(`${url}?partial=1`, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
-                })
+                }))
                 .then(res => res.text())
                 .then(html => {
                     const container = document.getElementById('model-root');
@@ -509,8 +542,6 @@
             }
         }
 </script>
-
-//script untuk fitur copy url, toggle form reply, dan toggle tampilan list balasan
 <script>
 // 1. Amankan Fungsi Copy URL
 window.copyModelUrl = function(url, buttonEl) {

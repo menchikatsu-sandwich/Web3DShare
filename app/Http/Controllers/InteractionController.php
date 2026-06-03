@@ -46,14 +46,22 @@ class InteractionController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            abort(500, 'star error');
+            \Log::error('Star toggle error: ' . $e->getMessage(), [
+                'user_id' => $user?->id,
+                'model_id' => $model->id,
+            ]);
+
+            return $r->wantsJson()
+                ? response()->json(['error' => 'Failed to update star.'], 500)
+                : back()->with('error', 'Failed to update star.');
         }
     }
 
     public function comment(Request $r, Model3D $model)
     {
         $r->validate([
-            'body' => 'required'
+            'body' => ['required', 'string', 'max:2000'],
+            'parent_id' => ['nullable', 'exists:comments,id'],
         ]);
 
         $comment = Comment::create([
@@ -67,7 +75,7 @@ class InteractionController extends Controller
 
         return $r->wantsJson()
             ? response()->json($comment)
-            : back();
+            : back()->with('success', 'Comment posted.');
     }
 
     public function deleteComment(Request $r, Comment $comment)
@@ -80,7 +88,9 @@ class InteractionController extends Controller
         $isOwner = $user && $user->id === $comment->user_id;
 
         if (!$isOwner && !$isAdminOrMod) {
-            abort(403, 'Anda tidak memiliki akses untuk menghapus komentar ini.');
+            return $r->wantsJson()
+                ? response()->json(['error' => 'You do not have access to delete this comment.'], 403)
+                : back()->with('error', 'You do not have access to delete this comment.');
         }
 
         DB::beginTransaction();
@@ -99,7 +109,14 @@ class InteractionController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            abort(500, 'Gagal menghapus komentar');
+            \Log::error('Comment delete error: ' . $e->getMessage(), [
+                'user_id' => $user?->id,
+                'comment_id' => $comment->id,
+            ]);
+
+            return $r->wantsJson()
+                ? response()->json(['error' => 'Failed to delete comment.'], 500)
+                : back()->with('error', 'Failed to delete comment.');
         }
     }
 

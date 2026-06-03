@@ -43,17 +43,30 @@ class SupabaseStorage
         $url        = env('SUPABASE_URL');
         $serviceKey = env('SUPABASE_SERVICE_ROLE_KEY');
 
+        if (!$bucket || !$url || !$serviceKey) {
+            throw new \Exception('Supabase configuration missing');
+        }
+
+        $fileContent = file_get_contents($file->getRealPath());
+        if ($fileContent === false) {
+            throw new \Exception('Failed to read file');
+        }
+
+        $mimeType = strtolower($file->getClientOriginalExtension()) === 'glb'
+            ? 'model/gltf-binary'
+            : ($file->getClientMimeType() ?: 'application/octet-stream');
+
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $serviceKey,
-            'Content-Type'  => $file->getMimeType(),
+            'Content-Type'  => $mimeType,
             'x-upsert'      => 'true',
         ])->withBody(
-            file_get_contents($file),
-            $file->getMimeType()
-        )->post("{$url}/storage/v1/object/{$bucket}/{$path}");
+            $fileContent,
+            $mimeType
+        )->timeout(120)->post("{$url}/storage/v1/object/{$bucket}/{$path}");
 
         if (!$response->successful()) {
-            throw new \Exception('Supabase upload error: ' . $response->body());
+            throw new \Exception('Supabase upload failed: ' . $response->status() . ' - ' . $response->body());
         }
 
         return $path;

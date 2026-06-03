@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="mb-5 flex flex-col lg:flex-row lg:items-end justify-between gap-4">
     <div>
         @if(request('filter') == 'my_models')
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white tracking-wide">My <span class="text-green-600 dark:text-neon">Models</span></h2>
@@ -12,56 +12,47 @@
         @endif
     </div>
     
-    @if(request('filter') == 'my_models')
-    <div>
-        <a href="/" class="text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-neon flex items-center gap-2 transition-colors bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-800 px-4 py-2 rounded-lg shadow-sm hover:border-green-300 dark:hover:border-neon/30">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
-            Back to Explore
-        </a>
-    </div>
-    @endif
-</div>
+    <div class="flex flex-col sm:flex-row gap-3 lg:items-center">
+        <form action="{{ url()->current() }}" method="GET" class="flex flex-col sm:flex-row gap-3">
+            @if(request('filter') == 'my_models')
+                <input type="hidden" name="filter" value="my_models">
+            @endif
+            @if(request('search'))
+                <input type="hidden" name="search" value="{{ request('search') }}">
+            @endif
+            @if(request('category'))
+                <input type="hidden" name="category" value="{{ request('category') }}">
+            @endif
+            @if(request('tag'))
+                <input type="hidden" name="tag" value="{{ request('tag') }}">
+            @endif
 
-<form action="{{ url()->current() }}" method="GET" class="mb-8 bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-800 rounded-2xl p-4 flex flex-wrap gap-4 items-center justify-end shadow-sm">
-    @if(request('filter') == 'my_models')
-        <input type="hidden" name="filter" value="my_models">
-    @endif
-    @if(request('search'))
-        <input type="hidden" name="search" value="{{ request('search') }}">
-    @endif
-
-    @if(request('category'))
-        <input type="hidden" name="category" value="{{ request('category') }}">
-    @endif
-    @if(request('tag'))
-        <input type="hidden" name="tag" value="{{ request('tag') }}">
-    @endif
-
-    <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto items-center">
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-            <span class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider hidden sm:inline">Sort</span>
             <select name="sort" onchange="this.form.submit()" 
-                class="w-full sm:w-44 px-3 py-2 text-sm bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 rounded-xl focus:outline-none focus:border-green-500 dark:focus:border-neon cursor-pointer transition-all">
+                class="w-full sm:w-44 px-3 py-2 text-sm bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 rounded-xl focus:outline-none focus:border-green-500 dark:focus:border-neon cursor-pointer transition-all shadow-sm">
                 <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Latest Uploads</option>
                 <option value="top_downloads" {{ request('sort') == 'top_downloads' ? 'selected' : '' }}>Top Downloads</option>
                 <option value="top_views" {{ request('sort') == 'top_views' ? 'selected' : '' }}>Top Views</option>
                 <option value="top_stars" {{ request('sort') == 'top_stars' ? 'selected' : '' }}>Top Stars</option>
             </select>
-        </div>
 
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-            <span class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider hidden sm:inline">Time</span>
             <select name="timeframe" onchange="this.form.submit()" 
-                class="w-full sm:w-40 px-3 py-2 text-sm bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 rounded-xl focus:outline-none focus:border-green-500 dark:focus:border-neon cursor-pointer transition-all">
+                class="w-full sm:w-40 px-3 py-2 text-sm bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 rounded-xl focus:outline-none focus:border-green-500 dark:focus:border-neon cursor-pointer transition-all shadow-sm">
                 <option value="all_time" {{ request('timeframe') == 'all_time' ? 'selected' : '' }}>All Time</option>
                 <option value="this_month" {{ request('timeframe') == 'this_month' ? 'selected' : '' }}>This Month</option>
                 <option value="this_week" {{ request('timeframe') == 'this_week' ? 'selected' : '' }}>This Week</option>
             </select>
-        </div>
-    </div>
-</form>
+        </form>
 
-<div class="my-6 space-y-4">
+        @if(request('filter') == 'my_models')
+        <a href="/" class="text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-neon flex items-center gap-2 transition-colors bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-800 px-4 py-2 rounded-lg shadow-sm hover:border-green-300 dark:hover:border-neon/30">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+            Back to Explore
+        </a>
+        @endif
+    </div>
+</div>
+
+<div class="mb-6 space-y-3">
     <div class="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar" style="scrollbar-width: none; -ms-overflow-style: none;">
         <style>
             .no-scrollbar::-webkit-scrollbar { display: none; }

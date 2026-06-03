@@ -26,6 +26,28 @@
                     Back to Home
                 </a>
             </div>
+        @elseif($pendingRequest)
+            <div class="flex flex-col items-center text-center py-8">
+                <div class="p-5 bg-yellow-100 dark:bg-yellow-500/10 rounded-full text-yellow-600 dark:text-yellow-400 mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-16 h-16">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Verification <span class="text-yellow-600 dark:text-yellow-400">Pending</span></h2>
+                <p class="text-gray-500 dark:text-gray-400 max-w-sm">
+                    Your request is waiting for admin or moderator review. You can submit a new request after this one is approved or rejected.
+                </p>
+
+                <div class="mt-6 w-full text-left bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/20 rounded-xl p-4">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-yellow-700 dark:text-yellow-400 mb-2">Submitted note</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $pendingRequest->note }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Submitted on {{ $pendingRequest->created_at->format('F j, Y H:i') }}</p>
+                </div>
+                
+                <a href="/" class="mt-8 px-8 py-3 bg-gray-100 dark:bg-darkBg text-gray-700 dark:text-white font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-800 transition-all">
+                    Back to Home
+                </a>
+            </div>
         @else
             {{-- FORM REQUEST JIKA BELUM VERIFIED --}}
             <form method="POST" action="/verify-request" class="flex flex-col gap-6">

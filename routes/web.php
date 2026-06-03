@@ -69,9 +69,12 @@ Route::middleware(['auth', 'role:admin,moderator'])->group(function(){
 
     // panel utama (hanya admin & moderator yang bisa akses via URL)
     Route::get('/panel', [AdminController::class, 'index']);
+    Route::get('/admin/status', [AdminController::class, 'status']);
 
     // MODEL moderation
     Route::delete('/admin/delete-model/{id}', [AdminController::class, 'deleteModel']);
+    Route::post('/admin/reports/{report}/reviewed', [AdminController::class, 'reviewReport']);
+    Route::post('/admin/reports/{report}/resolve', [AdminController::class, 'resolveReport']);
 
     // VERIFY (moderator + admin)
     Route::post('/verify/{id}/approve', [VerifyController::class, 'approve']);

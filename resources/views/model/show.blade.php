@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('head')
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+@endpush
+
 @section('content')
 
 <div id="model-root" class="is-full-page flex flex-col w-auto h-[calc(100vh-73px)] -m-6 lg:-m-8 bg-white dark:bg-darkPanel">

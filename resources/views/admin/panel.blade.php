@@ -88,21 +88,60 @@
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">User <span class="text-green-600 dark:text-neon">Reports</span></h2>
             <div class="space-y-3">
                 @forelse($reports as $r)
-                <div class="flex flex-col md:flex-row md:items-center justify-between bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 p-5 rounded-xl shadow-sm">
-                    <div class="mb-4 md:mb-0">
-                        <p class="font-semibold text-gray-800 dark:text-gray-200 text-lg">{{ $r->model->title }}</p>
-                        <p class="text-sm text-red-600 dark:text-red-500 mt-1 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                            Reason: {{ $r->reason }}
-                        </p>
+                <div class="bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 p-5 rounded-xl shadow-sm">
+                    <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <p class="font-semibold text-gray-800 dark:text-gray-200 text-lg">
+                                    {{ $r->model3d->title ?? 'Deleted model' }}
+                                </p>
+                                <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border
+                                    {{ $r->report_status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-500/20' : ($r->report_status === 'reviewed' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500/20' : 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-neon border-green-300 dark:border-green-500/20') }}">
+                                    {{ $r->report_status }}
+                                </span>
+                            </div>
+                            <p class="text-sm text-red-600 dark:text-red-500 mt-2 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                Reason: {{ ucwords(str_replace('_', ' ', $r->reason)) }}
+                            </p>
+                            <div class="mt-3 grid sm:grid-cols-2 gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                <p>Reporter: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $r->reporter->username ?? 'Deleted user' }}</span></p>
+                                <p>Model owner: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $r->model3d->user->username ?? 'Deleted user' }}</span></p>
+                                <p>Created: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $r->created_at->format('M j, Y H:i') }}</span></p>
+                                <p>Reviewer: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $r->reviewer->username ?? '-' }}</span></p>
+                            </div>
+                            @if($r->description)
+                                <p class="mt-3 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-black/30 border border-gray-200 dark:border-gray-800 rounded-lg p-3">{{ $r->description }}</p>
+                            @endif
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row lg:flex-col gap-2 lg:w-44 flex-shrink-0">
+                            @if($r->model3d)
+                                <a href="/models/{{ $r->model_id }}" class="text-center bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-green-400 dark:hover:border-neon/40 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Open Model</a>
+                            @endif
+                            @if($r->report_status === 'pending')
+                                <form method="POST" action="/admin/reports/{{ $r->id }}/reviewed">
+                                    @csrf
+                                    <button class="w-full bg-blue-100 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Mark Reviewed</button>
+                                </form>
+                            @endif
+                            @if($r->report_status !== 'resolved')
+                                <form method="POST" action="/admin/reports/{{ $r->id }}/resolve">
+                                    @csrf
+                                    <button class="w-full bg-green-100 dark:bg-green-500/10 border border-green-300 dark:border-green-500/20 text-green-700 dark:text-neon hover:bg-green-600 hover:text-white dark:hover:text-black px-4 py-2 rounded-lg text-sm font-semibold transition-colors">Resolve</button>
+                                </form>
+                            @endif
+                            @if($r->model3d)
+                                <form method="POST" action="/admin/delete-model/{{ $r->model_id }}" onsubmit="return confirm('Take down this model? This will delete the model and its reports.')">
+                                    @csrf @method('DELETE')
+                                    <button class="w-full bg-red-100 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Take Down</button>
+                                </form>
+                            @endif
+                        </div>
                     </div>
-                    <form method="POST" action="/admin/delete-model/{{ $r->model_id }}">
-                        @csrf @method('DELETE')
-                        <button class="bg-red-100 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-500 hover:bg-red-500 hover:text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors">Take Down Model</button>
-                    </form>
                 </div>
                 @empty
-                <div class="text-center py-10 text-gray-500">No pending reports.</div>
+                <div class="text-center py-10 text-gray-500">No reports yet.</div>
                 @endforelse
             </div>
         </div>
@@ -221,6 +260,8 @@
 </div>
 
 <script>
+    window.panelStats = @json($stats);
+
     document.addEventListener('DOMContentLoaded', function() {
         // 1. Ambil tab terakhir dari localStorage atau URL hash, default ke 'dashboard'
         const lastTab = localStorage.getItem('activeAdminTab') || window.location.hash.substring(1) || 'dashboard';
@@ -232,7 +273,31 @@
         if (targetBtn) {
             changeTab(lastTab, targetBtn);
         }
+
+        setInterval(checkAdminUpdates, 15000);
     });
+
+    async function checkAdminUpdates() {
+        try {
+            const response = await fetch('/admin/status', {
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) return;
+
+            const latest = await response.json();
+            const activeTab = localStorage.getItem('activeAdminTab') || 'dashboard';
+            const reportChanged = latest.reports !== window.panelStats.reports;
+            const verifyChanged = latest.verify !== window.panelStats.verify;
+
+            window.panelStats = latest;
+
+            if ((activeTab === 'reports' && reportChanged) || (activeTab === 'verify' && verifyChanged)) {
+                window.location.reload();
+            }
+        } catch (error) {
+            console.warn('Admin update check failed', error);
+        }
+    }
 
     function changeTab(tabId, btnElement) {
         // Simpan ID tab ke localStorage agar awet saat reload

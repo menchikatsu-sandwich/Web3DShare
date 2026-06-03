@@ -12,6 +12,7 @@ use App\Services\SupabaseStorage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon; 
 
 class ModelController extends Controller
@@ -21,7 +22,23 @@ class ModelController extends Controller
     public function index(Request $r)
     {
         // 1. Inisialisasi query dasar beserta relasinya
-        $q = Model3D::with(['user', 'category', 'tags']);
+        $q = Model3D::select([
+                'id',
+                'user_id',
+                'category_id',
+                'title',
+                'description',
+                'thumbnail_path',
+                'download_count',
+                'stars_count',
+                'view_count',
+                'created_at',
+            ])
+            ->with([
+                'user:id,username,nickname,upload_tier,profile_image_path',
+                'category:id,name',
+                'tags:id,name,slug',
+            ]);
 
         // 2. Fitur Pencarian (Search) - SEKARANG CASE INSENSITIVE & BISA CARI CREATOR/TAGS
         if ($r->filled('search')) {
@@ -90,8 +107,8 @@ class ModelController extends Controller
         $models = $q->paginate(12)->withQueryString();
 
         // TAMBAHAN: Ambil data Kategori & Tags dari database agar bisa doloop di view 'home'
-        $categories = \App\Models\Category::all();
-        $tags = \App\Models\Tag::limit(10)->get(); // Ambil 10 tag untuk dipasang di bagian "Popular Tags"
+        $categories = \App\Models\Category::orderBy('name')->get(['id', 'name']);
+        $tags = \App\Models\Tag::orderBy('name')->limit(10)->get(['id', 'name', 'slug']);
 
         // 8. Return data sesuai format request
         return $r->wantsJson()
@@ -101,66 +118,120 @@ class ModelController extends Controller
 
     public function store(Request $r)
     {
-        $r->validate([
-            'title' => 'required',
-            'model' => 'required|file|mimes:glb',
-            'thumbnail' => 'required|image'
+        $validator = Validator::make($r->all(), [
+            'title' => ['required', 'string', 'max:255'],
+            'model' => [
+                'required',
+                'file',
+                'max:50000',
+                function ($attribute, $value, $fail) {
+                    if (!$value->isValid()) {
+                        $fail('The model upload did not complete. Please choose the file again.');
+                        return;
+                    }
+
+                    if (strtolower($value->getClientOriginalExtension()) !== 'glb') {
+                        $fail('The model must be a .glb file.');
+                    }
+                },
+            ],
+            'thumbnail' => [
+                'required',
+                'image',
+                'max:5000',
+                function ($attribute, $value, $fail) {
+                    if (!$value->isValid()) {
+                        $fail('The thumbnail upload did not complete. Please choose the image again.');
+                    }
+                },
+            ],
+            'category_id' => ['required', 'exists:categories,id'],
         ]);
+
+        if ($validator->fails()) {
+            \Log::warning('Model upload validation failed', [
+                'user_id' => $r->user()?->id,
+                'errors' => $validator->errors()->toArray(),
+                'model_file' => $r->file('model')?->getClientOriginalName(),
+                'model_size' => $r->file('model')?->getSize(),
+                'model_mime' => $r->file('model')?->getClientMimeType(),
+                'thumbnail_file' => $r->file('thumbnail')?->getClientOriginalName(),
+                'thumbnail_size' => $r->file('thumbnail')?->getSize(),
+                'thumbnail_mime' => $r->file('thumbnail')?->getClientMimeType(),
+                'category_id' => $r->category_id,
+            ]);
+
+            return response()->json([
+                'message' => 'Upload validation failed.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
         $user = $r->user();
 
         // limit upload user basic
         if (!$user->isVerifiedUploader()) {
             $count = Model3D::where('user_id', $user->id)
+                ->whereYear('created_at', now()->year)
                 ->whereMonth('created_at', now()->month)
                 ->count();
 
             if ($count >= 5) {
-                abort(403, 'limit');
+                return response()->json([
+                    'error' => 'Upload limit reached for this month. Please wait until next month or upgrade to verified uploader.',
+                    'next_reset' => now()->addMonthNoOverflow()->startOfMonth()->toDateString(),
+                ], 403);
             }
         }
 
-        // upload file
-        $modelPath = SupabaseStorage::uploadModel($user->id, $r->file('model'));
-        $thumbPath = SupabaseStorage::uploadThumbnail($user->id, $r->file('thumbnail'));
+        try {
+            // upload file
+            $modelPath = SupabaseStorage::uploadModel($user->id, $r->file('model'));
+            $thumbPath = SupabaseStorage::uploadThumbnail($user->id, $r->file('thumbnail'));
 
-        // create model
-        $model = Model3D::create([
-            'user_id' => $user->id,
-            'category_id' => $r->category_id,
-            'title' => $r->title,
-            'description' => $r->description,
-            'model_path' => $modelPath,
-            'thumbnail_path' => $thumbPath
-        ]);
+            // create model
+            $model = Model3D::create([
+                'user_id' => $user->id,
+                'category_id' => $r->category_id,
+                'title' => $r->title,
+                'description' => $r->description,
+                'model_path' => $modelPath,
+                'thumbnail_path' => $thumbPath
+            ]);
 
-        // handle tags
-        if ($r->tags) {
-            $tagNames = explode(',', $r->tags);
-            $tagIds = [];
+            // handle tags
+            if ($r->tags) {
+                $tagNames = explode(',', $r->tags);
+                $tagIds = [];
 
-            foreach ($tagNames as $name) {
-                $name = trim(strtolower($name));
+                foreach ($tagNames as $name) {
+                    $name = trim(strtolower($name));
 
-                if (!$name) continue;
+                    if (!$name) continue;
 
-                $tag = Tag::firstOrCreate(
-                    ['slug' => Str::slug($name)],
-                    [
-                        'name' => $name,
-                        'created_by' => $user->id
-                    ]
-                );
+                    $tag = Tag::firstOrCreate(
+                        ['slug' => Str::slug($name)],
+                        [
+                            'name' => $name,
+                            'created_by' => $user->id
+                        ]
+                    );
 
-                $tagIds[] = $tag->id;
+                    $tagIds[] = $tag->id;
+                }
+
+                $model->tags()->sync(array_unique($tagIds));
             }
 
-            $model->tags()->sync(array_unique($tagIds));
+            return response()->json($model, 201);
+        } catch (\Exception $e) {
+            \Log::error('Model upload error: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        return $r->wantsJson()
-            ? response()->json($model)
-            : redirect('/');
     }
 
     public function show(Request $r, Model3D $model)
@@ -191,12 +262,13 @@ class ModelController extends Controller
         //     ->limit(5)
         //     ->get();
 
-        $recommendations = Model3D::where('category_id', $model->category_id)
-        ->where('id', '!=', $model->id)
-        ->latest() // Lebih cepat dari inRandomOrder
-        ->limit(5)
-        ->select('id', 'title', 'thumbnail_path') // Ambil yang perlu saja
-        ->get();
+        $recommendations = Model3D::with('category:id,name')
+            ->where('category_id', $model->category_id)
+            ->where('id', '!=', $model->id)
+            ->latest()
+            ->limit(5)
+            ->select('id', 'category_id', 'title', 'thumbnail_path')
+            ->get();
 
         // PERBAIKAN: Langsung lempar ke view 'partial' tanpa dibungkus layout modal tambahan.
         // Ini bikin respons API jauh lebih cepat pas buka modal.

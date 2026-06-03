@@ -1,48 +1,95 @@
-<div class="flex flex-col lg:flex-row h-full w-full bg-white dark:bg-darkPanel text-gray-800 dark:text-gray-200">
+<div class="flex flex-col lg:flex-row h-full min-h-0 w-full bg-white dark:bg-darkPanel text-gray-800 dark:text-gray-200">
 
-    <div class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden">
+    <div class="flex-1 min-h-0 flex flex-col overflow-y-auto overflow-x-hidden">
 
-        <div class="w-full h-[50vh] lg:h-[60vh] bg-gray-100 dark:bg-black relative group flex-shrink-0">
+        <div class="px-4 sm:px-6 lg:px-8 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between gap-3 bg-white dark:bg-darkPanel flex-shrink-0">
+            <a href="/" id="back-to-explore-btn" class="hidden text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-neon items-center gap-2 transition-colors bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 px-4 py-2 rounded-lg shadow-sm hover:border-green-300 dark:hover:border-neon/30">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Back to Explore
+            </a>
+
+            <div class="ml-auto flex items-center gap-2">
+                <div class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-sm font-semibold text-gray-600 dark:text-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {{ $model->view_count }}
+                </div>
+
+                <details class="relative">
+                    <summary class="list-none cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-red-300 hover:text-red-500 transition-all shadow-sm">
+                        Report
+                    </summary>
+                    <div class="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] z-30 bg-white dark:bg-darkPanel border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl p-4">
+                        @auth
+                            <form method="POST" action="/models/{{ $model->id }}/report" class="space-y-3">
+                                @csrf
+                                <select name="reason" required class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-red-500">
+                                    <option value="" disabled selected>Select reason...</option>
+                                    <option value="stolen_content">Stolen content</option>
+                                    <option value="inappropriate_content">Inappropriate content</option>
+                                    <option value="spam">Spam or misleading</option>
+                                    <option value="broken_file">Broken or unsafe file</option>
+                                    <option value="wrong_category">Wrong category</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <textarea name="description" rows="3" maxlength="1000" placeholder="Add context for moderators..."
+                                    class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-3 py-2 rounded-lg text-sm resize-none focus:outline-none focus:border-red-500"></textarea>
+                                <button type="submit" class="w-full bg-red-600 text-white font-semibold text-sm py-2 rounded-lg hover:bg-red-700 transition-colors">Submit Report</button>
+                            </form>
+                        @else
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Please <a href="/login" class="text-green-600 dark:text-neon font-semibold hover:underline">login</a> to report this model.</p>
+                        @endauth
+                    </div>
+                </details>
+
+                <button type="button" 
+                        onclick="copyModelUrl('{{ url('/models/' . $model->id) }}', this)"
+                        class="flex items-center gap-2 px-4 py-2 bg-green-500 dark:bg-neon text-white dark:text-black font-semibold rounded-lg hover:bg-green-600 dark:hover:bg-[#00cc6a] transition-all shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 19c1.5-5.5 5.5-8.5 11-8.5V5l6 6-6 6v-5.5C10.5 11.5 6.8 14 4 19z" />
+                    </svg>
+                    <span class="share-text">Share</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="w-full h-[46vh] min-h-[320px] lg:h-[58vh] bg-gray-100 dark:bg-black relative group flex-shrink-0">
             <model-viewer src="{{ $model->modelUrl() }}" loading="lazy" camera-controls auto-rotate shadow-intensity="1" class="w-full h-full outline-none"></model-viewer>
         </div>
 
-        <div class="p-6 lg:p-8 flex flex-col gap-8">
+        <div class="p-6 lg:p-8 flex flex-col gap-6">
 
-            <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white leading-tight flex-1">{{ $model->title }}</h1>
-
-                <div class="flex items-center gap-3 flex-wrap lg:justify-end">
-                   <button type="button" 
-                            onclick="copyModelUrl('{{ url('/models/' . $model->id) }}', this)"
-                            class="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-800 text-sm font-medium bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-neon hover:border-green-200 dark:hover:border-neon/30 hover:bg-green-50/50 dark:hover:bg-neon/5 transition-all shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
-                        <span class="share-text">Share</span>
-                    </button>
-                                        <form method="POST" action="/models/{{ $model->id }}/report">
-                        @csrf
-                        <button class="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-500 hover:text-red-500 hover:border-red-200 dark:hover:border-red-500/30 transition-colors" title="Report Model">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <div class="flex flex-col gap-5">
+                <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
+                    <div class="min-w-0">
+                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white leading-tight">{{ $model->title }}</h1>
+                        <div class="flex items-center gap-3 mt-3">
+                            <img loading="lazy" src="{{ $model->user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name='.urlencode($model->user->nickname ?? $model->user->username).'&background=e5e7eb&color=1f2937' }}"
+                                class="w-10 h-10 rounded-full object-cover ring-2 ring-green-600 dark:ring-neon">
+                            <div class="min-w-0">
+                                <p class="font-bold text-gray-900 dark:text-white leading-none truncate">{{ $model->user->nickname ?? $model->user->username }}</p>
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mt-1.5">{{ $model->user->models_count ?? 0 }} Models Published</p>
+                            </div>
+                            @if($model->user->upload_tier === 'verified')
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 flex-shrink-0 text-green-500 dark:text-neon" title="Verified Creator">
+                                <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
                             </svg>
-                            <span class="hidden sm:inline">Report</span>
-                        </button>
-                    </form>
-
-                    <div class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        {{ $model->view_count }}
+                            @endif
+                        </div>
                     </div>
 
+                <div class="flex items-center gap-3 flex-wrap lg:justify-end">
                     <form method="POST" action="/models/{{ $model->id }}/star">
                         @csrf
-                        <button class="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-yellow-500 hover:border-yellow-300 dark:hover:text-yellow-400 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <button class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-lg hover:text-yellow-500 hover:border-yellow-300 dark:hover:text-yellow-400 transition-all shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                             </svg>
-                            {{ $model->stars_count }}
+                            Star ({{ $model->stars_count }})
                         </button>
                     </form>
 
@@ -68,49 +115,28 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-4 py-2">
-                <img loading="lazy" src="{{ $model->user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name='.urlencode($model->user->nickname ?? $model->user->username).'&background=e5e7eb&color=1f2937' }}"
-                    class="w-12 h-12 rounded-full object-cover ring-2 ring-green-600 dark:ring-neon">
+            <div class="bg-gray-50 dark:bg-darkBg/50 border border-gray-100 dark:border-gray-800 rounded-2xl p-5 space-y-4">
                 <div>
-                    <p class="font-bold text-gray-900 dark:text-white leading-none">{{ $model->user->nickname ?? $model->user->username }}</p>
-                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mt-1.5">{{ $model->user->models_count ?? 0 }} Models Published</p>
+                    <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">About</h3>
+                    <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $model->description ?? 'No description available for this model.' }}</p>
                 </div>
-                @if($model->user->upload_tier === 'verified')
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 flex-shrink-0 text-green-500 dark:text-neon" title="Verified Creator">
-                    <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
-                </svg>
-                @endif
-            </div>
 
-            <div class="space-y-3">
-                <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">About this model</h3>
-                <div class="bg-gray-50 dark:bg-darkBg/50 border border-gray-100 dark:border-gray-800 p-5 rounded-2xl text-sm leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                    {{ $model->description ?? 'No description available for this model.' }}
-                </div>
-            </div>
+                <div class="flex flex-wrap gap-2">
+                    @if(isset($model->category))
+                        <a href="/?category={{ $model->category_id }}" 
+                        class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-white dark:bg-gray-900/60 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-800 hover:bg-green-100 dark:hover:bg-neon/20 hover:text-green-600 dark:hover:text-neon transition-colors shadow-sm">
+                            {{ $model->category->name }}
+                        </a>
+                    @endif
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                @if(isset($model->category))
-                <div class="flex items-center gap-2 mt-2">
-                    <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Category:</span>
-                    <a href="/?category={{ $model->category_id }}" 
-                    class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-green-100 dark:hover:bg-neon/20 hover:text-green-600 dark:hover:text-neon transition-colors shadow-sm">
-                        {{ $model->category->name }}
-                    </a>
-                </div>
-                @endif
-
-                @if($model->tags && $model->tags->count() > 0)
-                <div class="flex flex-wrap items-center gap-2 mt-3">
-                    <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Tags:</span>
                     @foreach($model->tags as $tag)
                         <a href="/?tag={{ $tag->slug }}" 
-                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-50 dark:bg-gray-900/60 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:border-green-400 dark:hover:border-neon/40 hover:text-green-600 dark:hover:text-neon transition-all shadow-sm">
+                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-white dark:bg-gray-900/60 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:border-green-400 dark:hover:border-neon/40 hover:text-green-600 dark:hover:text-neon transition-all shadow-sm">
                             <span class="text-gray-400">#</span>{{ $tag->name }}
                         </a>
                     @endforeach
+
                 </div>
-                @endif
             </div>
 
             <div class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800/60">
@@ -160,6 +186,7 @@
 
         </div>
     </div>
+    </div>
 
     @php
     $isFromPanel = Str::contains(request()->header('referer'), 'panel');
@@ -172,13 +199,6 @@
             <h3 class="font-bold text-xs text-gray-500 uppercase tracking-widest">More Like This</h3>
 
             <div class="flex items-center gap-2">
-                <a href="/" id="back-to-explore-btn" class="hidden text-xs font-semibold text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-neon items-center gap-1.5 transition-colors bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-800 px-3 py-1.5 rounded-lg shadow-sm hover:border-green-300 dark:hover:border-neon/30">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                    </svg>
-                    Back to Explore
-                </a>
-
                 <button id="close-modal-btn" onclick="closeTop()" class="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-500 dark:hover:bg-red-500/10 transition-colors" title="Close">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
