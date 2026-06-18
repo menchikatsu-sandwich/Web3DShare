@@ -1,9 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $isMyModels = request('filter') == 'my_models';
+@endphp
 <div class="mb-5 flex flex-col lg:flex-row lg:items-end justify-between gap-4">
     <div>
-        @if(request('filter') == 'my_models')
+        @if($isMyModels)
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white tracking-wide">My <span class="text-green-600 dark:text-neon">Models</span></h2>
             <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">Manage and view all your uploaded 3D creations</p>
         @else
@@ -14,7 +17,7 @@
     
     <div class="flex flex-col sm:flex-row gap-3 lg:items-center">
         <form action="{{ url()->current() }}" method="GET" class="flex flex-col sm:flex-row gap-3">
-            @if(request('filter') == 'my_models')
+            @if($isMyModels)
                 <input type="hidden" name="filter" value="my_models">
             @endif
             @if(request('search'))
@@ -43,7 +46,7 @@
             </select>
         </form>
 
-        @if(request('filter') == 'my_models')
+        @if($isMyModels)
         <a href="/" class="text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-neon flex items-center gap-2 transition-colors bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-800 px-4 py-2 rounded-lg shadow-sm hover:border-green-300 dark:hover:border-neon/30">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
             Back to Explore
@@ -127,7 +130,7 @@
     @forelse($models as $model)
     <div class="bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden hover:border-green-400 dark:hover:border-neon/40 shadow-sm hover:shadow-md dark:hover:shadow-[0_0_20px_rgba(0,255,136,0.1)] transition-all duration-300 group flex flex-col">
         
-        <a href="/models/{{ $model->id }}" onclick="openModel('{{ $model->id }}', event)" class="relative w-full h-48 overflow-hidden block bg-gray-100 dark:bg-black">
+        <a href="/models/{{ $model->id }}{{ $isMyModels ? '?from=my_models' : '' }}" onclick="openModel('{{ $model->id }}', event)" class="relative w-full h-48 overflow-hidden block bg-gray-100 dark:bg-black">
             <img src="{{ $model->thumbnailUrl() }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
             @if(isset($model->category))
             <div class="absolute top-3 right-3 bg-white/90 dark:bg-black/70 backdrop-blur-md border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-md shadow-sm">
@@ -137,7 +140,7 @@
         </a>
 
         <div class="p-5 flex flex-col flex-1">
-            <a href="/models/{{ $model->id }}" class="block mb-3">
+            <a href="/models/{{ $model->id }}{{ $isMyModels ? '?from=my_models' : '' }}" class="block mb-3">
                 <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 group-hover:text-green-600 dark:group-hover:text-neon transition-colors truncate" title="{{ $model->title }}">
                     {{ $model->title }}
                 </h3>
@@ -162,6 +165,66 @@
                 </div>
             </div>
 
+            @if($isMyModels && auth()->id() === $model->user_id)
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button type="button" onclick="openModelEditModal('edit-model-{{ $model->id }}')" class="flex items-center justify-center gap-2 bg-yellow-400 text-black border border-yellow-300 hover:bg-yellow-300 px-3 py-2 rounded-lg text-sm font-bold transition-all shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 7.125 16.875 4.5" />
+                        </svg>
+                        Edit
+                    </button>
+
+                    <form method="POST" action="/models/{{ $model->id }}" onsubmit="return confirm('Delete this model permanently from your list?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="w-full flex items-center justify-center gap-2 bg-red-600 text-white border border-red-700 hover:bg-red-700 px-3 py-2 rounded-lg text-sm font-bold transition-all shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21H8.084a2.25 2.25 0 0 1-2.244-1.327L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                            </svg>
+                            Delete
+                        </button>
+                    </form>
+                </div>
+
+                <div id="edit-model-{{ $model->id }}" class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/70 backdrop-blur-md p-4">
+                    <div class="relative w-full max-w-xl bg-white dark:bg-darkPanel p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-neon/20 shadow-xl dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]">
+                        <button type="button" onclick="closeModelEditModal('edit-model-{{ $model->id }}')" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                        </button>
+
+                        <form method="POST" action="/models/{{ $model->id }}" class="flex flex-col gap-5">
+                            @csrf
+                            @method('PATCH')
+                            <div>
+                                <h2 class="text-3xl font-bold text-gray-900 dark:text-white tracking-wide">Edit <span class="text-green-600 dark:text-neon">Model</span></h2>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Only title, description, category, and tags can be changed.</p>
+                            </div>
+
+                            <input type="text" name="title" value="{{ $model->title }}" required maxlength="255"
+                                class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all">
+
+                            <textarea name="description" rows="4" maxlength="5000" placeholder="Description"
+                                class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all resize-none">{{ $model->description }}</textarea>
+
+                            <select name="category_id" required
+                                class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all">
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}" {{ $model->category_id == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                @endforeach
+                            </select>
+
+                            <input type="text" name="tags" value="{{ $model->tags->pluck('name')->implode(', ') }}" placeholder="Tags separated by comma"
+                                class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all">
+
+                            <button type="submit" class="w-full bg-green-500 dark:bg-neon text-white dark:text-black font-semibold text-lg py-3 rounded-xl hover:bg-green-600 dark:hover:bg-[#00cc6a] transition-all">
+                                Save Changes
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @endif
+
             <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800/80 text-gray-500 text-xs font-semibold">
                 <div class="flex items-center gap-1.5 hover:text-green-600 dark:hover:text-neon transition-colors" title="{{ $model->view_count }} Views">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
@@ -182,7 +245,7 @@
     <div class="col-span-full py-20 text-center flex flex-col items-center justify-center bg-white dark:bg-darkPanel border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-gray-400 dark:text-gray-600 mb-4"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>
         <p class="text-gray-500 dark:text-gray-400 text-lg">No models found.</p>
-        @if(request('filter') == 'my_models')
+        @if($isMyModels)
             <a href="/upload" class="mt-4 text-green-600 dark:text-neon font-medium hover:underline">Upload your first model now!</a>
         @endif
     </div>
@@ -192,4 +255,33 @@
 <div class="mt-10">
     {{ $models->appends(request()->query())->links() }}
 </div>
+
+@if($isMyModels)
+<script>
+    function openModelEditModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModelEditModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key !== 'Escape') return;
+        document.querySelectorAll('[id^="edit-model-"]').forEach((modal) => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        });
+        document.body.style.overflow = '';
+    });
+</script>
+@endif
 @endsection

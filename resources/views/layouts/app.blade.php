@@ -256,15 +256,29 @@
         // TAMBAHAN SIMPEL: Variabel global untuk menyimpan filter aktif dari halaman home
         let activeFilters = window.location.search || ''; 
 
+        function appendQuery(url, params) {
+            const separator = url.includes('?') ? '&' : '?';
+            return `${url}${separator}${params}`;
+        }
+
+        function isMyModelsContext() {
+            return new URLSearchParams(activeFilters || window.location.search).get('filter') === 'my_models';
+        }
+
+        function modelUrl(id) {
+            return `/models/${id}${isMyModelsContext() ? '?from=my_models' : ''}`;
+        }
+
         // 1. Fungsi Utama Buka Modal
         async function openModel(id, event) {
             if (event) event.preventDefault();
-            const url = `/models/${id}`;
 
             // Jika buka dari Home pertama kali, kunci/ingat filter yang sedang aktif saat ini
             if (!modalOpen) {
                 activeFilters = window.location.search || '';
             }
+
+            const url = modelUrl(id);
 
             // Jika buka model baru saat modal sudah ada (tumpukan)
             if (modalOpen && history.state) {
@@ -283,7 +297,7 @@
             showLoadingState();
 
             document.body.style.cursor = 'wait';
-            ensureModelViewerLoaded().then(() => fetch(`${url}?partial=1`, {
+            ensureModelViewerLoaded().then(() => fetch(appendQuery(url, 'partial=1'), {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
@@ -411,6 +425,7 @@
         // 5. POPSTATE HANDLER
         window.addEventListener('popstate', function(event) {
             const path = window.location.pathname;
+            const pathWithSearch = window.location.pathname + window.location.search;
             const state = event.state;
             const isModelPath = path.startsWith('/models');
             const isFullPage = !!document.getElementById('model-root');
@@ -447,7 +462,7 @@
                     history.go(-backDepth);
                 } else {
                     // Navigasi antar pop-up (hasil closeTop)
-                    loadModal(path, false);
+                    loadModal(pathWithSearch, false);
                     isInternalNavigation = false;
                 }
                 return;
@@ -461,11 +476,11 @@
                         history.replaceState({
                             ...state,
                             isFinal: true
-                        }, '', path);
+                        }, '', pathWithSearch);
                     }
-                    loadModelContentSPA(path);
+                    loadModelContentSPA(pathWithSearch);
                 } else {
-                    window.location.href = path;
+                    window.location.href = pathWithSearch;
                 }
                 return;
             }
@@ -478,19 +493,19 @@
                     } else {
                         // Tentukan: Jadi Pop-up atau Full Page?
                         if (state.depth > 1) {
-                            window.location.href = path; // Tumpukan -> Full Page
+                            window.location.href = pathWithSearch; // Tumpukan -> Full Page
                         } else {
-                            loadModal(path, false); // Tunggal -> Pop-up
+                            loadModal(pathWithSearch, false); // Tunggal -> Pop-up
                         }
                     }
                 } else {
-                    window.location.href = path;
+                    window.location.href = pathWithSearch;
                 }
             }
         });
 
         function loadModelContentSPA(url) {
-            ensureModelViewerLoaded().then(() => fetch(`${url}?partial=1`, {
+            ensureModelViewerLoaded().then(() => fetch(appendQuery(url, 'partial=1'), {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
@@ -508,7 +523,7 @@
         function handleModelClick(id, event) {
             // Cek apakah kita di halaman Full Page (mencari elemen model-root)
             const isFullPage = !!document.getElementById('model-root');
-            const url = `/models/${id}`;
+            const url = modelUrl(id);
 
             if (isFullPage) {
                 // JIKA DI FULL PAGE: Jangan buka modal, tapi navigasi antar halaman (AJAX)

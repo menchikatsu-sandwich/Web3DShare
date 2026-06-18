@@ -22,6 +22,7 @@ Route::get('/models/{model}', [ModelController::class,'show']);
 
 Route::view('/login','auth.login')->name('login');
 Route::view('/register','auth.register');
+Route::view('/terms','legal.terms')->name('terms');
 
 Route::post('/login',[AuthController::class,'login']);
 Route::post('/register',[AuthController::class,'register']);
@@ -42,6 +43,7 @@ Route::middleware('auth')->group(function(){
     // upload & model
     Route::get('/upload',[UploadPageController::class,'index']);
     Route::post('/models',[ModelController::class,'store']);
+    Route::patch('/models/{model}',[ModelController::class,'update']);
     Route::delete('/models/{model}',[ModelController::class,'destroy']);
 
     // interaction

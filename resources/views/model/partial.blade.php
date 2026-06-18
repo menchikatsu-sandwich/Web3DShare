@@ -1,3 +1,7 @@
+@php
+    $isManageContext = $isManageContext ?? false;
+@endphp
+
 <div class="flex flex-col lg:flex-row h-full min-h-0 w-full bg-white dark:bg-darkPanel text-gray-800 dark:text-gray-200">
 
     <div class="flex-1 min-h-0 flex flex-col overflow-y-auto overflow-x-hidden">
@@ -11,14 +15,6 @@
             </a>
 
             <div class="ml-auto flex items-center gap-2">
-                <div class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-sm font-semibold text-gray-600 dark:text-gray-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {{ $model->view_count }}
-                </div>
-
                 <details class="relative">
                     <summary class="list-none cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-red-300 hover:text-red-500 transition-all shadow-sm">
                         Report
@@ -66,6 +62,13 @@
             <div class="flex flex-col gap-5">
                 <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
                     <div class="min-w-0">
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-sm font-semibold text-gray-600 dark:text-gray-300 mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {{ $model->view_count }}
+                        </div>
                         <h1 class="text-3xl font-bold text-gray-900 dark:text-white leading-tight">{{ $model->title }}</h1>
                         <div class="flex items-center gap-3 mt-3">
                             <a href="/creators/{{ $model->user->username }}" class="flex-shrink-0">
@@ -101,6 +104,27 @@
                         </svg>
                         Download ({{ $model->download_count }})
                     </a>
+
+                    @if($isManageContext)
+                    <button type="button" onclick="openViewerEditModal()" class="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-black border border-yellow-300 font-semibold rounded-lg hover:bg-yellow-300 transition-all shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 7.125 16.875 4.5" />
+                        </svg>
+                        Edit
+                    </button>
+
+                    <form method="POST" action="/models/{{ $model->id }}" onsubmit="return confirm('Delete this model permanently from your list?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white border border-red-700 font-semibold rounded-lg hover:bg-red-700 transition-all shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21H8.084a2.25 2.25 0 0 1-2.244-1.327L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                            </svg>
+                            Delete
+                        </button>
+                    </form>
+                    @endif
 
                     @can('moderator')
                     <form method="POST" action="/admin/delete-model/{{ $model->id }}" onsubmit="return confirm('Yakin ingin menghapus model ini secara permanen?')">
@@ -226,5 +250,60 @@
         </div>
 
     </div>
+    @endif
+
+    @if($isManageContext)
+    <div id="viewer-edit-model-modal" class="fixed inset-0 z-[140] hidden items-center justify-center bg-black/70 backdrop-blur-md p-4">
+        <div class="relative w-full max-w-xl bg-white dark:bg-darkPanel p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-neon/20 shadow-xl dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]" onclick="event.stopPropagation()">
+            <button type="button" onclick="closeViewerEditModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+            </button>
+
+            <form method="POST" action="/models/{{ $model->id }}" class="flex flex-col gap-5">
+                @csrf
+                @method('PATCH')
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white tracking-wide">Edit <span class="text-green-600 dark:text-neon">Model</span></h2>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">The GLB file cannot be replaced here. Delete and upload again if the model file changes.</p>
+                </div>
+
+                <input type="text" name="title" value="{{ $model->title }}" required maxlength="255"
+                    class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all">
+
+                <textarea name="description" rows="4" maxlength="5000" placeholder="Description"
+                    class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all resize-none">{{ $model->description }}</textarea>
+
+                <select name="category_id" required
+                    class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all">
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat->id }}" {{ $model->category_id == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                    @endforeach
+                </select>
+
+                <input type="text" name="tags" value="{{ $model->tags->pluck('name')->implode(', ') }}" placeholder="Tags separated by comma"
+                    class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all">
+
+                <button type="submit" class="w-full bg-green-500 dark:bg-neon text-white dark:text-black font-semibold text-lg py-3 rounded-xl hover:bg-green-600 dark:hover:bg-[#00cc6a] transition-all">
+                    Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openViewerEditModal() {
+            const modal = document.getElementById('viewer-edit-model-modal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeViewerEditModal() {
+            const modal = document.getElementById('viewer-edit-model-modal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    </script>
     @endif
 </div>

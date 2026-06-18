@@ -69,13 +69,42 @@
                     <strong>Note:</strong> Verified badges are given to authentic creators. Please provide links to your portfolio, ArtStation, or explain why you should be verified.
                 </div>
 
+                <div class="bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 rounded-xl p-4 text-sm">
+                    <p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-3">Current requirements</p>
+                    <div class="grid gap-2 text-gray-700 dark:text-gray-300">
+                        <p class="flex items-center justify-between gap-3">
+                            <span>Published models</span>
+                            <span class="font-semibold">{{ $verificationCheck['model_count'] }} / {{ $verificationCheck['rules']['min_models'] }}</span>
+                        </p>
+                        <p class="flex items-center justify-between gap-3">
+                            <span>Downloads per model</span>
+                            <span class="font-semibold">{{ $verificationCheck['rules']['min_downloads_per_model'] }} minimum</span>
+                        </p>
+                        <p class="flex items-center justify-between gap-3">
+                            <span>Account age</span>
+                            <span class="font-semibold">{{ $verificationCheck['account_age_days'] }} / {{ $verificationCheck['rules']['min_account_age_days'] }} day(s)</span>
+                        </p>
+                    </div>
+
+                    @if(!$verificationCheck['eligible'])
+                        <div class="mt-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-200 rounded-lg p-3">
+                            <p class="font-semibold mb-2">You cannot request verification yet:</p>
+                            <ul class="list-disc ml-5 space-y-1">
+                                @foreach($verificationCheck['reasons'] as $reason)
+                                    <li>{{ $reason }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 ml-1">Your Reason / Portfolio Links</label>
-                    <textarea name="note" placeholder="Tuliskan alasan kenapa kamu layak dapet badge verified (atau cantumkan link portofoliomu)..." rows="5" required
+                    <textarea name="note" placeholder="Tuliskan alasan kenapa kamu layak dapet badge verified (atau cantumkan link portofoliomu)..." rows="5" required {{ !$verificationCheck['eligible'] ? 'disabled' : '' }}
                               class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all placeholder-gray-400 dark:placeholder-gray-600 resize-none"></textarea>
                 </div>
 
-                <button type="submit" class="w-full bg-neon text-black font-semibold text-lg py-3 rounded-xl mt-2 hover:bg-[#00cc6a] hover:shadow-[0_0_15px_rgba(0,255,136,0.3)] transition-all">
+                <button type="submit" {{ !$verificationCheck['eligible'] ? 'disabled' : '' }} class="w-full bg-neon text-black font-semibold text-lg py-3 rounded-xl mt-2 hover:bg-[#00cc6a] hover:shadow-[0_0_15px_rgba(0,255,136,0.3)] transition-all disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none dark:disabled:bg-gray-800">
                     Submit Request
                 </button>
             </form>

@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // model
     Route::post('/models', [ModelController::class, 'store']);
+    Route::patch('/models/{model}', [ModelController::class, 'update']);
     Route::delete('/models/{model}', [ModelController::class, 'destroy']);
 
     // interaction

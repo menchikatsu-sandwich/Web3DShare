@@ -135,12 +135,16 @@ class InteractionController extends Controller
 
     public function download(Request $r, Model3D $model)
     {
-        Download::create([
-            'model_id' => $model->id,
-            'downloaded_at' => now()
-        ]);
+        $isOwnerDownload = $r->user() && $r->user()->id === $model->user_id;
 
-        $model->increment('download_count');
+        if (!$isOwnerDownload) {
+            Download::create([
+                'model_id' => $model->id,
+                'downloaded_at' => now()
+            ]);
+
+            $model->increment('download_count');
+        }
 
         return redirect($model->modelUrl());
     }

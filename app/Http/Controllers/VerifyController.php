@@ -4,17 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\VerificationRequest;
+use App\Models\Model3D;
 
 class VerifyController extends Controller
 {
     public function index(Request $r)
     {
+        $user = $r->user();
         $pendingRequest = VerificationRequest::where('user_id', $r->user()->id)
             ->where('request_status', 'pending')
             ->latest()
             ->first();
 
-        return view('verify.index', compact('pendingRequest'));
+        $verificationCheck = $this->verificationEligibility($user);
+
+        return view('verify.index', compact('pendingRequest', 'verificationCheck'));
     }
 
     public function store(Request $r)
@@ -22,6 +26,11 @@ class VerifyController extends Controller
         $r->validate([
             'note' => ['required', 'string', 'max:2000'],
         ]);
+
+        $verificationCheck = $this->verificationEligibility($r->user());
+        if (!$verificationCheck['eligible']) {
+            return back()->with('error', $verificationCheck['message']);
+        }
 
         $existing = VerificationRequest::where('user_id', $r->user()->id)
             ->where('request_status', 'pending')
@@ -48,14 +57,71 @@ class VerifyController extends Controller
             'upload_tier'=>'verified'
         ]);
 
-        $req->delete();
+        $req->update([
+            'request_status' => 'approved',
+            'reviewed_by' => auth()->id(),
+        ]);
 
         return back()->with('success', 'Verification request approved.');
     }
 
     public function reject($id)
     {
-        \App\Models\VerificationRequest::findOrFail($id)->delete();
+        \App\Models\VerificationRequest::findOrFail($id)->update([
+            'request_status' => 'rejected',
+            'reviewed_by' => auth()->id(),
+        ]);
         return back()->with('success', 'Verification request rejected.');
+    }
+
+    private function verificationEligibility($user): array
+    {
+        $rules = config('web3dshare.verification');
+        $reasons = [];
+
+        $accountAgeDays = $user->created_at ? (int) floor($user->created_at->diffInDays(now())) : 0;
+        if ($accountAgeDays < $rules['min_account_age_days']) {
+            $reasons[] = 'Your account must be at least ' . $rules['min_account_age_days'] . ' day(s) old.';
+        }
+
+        $models = Model3D::where('user_id', $user->id)
+            ->select('id', 'title', 'download_count')
+            ->get();
+
+        if ($models->count() < $rules['min_models']) {
+            $reasons[] = 'You need at least ' . $rules['min_models'] . ' published model(s).';
+        }
+
+        $modelsBelowDownloadRule = $models
+            ->filter(fn($model) => $model->download_count < $rules['min_downloads_per_model'])
+            ->values();
+
+        if ($models->isNotEmpty() && $modelsBelowDownloadRule->isNotEmpty()) {
+            $reasons[] = 'Every model must have at least ' . $rules['min_downloads_per_model'] . ' counted download(s).';
+        }
+
+        $latestRejectedRequest = VerificationRequest::where('user_id', $user->id)
+            ->where('request_status', 'rejected')
+            ->latest('updated_at')
+            ->first();
+
+        $cooldownUntil = null;
+        if ($latestRejectedRequest) {
+            $cooldownUntil = $latestRejectedRequest->updated_at->copy()->addHours($rules['rejection_cooldown_hours']);
+            if (now()->lt($cooldownUntil)) {
+                $reasons[] = 'Your last request was rejected. Please wait until ' . $cooldownUntil->format('F j, Y H:i') . ' before trying again.';
+            }
+        }
+
+        return [
+            'eligible' => empty($reasons),
+            'message' => implode(' ', $reasons),
+            'reasons' => $reasons,
+            'rules' => $rules,
+            'model_count' => $models->count(),
+            'models_below_download_rule' => $modelsBelowDownloadRule,
+            'account_age_days' => $accountAgeDays,
+            'cooldown_until' => $cooldownUntil,
+        ];
     }
 }

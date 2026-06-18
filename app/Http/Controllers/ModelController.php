@@ -269,24 +269,88 @@ class ModelController extends Controller
             ->limit(5)
             ->select('id', 'category_id', 'title', 'thumbnail_path')
             ->get();
+        $categories = \App\Models\Category::orderBy('name')->get(['id', 'name']);
+        $isManageContext = $r->query('from') === 'my_models'
+            && $r->user()
+            && $r->user()->id === $model->user_id;
 
         // PERBAIKAN: Langsung lempar ke view 'partial' tanpa dibungkus layout modal tambahan.
         // Ini bikin respons API jauh lebih cepat pas buka modal.
         if ($r->ajax()) {
-            return view('model.partial', compact('model', 'recommendations'));
+            return view('model.partial', compact('model', 'recommendations', 'categories', 'isManageContext'));
         }
 
-        return view('model.show', compact('model', 'recommendations'));
+        return view('model.show', compact('model', 'recommendations', 'categories', 'isManageContext'));
+    }
+
+    public function update(Request $r, Model3D $model)
+    {
+        if (!$r->user() || $r->user()->id !== $model->user_id) {
+            return $r->wantsJson()
+                ? response()->json(['error' => 'You do not have access to edit this model.'], 403)
+                : back()->with('error', 'You do not have access to edit this model.');
+        }
+
+        $data = $r->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:5000'],
+            'category_id' => ['required', 'exists:categories,id'],
+            'tags' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $model->update([
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+            'category_id' => $data['category_id'],
+        ]);
+
+        $this->syncTagsFromString($model, $data['tags'] ?? '', $r->user()->id);
+
+        return $r->wantsJson()
+            ? response()->json(['message' => 'Model updated.', 'model' => $model->fresh('category', 'tags')])
+            : back()->with('success', 'Model updated.');
     }
 
     public function destroy(Request $r, Model3D $model)
     {
-        $this->authorize('delete', $model);
+        $user = $r->user();
+        $isOwner = $user && $user->id === $model->user_id;
+        $isAdminOrMod = $user && in_array($user->role, ['admin', 'moderator']);
+
+        if (!$isOwner && !$isAdminOrMod) {
+            return $r->wantsJson()
+                ? response()->json(['error' => 'You do not have access to delete this model.'], 403)
+                : back()->with('error', 'You do not have access to delete this model.');
+        }
 
         $model->delete();
 
         return $r->wantsJson()
             ? response()->json(['msg' => 'deleted'])
-            : back();
+            : redirect('/?filter=my_models')->with('success', 'Model deleted.');
+    }
+
+    private function syncTagsFromString(Model3D $model, ?string $tags, int $userId): void
+    {
+        $tagIds = [];
+        $tagNames = collect(explode(',', $tags ?? ''))
+            ->map(fn($name) => trim(strtolower($name)))
+            ->filter()
+            ->unique()
+            ->take(10);
+
+        foreach ($tagNames as $name) {
+            $tag = Tag::firstOrCreate(
+                ['slug' => Str::slug($name)],
+                [
+                    'name' => $name,
+                    'created_by' => $userId,
+                ]
+            );
+
+            $tagIds[] = $tag->id;
+        }
+
+        $model->tags()->sync($tagIds);
     }
 }
