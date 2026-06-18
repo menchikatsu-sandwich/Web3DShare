@@ -3,8 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Support\Facades\Gate; // Tambahkan ini
-use App\Models\User; // Tambahkan ini
+use Illuminate\Support\Facades\Gate;
+use App\Models\User;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,8 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(at: '*');
+
         $middleware->web(append: [
-            // Kosongkan bagian ini dari RoleMiddleware agar tidak berjalan otomatis di halaman home
+            // Keep RoleMiddleware out of the default web stack so public pages stay open.
         ]);
 
         $middleware->alias([
@@ -25,7 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })
-    ->booting(function () { // Tambahkan logika Gate di sini
+    ->booting(function () {
         Gate::define('admin', function (User $user) {
             return $user->role === 'admin';
         });

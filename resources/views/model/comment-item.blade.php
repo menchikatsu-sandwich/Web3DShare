@@ -1,11 +1,11 @@
 <div class="flex gap-3 bg-gray-50/30 dark:bg-darkPanel/20 p-3.5 rounded-xl border border-gray-100/50 dark:border-gray-800/40 items-start">
-    <!-- Profile Picture & Garis Jalur Balasan Terpadu -->
+    <!-- Profile picture and reply thread guide -->
     <div class="flex flex-col items-center flex-shrink-0">
         <img src="{{ $comment->user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->username) . '&background=e5e7eb&color=1f2937' }}" 
              class="w-7 h-7 rounded-full object-cover">
     </div>
 
-    <!-- Konten Nama, Teks, & Aksi Komentar -->
+    <!-- Comment content and actions -->
     <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 mb-1">
             <span class="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">
@@ -20,7 +20,7 @@
             {{ $comment->body }}
         </p>
 
-        <!-- Aksi di Bawah Komentar -->
+        <!-- Comment actions -->
         <div class="flex items-center gap-4 mt-2.5 flex-wrap">
             @auth
             <button type="button" 
@@ -43,7 +43,7 @@
 
             @auth
                 @if(auth()->id() === $comment->user_id || in_array(auth()->user()->role, ['admin', 'moderator']))
-                <form action="/comments/{{ $comment->id }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus komentar ini? Semua balasan di bawahnya juga akan ikut terhapus secara permanen.')" class="inline">
+                <form action="/comments/{{ $comment->id }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this comment? All replies under it will also be permanently deleted.')" class="inline">
                     @csrf
                     @method('DELETE')
                     <button type="submit" 
@@ -56,7 +56,7 @@
             @endauth
         </div>
 
-        <!-- Form Reply (Disisipkan pas di dalam hirarki agar posisinya presisi & tidak renggang) -->
+        <!-- Reply form kept inside the comment hierarchy for accurate spacing -->
         @auth
         <div id="reply-form-{{ $comment->id }}" class="hidden mt-3 pt-1">
             <form action="/models/{{ $modelId }}/comment" method="POST">
@@ -80,7 +80,7 @@
     </div>
 </div>
 
-<!-- Wadah penampung balasan berikutnya (Indentation Nested) -->
+<!-- Nested replies container -->
 <div id="replies-container-{{ $comment->id }}" class="hidden ml-6 pl-3 border-l border-gray-200 dark:border-gray-800 mt-2 space-y-2 transition-all">
     @foreach($allComments->where('parent_id', $comment->id) as $subComment)
         @include('model.comment-item', ['comment' => $subComment, 'allComments' => $allComments, 'modelId' => $modelId])

@@ -28,7 +28,7 @@
         /* Smooth Scrolling */
         html { scroll-behavior: smooth; }
 
-        /* Animasi Modal Fade-in (Jika dipakai di halaman admin) */
+        /* Modal fade-in animation for admin pages. */
         @keyframes fadeInUpModal {
             from { opacity: 0; transform: translateY(30px) scale(0.98); }
             to { opacity: 1; transform: translateY(0) scale(1); }
@@ -119,12 +119,12 @@
 </div>
 
 <script>
-// --- LOGIKA MENU PROFIL (FIXED) ---
+// --- Profile Menu Logic ---
 function toggleMenu(){
     document.getElementById('menu').classList.toggle('hidden');
 }
 
-// Deteksi klik di luar menu profil (Mendukung trik 2 gambar profile)
+// Detect clicks outside the profile menu.
 window.addEventListener('click', function(e) {
     const menu = document.getElementById('menu');
     const isClickedOnProfileImg = e.target.closest('img[onclick="toggleMenu()"]');
@@ -134,7 +134,7 @@ window.addEventListener('click', function(e) {
     }
 });
 
-// --- LOGIKA EFEK WAVES (TRANSISI TEMA) ---
+// --- Theme Transition Effect ---
 const themeToggleBtn = document.getElementById('theme-toggle');
 
 function toggleThemeLogic() {
@@ -178,15 +178,15 @@ themeToggleBtn.addEventListener('click', function() {
 let modalOpen = false;
 let isInternalNavigation = false;
 
-// 1. Fungsi Utama Buka Modal
+// 1. Main model modal opener.
 async function openModel(id, event) {
     if (event) event.preventDefault();
     const url = `/models/${id}`;
     
-    // Jika buka model baru saat modal sudah ada (tumpukan)
+    // Opening another model while a modal is already stacked.
     if (modalOpen && history.state) {
         const currentState = history.state;
-        // Matikan status 'Final' di state sebelumnya agar saat Forward dari Home tidak ke sini
+        // Mark the previous state as non-final so browser Forward can skip it.
         history.replaceState({ ...currentState, isFinal: false }, '', window.location.href);
     }
     loadModal(url, true);
@@ -206,7 +206,7 @@ function loadModal(url, pushState = true) {
             history.pushState({ 
                 isModal: true, 
                 depth: currentDepth + 1,
-                isFinal: true  // Ini adalah titik terbaru/terakhir
+                isFinal: true  // Latest/final state in the modal stack.
             }, '', url);
         }
     })
@@ -239,7 +239,7 @@ function showLoadingState() {
         wrapper = document.createElement('div');
         wrapper.className = "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm modal-wrapper";
         
-        // TAMBAHKAN BARIS INI:
+        // Close when clicking the backdrop.
         wrapper.onclick = closeAll; 
         
         document.body.appendChild(wrapper);
@@ -274,15 +274,15 @@ function closeTop() {
     if (currentDepth > 1) {
         history.back();
         
-        // Kita gunakan event 'popstate' atau timeout untuk me-replace state tujuan
+        // Use popstate timing to replace the destination state.
         setTimeout(() => {
             if (history.state) {
-                // Kunci state A sebagai Final yang baru
+                // Mark the new current state as final.
                 history.replaceState({ ...history.state, isFinal: true }, '', window.location.href);
-                // Pastikan flag dimatikan setelah replace selesai
+                // Reset the flag after replaceState finishes.
                 isInternalNavigation = false;
             }
-        }, 100); // Naikkan sedikit ke 100ms agar lebih stabil di beberapa browser
+        }, 100); // Slight delay keeps this stable across browsers.
     } else {
         closeAll();
     }
@@ -292,7 +292,7 @@ function closeAll(e) {
     if (e && e.target !== e.currentTarget) return;
     
     if (modalOpen) {
-        // Hapus modal secara instan agar tidak menunggu proses history
+        // Remove the modal immediately instead of waiting for history.
         const wrapper = document.querySelector('.modal-wrapper');
         if (wrapper) wrapper.remove();
         

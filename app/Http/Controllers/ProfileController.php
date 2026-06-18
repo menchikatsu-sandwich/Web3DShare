@@ -55,7 +55,7 @@ class ProfileController extends Controller
 
         try {
             if($r->hasFile('image')){
-                // hapus lama
+                // Remove the old profile image.
                 SupabaseStorage::deleteProfile($user->profile_image_path);
 
                 $path = SupabaseStorage::uploadProfile($user->id, $r->file('image'));

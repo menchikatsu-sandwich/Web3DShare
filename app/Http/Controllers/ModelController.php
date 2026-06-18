@@ -40,42 +40,42 @@ class ModelController extends Controller
                 'tags:id,name,slug',
             ]);
 
-        // 2. Fitur Pencarian (Search) - SEKARANG CASE INSENSITIVE & BISA CARI CREATOR/TAGS
+        // 2. Search, case-insensitive and including creators/tags.
         if ($r->filled('search')) {
-            // Kita ubah keyword menjadi huruf kecil semua untuk keamanan case-insensitive
+            // Normalize the keyword for case-insensitive matching.
             $search = strtolower($r->search);
             
             $q->where(function($subQuery) use ($search) {
                 $subQuery->where(DB::raw('LOWER(title)'), 'like', '%' . $search . '%')
                         ->orWhere(DB::raw('LOWER(description)'), 'like', '%' . $search . '%')
-                        // TAMBAHAN: Cari berdasarkan Nama Creator (Username atau Nickname)
+                        // Search by creator name, username, or nickname.
                         ->orWhereHas('user', function($userQuery) use ($search) {
                             $userQuery->where(DB::raw('LOWER(username)'), 'like', '%' . $search . '%')
                                     ->orWhere(DB::raw('LOWER(nickname)'), 'like', '%' . $search . '%');
                         })
-                        // Cari berdasarkan Tag
+                        // Search by tag.
                         ->orWhereHas('tags', function($tagQuery) use ($search) {
                             $tagQuery->where(DB::raw('LOWER(name)'), 'like', '%' . $search . '%');
                         });
             });
         }
 
-        // 3. Filter Kategori & Tag bawaan lama
+        // 3. Category and tag filters.
         if ($r->category) {
             $q->where('category_id', $r->category);
         }
 
         if ($r->tag) {
-            // KOREKSI: Hanya cari berdasarkan 'slug' karena data yang dikirim dari front-end berupa teks slug.
-            // Ini mencegah error "invalid input syntax for type bigint" di PostgreSQL.
+            // Match by slug because the front-end sends tag slugs, not numeric ids.
+            // This avoids PostgreSQL "invalid input syntax for type bigint" errors.
             $q->whereHas('tags', fn($t) => $t->where('slug', $r->tag));
         }
-        // 4. Filter My Models vs Explore Umum
+        // 4. My Models vs public Explore filter.
         if ($r->filter == 'my_models' && Auth::check()) {
             $q->where('user_id', Auth::id());
         }
 
-        // 5. Filter Timeframe (Rentang Waktu: This Month, This Week)
+        // 5. Timeframe filter.
         if ($r->filled('timeframe') && $r->timeframe !== 'all_time') {
             if ($r->timeframe === 'this_month') {
                 $q->where('created_at', '>=', Carbon::now()->startOfMonth());
@@ -84,7 +84,7 @@ class ModelController extends Controller
             }
         }
 
-        // 6. Fitur Sorting (Urutan Data: Top Views, Downloads, Stars)
+        // 6. Sorting.
         $sort = $r->get('sort', 'latest');
         
         switch ($sort) {
@@ -103,14 +103,14 @@ class ModelController extends Controller
                 break;
         }
 
-        // 7. Pagination & Menjaga agar Query String di URL tidak hilang saat pindah halaman
+        // 7. Pagination while preserving the query string.
         $models = $q->paginate(12)->withQueryString();
 
-        // TAMBAHAN: Ambil data Kategori & Tags dari database agar bisa doloop di view 'home'
+        // Load categories and tags for the home view filters.
         $categories = \App\Models\Category::orderBy('name')->get(['id', 'name']);
         $tags = \App\Models\Tag::orderBy('name')->limit(10)->get(['id', 'name', 'slug']);
 
-        // 8. Return data sesuai format request
+        // 8. Return data in the requested format.
         return $r->wantsJson()
             ? response()->json($models)
             : view('home', compact('models', 'categories', 'tags'));
@@ -236,8 +236,7 @@ class ModelController extends Controller
 
     public function show(Request $r, Model3D $model)
     {
-        // PERBAIKAN: Menambahkan withCount('models') ke relasi user
-        // agar jumlah model yang diupload user bisa terhitung dan tampil di UI.
+        // Load model counts on the user relation so the UI can show published totals.
         $model->load([
             'tags', 
             'category',
@@ -274,8 +273,8 @@ class ModelController extends Controller
             && $r->user()
             && $r->user()->id === $model->user_id;
 
-        // PERBAIKAN: Langsung lempar ke view 'partial' tanpa dibungkus layout modal tambahan.
-        // Ini bikin respons API jauh lebih cepat pas buka modal.
+        // Return the partial directly without wrapping it in an extra modal layout.
+        // This keeps the modal response faster.
         if ($r->ajax()) {
             return view('model.partial', compact('model', 'recommendations', 'categories', 'isManageContext'));
         }

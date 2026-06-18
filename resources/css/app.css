@@ -33,3 +33,28 @@
         linear-gradient(114deg, transparent 0 44%, rgba(0, 0, 0, .44) 44% 64%, transparent 64% 100%),
         linear-gradient(20deg, rgba(255, 255, 255, .05) 0 12%, transparent 12% 100%);
 }
+
+.web3d-tour-panel {
+    position: fixed;
+    z-index: 300;
+    background: rgba(2, 6, 23, .72);
+    backdrop-filter: blur(4px);
+    pointer-events: auto;
+    transition: left .22s ease, top .22s ease, width .22s ease, height .22s ease;
+}
+
+.web3d-tour-highlight {
+    position: fixed;
+    z-index: 301;
+    border: 2px solid var(--color-neon);
+    border-radius: 16px;
+    pointer-events: none;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 0 32px rgba(0, 255, 136, .45);
+    transition: left .22s ease, top .22s ease, width .22s ease, height .22s ease, opacity .18s ease;
+}
+
+.web3d-tour-tooltip {
+    position: fixed;
+    z-index: 302;
+    transition: left .22s ease, top .22s ease;
+}

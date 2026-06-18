@@ -69,7 +69,7 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // delete semua model user
+        // Delete all models owned by the user.
         Model3D::where('user_id', $user->id)->delete();
 
         $user->delete();

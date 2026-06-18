@@ -82,8 +82,7 @@ class InteractionController extends Controller
     {
         $user = $r->user();
 
-        // Cek Hak Akses: Apakah dia admin, moderator, atau pemilik komentar tersebut
-        // Sesuaikan properti 'role' dengan kolom yang ada di database User kamu
+        // Access check: admin, moderator, or comment owner.
         $isAdminOrMod = $user && in_array($user->role, ['admin', 'moderator']);
         $isOwner = $user && $user->id === $comment->user_id;
 
@@ -95,17 +94,16 @@ class InteractionController extends Controller
 
         DB::beginTransaction();
         try {
-            // Fungsi pembantu untuk menghapus replies secara rekursif/berantai
+            // Delete replies recursively.
             $this->deleteRepliesRecursively($comment->id);
 
-            // Hapus komentar utama
             $comment->delete();
 
             DB::commit();
 
             return $r->wantsJson()
-                ? response()->json(['success' => true, 'message' => 'Komentar dan balasannya berhasil dihapus.'])
-                : back()->with('success', 'Komentar berhasil dihapus.');
+                ? response()->json(['success' => true, 'message' => 'Comment and replies deleted.'])
+                : back()->with('success', 'Comment deleted.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -120,15 +118,13 @@ class InteractionController extends Controller
         }
     }
 
-    // Fungsi pembantu rekursif untuk menjamin semua sub-reply terdalam ikut terhapus
+    // Recursive helper to delete every nested reply.
     private function deleteRepliesRecursively($parentId)
     {
         $replies = Comment::where('parent_id', $parentId)->get();
         
         foreach ($replies as $reply) {
-            // Cari lagi apakah sub-reply ini punya anak lagi di bawahnya
             $this->deleteRepliesRecursively($reply->id);
-            // Hapus sub-reply tersebut
             $reply->delete();
         }
     }

@@ -7,7 +7,7 @@
 @section('content')
 
 <div class="fixed inset-0 z-[100] flex items-start justify-center bg-black/60 backdrop-blur-md p-4 overflow-y-auto pt-10 pb-10">
-    <div class="relative w-full max-w-2xl bg-white dark:bg-darkPanel p-8 rounded-2xl border border-gray-200 dark:border-neon/20 shadow-xl dark:shadow-[0_0_40px_rgba(0,255,136,0.1)] transition-colors duration-300">
+    <div data-tour="upload-panel" class="relative w-full max-w-2xl bg-white dark:bg-darkPanel p-8 rounded-2xl border border-gray-200 dark:border-neon/20 shadow-xl dark:shadow-[0_0_40px_rgba(0,255,136,0.1)] transition-colors duration-300">
         
         <a href="/" class="absolute top-4 right-4 text-gray-400 hover:text-green-600 dark:hover:text-neon transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -21,7 +21,7 @@
             </div>
 
             @if($isVerifiedUploader)
-                <div class="bg-green-50 dark:bg-neon/10 border border-green-200 dark:border-neon/20 text-green-800 dark:text-neon px-4 py-3 rounded-xl flex items-center justify-between gap-3">
+                <div data-tour="upload-limit" class="bg-green-50 dark:bg-neon/10 border border-green-200 dark:border-neon/20 text-green-800 dark:text-neon px-4 py-3 rounded-xl flex items-center justify-between gap-3">
                     <div>
                         <p class="text-sm font-semibold">Verified uploader</p>
                         <p class="text-xs text-green-700 dark:text-neon/80 mt-0.5">Unlimited uploads are active for your account.</p>
@@ -29,7 +29,7 @@
                     <span class="text-xs font-bold uppercase tracking-wider bg-green-100 dark:bg-neon/20 px-3 py-1 rounded-lg">Unlimited</span>
                 </div>
             @else
-                <div class="{{ $remainingUploads > 0 ? 'bg-green-50 dark:bg-neon/10 border-green-200 dark:border-neon/20 text-green-800 dark:text-neon' : 'bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-200' }} border px-4 py-3 rounded-xl">
+                <div data-tour="upload-limit" class="{{ $remainingUploads > 0 ? 'bg-green-50 dark:bg-neon/10 border-green-200 dark:border-neon/20 text-green-800 dark:text-neon' : 'bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-200' }} border px-4 py-3 rounded-xl">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
                             <p class="text-sm font-semibold">Monthly upload limit</p>

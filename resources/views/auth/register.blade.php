@@ -16,7 +16,7 @@
             </div>
 
             <div class="space-y-4">
-                <input type="text" name="username" value="{{ old('username') }}" placeholder="Username" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]+$" title="Username harus mengandung setidaknya satu huruf dan satu angka" required
+                <input type="text" name="username" value="{{ old('username') }}" placeholder="Username" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]+$" title="Username must contain at least one letter and one number" required
                        class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all placeholder-gray-400 dark:placeholder-gray-600">
                 <input type="email" name="email" value="{{ old('email') }}" placeholder="Email address" required
                        class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all placeholder-gray-400 dark:placeholder-gray-600">

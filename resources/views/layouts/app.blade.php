@@ -103,11 +103,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                     </svg>
                 </button>
-                <a href="/">
+                <a href="/" data-tour="brand">
                     <h1 class="text-green-600 dark:text-neon font-bold text-2xl tracking-wide">Web3DShare</h1>
                 </a>
                 <div class="ml-4 hidden sm:block">
-                    <form action="/" method="GET" class="relative flex-1 max-w-md hidden sm:block">
+                    <form action="/" method="GET" class="relative flex-1 max-w-md hidden sm:block" data-tour="search">
                         @if(request('category'))
                             <input type="hidden" name="category" value="{{ request('category') }}">
                         @endif
@@ -163,12 +163,13 @@
                         @if(auth()->user()->role === 'admin' || auth()->user()->role === 'moderator' || auth()->user()->can('admin'))
                         <a href="/panel" class="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neon/10 hover:text-green-600 dark:hover:text-neon transition-colors border-b border-gray-100 dark:border-gray-800">Admin Panel</a>
                         @endif
+                        <a href="/creators/{{ auth()->user()->username }}" class="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neon/10 hover:text-green-600 dark:hover:text-neon transition-colors border-b border-gray-100 dark:border-gray-800">View Profile</a>
                         <a href="/profile" class="block px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neon/10 hover:text-green-600 dark:hover:text-neon transition-colors">Edit Profile</a>
                         <form method="POST" action="/logout">@csrf<button class="w-full text-left px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">Logout</button></form>
                     </div>
                 </div>
                 @else
-                <div class="flex items-center gap-4 text-sm font-medium">
+                <div class="flex items-center gap-4 text-sm font-medium" data-tour="auth-actions">
                     <a href="/login" class="text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-neon transition">Login</a>
                     <a href="/register" class="bg-green-500 dark:bg-neon text-white dark:text-black px-5 py-2.5 rounded-lg hover:bg-green-600 dark:hover:bg-[#00cc6a] shadow-sm transition-all font-semibold">Join Free</a>
                 </div>
@@ -181,13 +182,13 @@
             <aside id="sidebar" class="w-72 whitespace-nowrap overflow-hidden bg-white dark:bg-darkPanel border-r border-gray-200 dark:border-neon/10 py-6 px-6 flex-shrink-0 transition-all duration-300 flex flex-col shadow-sm dark:shadow-none">
                 <div class="mb-8 p-3 bg-green-100 dark:bg-neon/5 border border-green-300 dark:border-neon/20 rounded-xl text-xs font-semibold text-green-700 dark:text-neon text-center uppercase tracking-widest shadow-inner">Tier: {{ auth()->check() ? strtoupper(auth()->user()->upload_tier) : 'GUEST' }}</div>
                 <ul class="space-y-2 flex-1">
-                    <li><a href="/upload" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-green-50 dark:hover:bg-neon/10 hover:text-green-600 dark:hover:text-neon transition-all group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 group-hover:text-green-600 dark:group-hover:text-neon transition-colors">
+                    <li><a href="/upload" data-tour="sidebar-upload" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-green-50 dark:hover:bg-neon/10 hover:text-green-600 dark:hover:text-neon transition-all group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 group-hover:text-green-600 dark:group-hover:text-neon transition-colors">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
                             </svg>Upload</a></li>
-                    <li><a href="/verify" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-green-50 dark:hover:bg-neon/10 hover:text-green-600 dark:hover:text-neon transition-all group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 group-hover:text-green-600 dark:group-hover:text-neon transition-colors">
+                    <li><a href="/verify" data-tour="sidebar-verify" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-green-50 dark:hover:bg-neon/10 hover:text-green-600 dark:hover:text-neon transition-all group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 group-hover:text-green-600 dark:group-hover:text-neon transition-colors">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                             </svg>Request Verify</a></li>
-                    <li><a href="/?filter=my_models" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-green-50 dark:hover:bg-neon/10 hover:text-green-600 dark:hover:text-neon transition-all group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 group-hover:text-green-600 dark:group-hover:text-neon transition-colors">
+                    <li><a href="/?filter=my_models" data-tour="sidebar-my-models" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-green-50 dark:hover:bg-neon/10 hover:text-green-600 dark:hover:text-neon transition-all group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 group-hover:text-green-600 dark:group-hover:text-neon transition-colors">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
                             </svg>My Models</a></li>
                 </ul>
@@ -253,7 +254,7 @@
 <script>
         let modalOpen = false;
         let isInternalNavigation = false;
-        // TAMBAHAN SIMPEL: Variabel global untuk menyimpan filter aktif dari halaman home
+        // Store the active home filters while navigating through model modals.
         let activeFilters = window.location.search || ''; 
 
         function appendQuery(url, params) {
@@ -269,21 +270,21 @@
             return `/models/${id}${isMyModelsContext() ? '?from=my_models' : ''}`;
         }
 
-        // 1. Fungsi Utama Buka Modal
+        // 1. Main model modal opener.
         async function openModel(id, event) {
             if (event) event.preventDefault();
 
-            // Jika buka dari Home pertama kali, kunci/ingat filter yang sedang aktif saat ini
+            // Capture the current filter state when opening from Home.
             if (!modalOpen) {
                 activeFilters = window.location.search || '';
             }
 
             const url = modelUrl(id);
 
-            // Jika buka model baru saat modal sudah ada (tumpukan)
+            // Opening another model while a modal is already stacked.
             if (modalOpen && history.state) {
                 const currentState = history.state;
-                // Matikan status 'Final' di state sebelumnya agar saat Forward dari Home tidak ke sini
+                // Mark the previous state as non-final so browser Forward can skip it.
                 history.replaceState({
                     ...currentState,
                     isFinal: false
@@ -292,7 +293,7 @@
             loadModal(url, true);
         }
 
-        // 2. Load Konten (Partial)
+        // 2. Load partial content.
         function loadModal(url, pushState = true) {
             showLoadingState();
 
@@ -310,7 +311,7 @@
                         history.pushState({
                             isModal: true,
                             depth: currentDepth + 1,
-                            isFinal: true // Ini adalah titik terbaru/terakhir
+                            isFinal: true // Latest/final state in the modal stack.
                         }, '', url);
                     }
                 })
@@ -345,7 +346,7 @@
                 wrapper = document.createElement('div');
                 wrapper.className = "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm modal-wrapper";
 
-                // TAMBAHKAN BARIS INI:
+                // Close when clicking the backdrop.
                 wrapper.onclick = closeAll;
 
                 document.body.appendChild(wrapper);
@@ -371,7 +372,7 @@
             modalOpen = true;
         }
 
-        // 3. Tombol Silang (Back 1 Langkah)
+        // 3. Close button, one step back.
         function closeTop() {
             if (!modalOpen) return;
             isInternalNavigation = true;
@@ -381,29 +382,29 @@
             if (currentDepth > 1) {
                 history.back();
 
-                // Kita gunakan event 'popstate' atau timeout untuk me-replace state tujuan
+                // Use popstate timing to replace the destination state.
                 setTimeout(() => {
                     if (history.state) {
-                        // Kunci state A sebagai Final yang baru
+                        // Mark the new current state as final.
                         history.replaceState({
                             ...history.state,
                             isFinal: true
                         }, '', window.location.href);
-                        // Pastikan flag dimatikan setelah replace selesai
+                        // Reset the flag after replaceState finishes.
                         isInternalNavigation = false;
                     }
-                }, 100); // Naikkan sedikit ke 100ms agar lebih stabil di beberapa browser
+                }, 100); // Slight delay keeps this stable across browsers.
             } else {
                 closeAll();
             }
         }
 
-        // 4. Klik Backdrop (Back ke Home)
+        // 4. Backdrop click, back to Home.
         function closeAll(e) {
             if (e && e.target !== e.currentTarget) return;
 
             if (modalOpen) {
-                // Hapus modal secara instan agar tidak menunggu proses history
+                // Remove the modal immediately instead of waiting for history.
                 const wrapper = document.querySelector('.modal-wrapper');
                 if (wrapper) wrapper.remove();
 
@@ -413,8 +414,8 @@
                 const depth = (history.state && history.state.depth) ? history.state.depth : 1;
                 isInternalNavigation = true;
                 
-                // Tambahkan filter aktif saat ini ke State Home sebelum kembali mundur lewat history.go()
-                // Agar sewaktu mundur ke belakang, popstate mengenali query filternya
+                // Add active filters to the Home state before moving back through history.
+                // This lets popstate recognize the correct query string.
                 const targetUrl = '/' + activeFilters;
                 history.replaceState(null, '', targetUrl);
                 
@@ -430,7 +431,7 @@
             const isModelPath = path.startsWith('/models');
             const isFullPage = !!document.getElementById('model-root');
 
-            // A. KEMBALI KE HOME
+            // A. Back to Home.
             if (!isModelPath || path === '/' || path === '') {
                 const wrapper = document.querySelector('.modal-wrapper');
                 if (wrapper) wrapper.remove();
@@ -441,11 +442,11 @@
 
                 const homeExists = document.querySelector('.home-grid') || document.getElementById('home-content');
                 
-                // TAMBAHAN KOREKSI: Gunakan activeFilters agar saat fallback redirect tidak kehilangan filter anakan
+                // Preserve active filters during fallback redirects.
                 if (!homeExists) {
                     window.location.href = '/' + activeFilters;
                 } else {
-                    // Jika halaman home-grid-nya ada di belakang, paksa sinkronisasi URL agar filternya muncul di address bar
+                    // Keep the address bar in sync when the home grid is already behind the modal.
                     if (window.location.search !== activeFilters) {
                         history.replaceState(null, '', '/' + activeFilters);
                     }
@@ -453,25 +454,25 @@
                 return;
             }
 
-            // B. NAVIGASI SAAT MODAL TERBUKA (Internal/Back Browser)
+            // B. Navigation while the modal is open.
             if (modalOpen) {
                 if (!isInternalNavigation) {
-                    // Ini jika user tekan Back browser saat pop-up buka
+                    // Browser Back while the modal is open.
                     isInternalNavigation = true;
                     const backDepth = (state && state.depth) ? state.depth : 1;
                     history.go(-backDepth);
                 } else {
-                    // Navigasi antar pop-up (hasil closeTop)
+                    // Navigation between stacked modals after closeTop.
                     loadModal(pathWithSearch, false);
                     isInternalNavigation = false;
                 }
                 return;
             }
 
-            // C. NAVIGASI SAAT DI HALAMAN FULL PAGE
+            // C. Navigation on the full-page model view.
             if (isFullPage) {
                 if (state && state.depth >= 1) {
-                    // Ambil alih status Final agar Forward dari Home nantinya berhenti di sini
+                    // Claim final-state status so Forward from Home stops here.
                     if (state.isFinal === false) {
                         history.replaceState({
                             ...state,
@@ -485,17 +486,17 @@
                 return;
             }
 
-            // D. NAVIGASI DARI HOME (FORWARD KE MODEL)
+            // D. Navigation from Home to a model.
             if (!modalOpen && !isFullPage) {
                 if (state && state.isModal) {
                     if (state.isFinal === false) {
-                        history.forward(); // Masih ada state Final di depan, lewati!
+                            history.forward(); // Skip ahead to the final state.
                     } else {
-                        // Tentukan: Jadi Pop-up atau Full Page?
+                        // Decide between modal and full-page navigation.
                         if (state.depth > 1) {
-                            window.location.href = pathWithSearch; // Tumpukan -> Full Page
+                            window.location.href = pathWithSearch; // Stacked navigation becomes a full page.
                         } else {
-                            loadModal(pathWithSearch, false); // Tunggal -> Pop-up
+                            loadModal(pathWithSearch, false); // Single navigation opens a modal.
                         }
                     }
                 } else {
@@ -521,15 +522,15 @@
         }
 
         function handleModelClick(id, event) {
-            // Cek apakah kita di halaman Full Page (mencari elemen model-root)
+            // Check whether we are on the full-page model view.
             const isFullPage = !!document.getElementById('model-root');
             const url = modelUrl(id);
 
             if (isFullPage) {
-                // JIKA DI FULL PAGE: Jangan buka modal, tapi navigasi antar halaman (AJAX)
+                // Full page: navigate between models with AJAX instead of opening a modal.
                 if (event) event.preventDefault();
 
-                // Update URL di browser
+                // Update the browser URL.
                 const currentDepth = (history.state && history.state.depth) ? history.state.depth : 1;
                 history.pushState({
                     isModal: false,
@@ -537,18 +538,18 @@
                     isFinal: true
                 }, '', url);
 
-                // Panggil fungsi loader Full Page yang sudah kita buat sebelumnya
+                // Use the full-page loader when available.
                 if (typeof loadModelContentSPA === 'function') {
                     loadModelContentSPA(url);
                 } else {
-                    window.location.href = url; // Fallback jika fungsi AJAX tidak ada
+                    window.location.href = url; // Fallback when the AJAX loader is unavailable.
                 }
             } else {
-                // TAMBAHAN KOREKSI: Kunci filter di sini sebelum animasi modal loading muncul
+                // Capture the active filters before the modal loading animation appears.
                 activeFilters = window.location.search || '';
                 
                 showLoadingState();
-                // JIKA DI HOME: Panggil fungsi openModel yang membuka Pop-up
+                // Home page: open the model modal.
                 if (typeof openModel === 'function') {
                     openModel(id, event);
                 } else {
@@ -558,7 +559,7 @@
         }
 </script>
 <script>
-// 1. Amankan Fungsi Copy URL
+// 1. Safe copy URL helper.
 window.copyModelUrl = function(url, buttonEl) {
     navigator.clipboard.writeText(url).then(() => {
         const textSpan = buttonEl.querySelector('.share-text');
@@ -578,7 +579,7 @@ window.copyModelUrl = function(url, buttonEl) {
     });
 };
 
-// 2. Amankan Fungsi Toggle Form Reply
+// 2. Safe reply form toggle helper.
 window.toggleReplyForm = function(commentId) {
     const form = document.getElementById(`reply-form-${commentId}`);
     if (form) {
@@ -590,7 +591,7 @@ window.toggleReplyForm = function(commentId) {
     }
 };
 
-// 3. Amankan Fungsi Toggle Tampilan List Balasan
+// 3. Safe replies list toggle helper.
 window.toggleRepliesDisplay = function(commentId) {
     const container = document.getElementById(`replies-container-${commentId}`);
     const btn = document.getElementById(`toggle-btn-${commentId}`);
@@ -614,6 +615,7 @@ window.toggleRepliesDisplay = function(commentId) {
     }
 };
 </script>
+@include('components.onboarding-tour')
 </body>
 
 </html>

@@ -3,7 +3,7 @@
 @section('content')
 <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
     
-    <div class="relative w-full max-w-xl bg-white dark:bg-darkPanel p-8 rounded-2xl border border-gray-200 dark:border-neon/20 shadow-xl dark:shadow-[0_0_40px_rgba(0,255,136,0.1)] transition-colors duration-300">
+    <div data-tour="verify-panel" class="relative w-full max-w-xl bg-white dark:bg-darkPanel p-8 rounded-2xl border border-gray-200 dark:border-neon/20 shadow-xl dark:shadow-[0_0_40px_rgba(0,255,136,0.1)] transition-colors duration-300">
         
         <a href="/" class="absolute top-4 right-4 text-gray-400 hover:text-neon transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
@@ -20,7 +20,7 @@
                     </svg>
                 </div>
                 <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">You're Already <span class="text-neon">Verified</span>!</h2>
-                <p class="text-gray-500 dark:text-gray-400 max-w-sm">Akun kamu sudah terverifikasi. Badge resmi sudah aktif di profilmu sebagai creator otentik.</p>
+                <p class="text-gray-500 dark:text-gray-400 max-w-sm">Your account is already verified. The official creator badge is active on your profile.</p>
                 
                 <a href="/" class="mt-8 px-8 py-3 bg-gray-100 dark:bg-darkBg text-gray-700 dark:text-white font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-800 transition-all">
                     Back to Home
@@ -69,7 +69,7 @@
                     <strong>Note:</strong> Verified badges are given to authentic creators. Please provide links to your portfolio, ArtStation, or explain why you should be verified.
                 </div>
 
-                <div class="bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 rounded-xl p-4 text-sm">
+                <div data-tour="verify-rules" class="bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 rounded-xl p-4 text-sm">
                     <p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-3">Current requirements</p>
                     <div class="grid gap-2 text-gray-700 dark:text-gray-300">
                         <p class="flex items-center justify-between gap-3">
@@ -100,7 +100,7 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 ml-1">Your Reason / Portfolio Links</label>
-                    <textarea name="note" placeholder="Tuliskan alasan kenapa kamu layak dapet badge verified (atau cantumkan link portofoliomu)..." rows="5" required {{ !$verificationCheck['eligible'] ? 'disabled' : '' }}
+                    <textarea name="note" placeholder="Explain why you should receive the verified badge, or include links to your portfolio..." rows="5" required {{ !$verificationCheck['eligible'] ? 'disabled' : '' }}
                               class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all placeholder-gray-400 dark:placeholder-gray-600 resize-none"></textarea>
                 </div>
 

@@ -121,20 +121,20 @@ class SupabaseStorage
     {
         $userId = $model->user_id;
     
-        // 1. Hapus file lama jika ada di database
+        // 1. Delete the old file if one is stored in the database.
         if ($model->thumbnail_path) {
-            // Hapus path yang tersimpan di kolom thumbnail_path
+            // Delete the path stored in the thumbnail_path column.
             self::supabaseDelete($model->thumbnail_path);
         }
     
-        // 2. Generate path baru yang unik
+        // 2. Generate a new unique path.
         $path = self::thumbPath($userId, $file);
     
-        // 3. Upload file baru
+        // 3. Upload the new file.
         $uploadStatus = self::supabaseUpload($path, $file);
     
         if ($uploadStatus) {
-            // 4. Update path baru ke database agar sinkron
+            // 4. Keep the database path in sync.
             $model->update(['thumbnail_path' => $path]);
         }
     

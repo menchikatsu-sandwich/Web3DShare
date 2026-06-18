@@ -69,7 +69,7 @@
                             @endif
                         </span>
                     </p>
-                    <form method="POST" action="/admin/delete-model/{{ $m->id }}" onsubmit="return confirm('Yakin ingin menghapus model ini secara permanen?')">
+                    <form method="POST" action="/admin/delete-model/{{ $m->id }}" onsubmit="return confirm('Are you sure you want to permanently delete this model?')">
                         @csrf @method('DELETE')
                         <button class="w-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 
                             hover:bg-red-600 hover:text-white hover:border-red-600
@@ -300,13 +300,13 @@
     }
 
     function changeTab(tabId, btnElement) {
-        // Simpan ID tab ke localStorage agar awet saat reload
+        // Keep the selected tab across reloads.
         localStorage.setItem('activeAdminTab', tabId);
         
-        // Update URL hash (opsional, biar keren bisa di-copy linknya)
+        // Update the URL hash so the tab can be linked directly.
         window.location.hash = tabId;
 
-        // Tampilkan konten yang dipilih
+        // Show the selected content.
         document.querySelectorAll('.tab-content').forEach(el => {
             el.classList.remove('active');
         });
@@ -315,13 +315,13 @@
             targetContent.classList.add('active');
         }
 
-        // Reset semua tombol ke style "Inactive"
+        // Reset all tab buttons to the inactive style.
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('text-green-700', 'bg-green-100', 'dark:text-neon', 'dark:bg-neon/10');
             btn.classList.add('text-gray-600', 'dark:text-gray-400', 'hover:text-green-600', 'hover:bg-green-50', 'dark:hover:text-neon', 'dark:hover:bg-neon/5');
         });
 
-        // Set tombol yang diklik ke style "Active"
+        // Set the clicked tab button to the active style.
         btnElement.classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:text-green-600', 'hover:bg-green-50', 'dark:hover:text-neon', 'dark:hover:bg-neon/5');
         btnElement.classList.add('text-green-700', 'bg-green-100', 'dark:text-neon', 'dark:bg-neon/10');
     }

@@ -14,7 +14,7 @@
                 Back to Explore
             </a>
 
-            <div class="ml-auto flex items-center gap-2">
+            <div class="ml-auto flex items-center gap-2" data-tour="viewer-top-actions">
                 <details class="relative">
                     <summary class="list-none cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:border-red-300 hover:text-red-500 transition-all shadow-sm">
                         Report
@@ -53,7 +53,7 @@
             </div>
         </div>
 
-        <div class="w-full h-[46vh] min-h-[320px] lg:h-[58vh] bg-gray-100 dark:bg-black relative group flex-shrink-0">
+        <div data-tour="viewer-stage" class="w-full h-[46vh] min-h-[320px] lg:h-[58vh] bg-gray-100 dark:bg-black relative group flex-shrink-0">
             <model-viewer src="{{ $model->modelUrl() }}" loading="lazy" camera-controls auto-rotate shadow-intensity="1" class="w-full h-full outline-none"></model-viewer>
         </div>
 
@@ -62,14 +62,14 @@
             <div class="flex flex-col gap-5">
                 <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
                     <div class="min-w-0">
-                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-sm font-semibold text-gray-600 dark:text-gray-300 mb-3">
+                        <div data-tour="viewer-views" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-sm font-semibold text-gray-600 dark:text-gray-300 mb-3">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             {{ $model->view_count }}
                         </div>
-                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white leading-tight">{{ $model->title }}</h1>
+                        <h1 data-tour="viewer-title" class="text-3xl font-bold text-gray-900 dark:text-white leading-tight">{{ $model->title }}</h1>
                         <div class="flex items-center gap-3 mt-3">
                             <a href="/creators/{{ $model->user->username }}" class="flex-shrink-0">
                                 <img loading="lazy" src="{{ $model->user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name='.urlencode($model->user->nickname ?? $model->user->username).'&background=e5e7eb&color=1f2937' }}"
@@ -87,7 +87,7 @@
                         </div>
                     </div>
 
-                <div class="flex items-center gap-3 flex-wrap lg:justify-end">
+                <div class="flex items-center gap-3 flex-wrap lg:justify-end" data-tour="viewer-actions">
                     <form method="POST" action="/models/{{ $model->id }}/star">
                         @csrf
                         <button class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-lg hover:text-yellow-500 hover:border-yellow-300 dark:hover:text-yellow-400 transition-all shadow-sm">
@@ -106,6 +106,7 @@
                     </a>
 
                     @if($isManageContext)
+                    <div data-tour="viewer-owner-actions" class="flex items-center gap-3 flex-wrap">
                     <button type="button" onclick="openViewerEditModal()" class="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-black border border-yellow-300 font-semibold rounded-lg hover:bg-yellow-300 transition-all shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
@@ -124,10 +125,11 @@
                             Delete
                         </button>
                     </form>
+                    </div>
                     @endif
 
                     @can('moderator')
-                    <form method="POST" action="/admin/delete-model/{{ $model->id }}" onsubmit="return confirm('Yakin ingin menghapus model ini secara permanen?')">
+                    <form method="POST" action="/admin/delete-model/{{ $model->id }}" onsubmit="return confirm('Are you sure you want to permanently delete this model?')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="flex items-center gap-2 px-6 py-3 bg-red-100 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-500 hover:bg-red-600 dark:hover:bg-red-600 hover:text-white dark:hover:text-white hover:border-red-600 dark:hover:border-red-600 rounded-xl font-bold transition-all duration-300 shadow-sm hover:shadow-red-500/20 active:scale-95">
@@ -165,14 +167,14 @@
                 </div>
             </div>
 
-            <div class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800/60">
+            <div data-tour="viewer-comments" class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800/60">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-green-500 dark:text-neon"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.222 3.419.169A1.751 1.751 0 0 1 10.5 18v2.25a2.25 2.25 0 0 0 3.935 1.507l2.812-2.812A1.75 1.75 0 0 0 18.5 17.75c1.002-.012 1.996-.143 2.96-.39a1.75 1.75 0 0 0 1.29-1.666V8.25a1.75 1.75 0 0 0-1.75-1.75h-3.536a4.466 4.466 0 0 1-.52-.805 4.75 4.75 0 0 0-7.38 0c-.15.244-.325.513-.52.805H3.75A1.75 1.75 0 0 0 2 8.25v3.76Z" /></svg>
                     Comments ({{ $model->comments ? $model->comments->count() : 0 }})
                 </h3>
 
                 @auth
-                <!-- Form Utama: Untuk Komentar Level Paling Atas (Parent Null) -->
+                <!-- Top-level comment form -->
                 <form action="/models/{{ $model->id }}/comment" method="POST" class="mb-8">
                     @csrf
                     <div class="w-full bg-gray-50 dark:bg-black/30 border border-gray-200 dark:border-gray-800 rounded-xl focus-within:border-green-500 dark:focus-within:border-neon transition-all p-2">
@@ -191,7 +193,7 @@
                 </div>
                 @endauth
 
-                <!-- Daftar List Komentar Terstruktur -->
+                <!-- Threaded comments list -->
                 <div class="space-y-4 max-h-[550px] overflow-y-auto pr-2">
                     @php
                         $allComments = $model->comments ?? collect();
@@ -219,7 +221,7 @@
     @endphp
 
     @if(!$isFromPanel)
-    <div class="w-full lg:w-80 flex-shrink-0 bg-gray-50 dark:bg-[#0c0c0e] border-l border-gray-200 dark:border-gray-800 flex flex-col relative">
+    <div data-tour="viewer-recommendations" class="w-full lg:w-80 flex-shrink-0 bg-gray-50 dark:bg-[#0c0c0e] border-l border-gray-200 dark:border-gray-800 flex flex-col relative">
 
         <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between bg-gray-50 dark:bg-[#0c0c0e] z-10">
             <h3 class="font-bold text-xs text-gray-500 uppercase tracking-widest">More Like This</h3>

@@ -52,13 +52,13 @@ class AuthController extends Controller
     
         $r->session()->regenerate();
 
-        // 1. Ambil data user yang berhasil login
+        // 1. Get the authenticated user.
         $user = Auth::user();
 
-        // 2. Tentukan tujuan default (user biasa)
+        // 2. Set the default destination for regular users.
         $redirectUrl = '/';
 
-        // 3. Cek apakah role-nya admin atau moderator
+        // 3. Check whether the user is an admin or moderator.
         if ($user->role === 'admin' || $user->role === 'moderator') {
             $redirectUrl = '/panel'; // Sesuaikan dengan route admin-mu
         }

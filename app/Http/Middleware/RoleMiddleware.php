@@ -11,23 +11,23 @@ class RoleMiddleware
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
-     * @param  string  ...$roles  <-- Perhatikan titik tiga ini (Variadic Parameter)
+     * @param  string  ...$roles
      * @return mixed
      */
     public function handle($request, Closure $next, ...$roles)
     {
-        // 1. Cek apakah user sudah login dan punya role
+        // 1. Check whether the user is logged in and has a role.
         if (!$request->user()) {
             abort(403, 'Unauthorized.');
         }
 
-        // 2. Cek apakah role user saat ini ada di dalam list array $roles yang diizinkan
+        // 2. Check whether the current role is in the allowed roles list.
         if (in_array($request->user()->role, $roles)) {
             return $next($request);
         }
 
-        // Jika tidak punya salah satu role di atas, blokir
-        abort(403, 'Anda tidak memiliki hak akses ke halaman ini.');
+        // Block users without one of the allowed roles.
+        abort(403, 'You do not have permission to access this page.');
     }
 }
 
