@@ -30,6 +30,11 @@ class Model3D extends Model
         'deleted_at' => 'datetime'
     ];
 
+    protected $appends = [
+        'model_url',
+        'thumbnail_url',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -90,8 +95,18 @@ class Model3D extends Model
         return \App\Services\SupabaseStorage::getModelUrl($this->model_path);
     }
 
+    public function getModelUrlAttribute()
+    {
+        return $this->model_path ? $this->modelUrl() : null;
+    }
+
     public function thumbnailUrl()
     {
         return \App\Services\SupabaseStorage::getThumbnailUrl($this->thumbnail_path);
+    }
+
+    public function getThumbnailUrlAttribute()
+    {
+        return $this->thumbnail_path ? $this->thumbnailUrl() : null;
     }
 }

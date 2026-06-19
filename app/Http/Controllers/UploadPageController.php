@@ -23,6 +23,19 @@ class UploadPageController extends Controller
             : max(0, $monthlyLimit - $monthlyUploads);
         $nextUploadReset = now()->addMonthNoOverflow()->startOfMonth();
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'categories' => $categories,
+                'upload_limit' => [
+                    'monthly_limit' => $monthlyLimit,
+                    'monthly_uploads' => $monthlyUploads,
+                    'remaining_uploads' => $remainingUploads,
+                    'is_verified_uploader' => $isVerifiedUploader,
+                    'next_reset' => $nextUploadReset,
+                ],
+            ]);
+        }
+
         return view('upload.index', compact(
             'categories',
             'monthlyLimit',

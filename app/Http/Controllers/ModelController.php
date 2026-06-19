@@ -21,7 +21,7 @@ class ModelController extends Controller
 
     public function index(Request $r)
     {
-        // 1. Inisialisasi query dasar beserta relasinya
+        // 1. Base query with relationships.
         $q = Model3D::select([
                 'id',
                 'user_id',
@@ -111,9 +111,23 @@ class ModelController extends Controller
         $tags = \App\Models\Tag::orderBy('name')->limit(10)->get(['id', 'name', 'slug']);
 
         // 8. Return data in the requested format.
-        return $r->wantsJson()
-            ? response()->json($models)
-            : view('home', compact('models', 'categories', 'tags'));
+        if ($r->wantsJson()) {
+            return response()->json([
+                'models' => $models,
+                'categories' => $categories,
+                'tags' => $tags,
+                'filters' => [
+                    'search' => $r->get('search'),
+                    'category' => $r->get('category'),
+                    'tag' => $r->get('tag'),
+                    'filter' => $r->get('filter'),
+                    'timeframe' => $r->get('timeframe', 'all_time'),
+                    'sort' => $sort,
+                ],
+            ]);
+        }
+
+        return view('home', compact('models', 'categories', 'tags'));
     }
 
     public function store(Request $r)
@@ -275,6 +289,15 @@ class ModelController extends Controller
 
         // Return the partial directly without wrapping it in an extra modal layout.
         // This keeps the modal response faster.
+        if ($r->wantsJson()) {
+            return response()->json([
+                'model' => $model,
+                'recommendations' => $recommendations,
+                'categories' => $categories,
+                'is_manage_context' => $isManageContext,
+            ]);
+        }
+
         if ($r->ajax()) {
             return view('model.partial', compact('model', 'recommendations', 'categories', 'isManageContext'));
         }

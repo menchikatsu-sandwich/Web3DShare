@@ -18,6 +18,13 @@ class VerifyController extends Controller
 
         $verificationCheck = $this->verificationEligibility($user);
 
+        if ($r->wantsJson()) {
+            return response()->json([
+                'pending_request' => $pendingRequest,
+                'verification_check' => $verificationCheck,
+            ]);
+        }
+
         return view('verify.index', compact('pendingRequest', 'verificationCheck'));
     }
 
@@ -29,7 +36,12 @@ class VerifyController extends Controller
 
         $verificationCheck = $this->verificationEligibility($r->user());
         if (!$verificationCheck['eligible']) {
-            return back()->with('error', $verificationCheck['message']);
+            return $r->wantsJson()
+                ? response()->json([
+                    'error' => $verificationCheck['message'],
+                    'verification_check' => $verificationCheck,
+                ], 403)
+                : back()->with('error', $verificationCheck['message']);
         }
 
         $existing = VerificationRequest::where('user_id', $r->user()->id)
@@ -37,19 +49,26 @@ class VerifyController extends Controller
             ->first();
 
         if ($existing) {
-            return back()->with('error', 'You already have a pending verification request.');
+            return $r->wantsJson()
+                ? response()->json(['error' => 'You already have a pending verification request.'], 409)
+                : back()->with('error', 'You already have a pending verification request.');
         }
 
-        VerificationRequest::create([
+        $verificationRequest = VerificationRequest::create([
             'user_id'=>$r->user()->id,
             'note'=>$r->note,
             'request_status'=>'pending'
         ]);
 
-        return back()->with('success', 'Verification request submitted.');
+        return $r->wantsJson()
+            ? response()->json([
+                'message' => 'Verification request submitted.',
+                'verification_request' => $verificationRequest,
+            ], 201)
+            : back()->with('success', 'Verification request submitted.');
     }
 
-    public function approve($id)
+    public function approve(Request $r, $id)
     {
         $req = \App\Models\VerificationRequest::findOrFail($id);
 
@@ -59,19 +78,32 @@ class VerifyController extends Controller
 
         $req->update([
             'request_status' => 'approved',
-            'reviewed_by' => auth()->id(),
+            'reviewed_by' => $r->user()?->id ?? auth()->id(),
         ]);
 
-        return back()->with('success', 'Verification request approved.');
+        return $r->wantsJson()
+            ? response()->json([
+                'message' => 'Verification request approved.',
+                'verification_request' => $req->fresh('user', 'reviewer'),
+            ])
+            : back()->with('success', 'Verification request approved.');
     }
 
-    public function reject($id)
+    public function reject(Request $r, $id)
     {
-        \App\Models\VerificationRequest::findOrFail($id)->update([
+        $req = \App\Models\VerificationRequest::findOrFail($id);
+
+        $req->update([
             'request_status' => 'rejected',
-            'reviewed_by' => auth()->id(),
+            'reviewed_by' => $r->user()?->id ?? auth()->id(),
         ]);
-        return back()->with('success', 'Verification request rejected.');
+
+        return $r->wantsJson()
+            ? response()->json([
+                'message' => 'Verification request rejected.',
+                'verification_request' => $req->fresh('user', 'reviewer'),
+            ])
+            : back()->with('success', 'Verification request rejected.');
     }
 
     private function verificationEligibility($user): array

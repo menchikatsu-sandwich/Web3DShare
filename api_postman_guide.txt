@@ -1,0 +1,897 @@
+WEB3DSHARE API POSTMAN GUIDE
+Base URL examples:
+- Local: http://127.0.0.1:8000
+- Ngrok: https://your-ngrok-domain.ngrok-free.app
+
+In Postman, create an environment:
+- base_url = http://127.0.0.1:8000
+- token = empty at first
+
+Use this URL pattern:
+{{base_url}}/api/...
+
+For protected endpoints, add this header:
+Authorization: Bearer {{token}}
+Accept: application/json
+
+For normal JSON requests:
+Content-Type: application/json
+
+For upload requests:
+Use Body > form-data. Do not use raw JSON for file upload.
+
+After login or register:
+1. Copy the token from the JSON response.
+2. Paste it into the Postman environment variable named token.
+3. Use Authorization: Bearer {{token}} for protected routes.
+
+If you get:
+- 401 Unauthorized: login again and refresh the token.
+- 403 Forbidden: your user role or ownership is not allowed.
+- 422 Unprocessable Content: check the validation errors in the response.
+- 409 Conflict: the request conflicts with an existing state, such as duplicate active report or pending verification.
+
+============================================================
+PUBLIC ENDPOINTS
+============================================================
+
+1. MAIN API EXPLORE
+Method: GET
+URL: {{base_url}}/api
+Headers:
+- Accept: application/json
+Query Params:
+- Empty by default.
+- Optional: search, category, tag, filter, timeframe, sort, page.
+Body:
+- Empty.
+Postman Steps:
+1. Create a new GET request.
+2. Set URL to {{base_url}}/api.
+3. Leave body empty.
+4. Add Accept: application/json if not already set.
+5. Click Send.
+Expected Response:
+- 200 OK.
+- JSON containing models, categories, tags, and filters.
+Notes:
+- This is the API version of the home/explore page.
+
+2. LIST MODELS
+Method: GET
+URL: {{base_url}}/api/models
+Headers:
+- Accept: application/json
+Query Params:
+- search: optional text search.
+- category: optional category id.
+- tag: optional tag slug.
+- filter: optional, for example my_models when authenticated.
+- timeframe: all_time, this_month, or this_week.
+- sort: latest, top_downloads, top_views, or top_stars.
+- page: optional pagination page.
+Body:
+- Empty.
+Postman Steps:
+1. Create a GET request.
+2. Set URL to {{base_url}}/api/models.
+3. Open Params tab if you want filtering.
+4. Example params: sort=top_views and timeframe=this_month.
+5. Click Send.
+Expected Response:
+- 200 OK.
+- JSON containing paginated models, categories, tags, and active filters.
+Notes:
+- Use this endpoint to get model ids for detail, star, comment, report, download, edit, and delete tests.
+
+3. SHOW MODEL DETAIL
+Method: GET
+URL: {{base_url}}/api/models/{model}
+Headers:
+- Accept: application/json
+Path Params:
+- {model}: model id.
+Query Params:
+- Optional: from=my_models.
+Body:
+- Empty.
+Postman Steps:
+1. Call GET {{base_url}}/api/models first.
+2. Copy a model id.
+3. Replace {model} with that id.
+4. Send GET request.
+Expected Response:
+- 200 OK.
+- JSON containing model, recommendations, categories, and is_manage_context.
+Notes:
+- Opening this endpoint increments model view count.
+
+4. DOWNLOAD MODEL
+Method: GET
+URL: {{base_url}}/api/models/{model}/download
+Headers:
+- Accept: application/json
+Optional Headers:
+- Authorization: Bearer {{token}} if you want the API to know the current user.
+Path Params:
+- {model}: model id.
+Body:
+- Empty.
+Postman Steps:
+1. Get a model id from /api/models.
+2. Replace {model}.
+3. Send GET request.
+4. Copy download_url from response if you want to open the file.
+Expected Response:
+- 200 OK.
+- JSON containing download_url, counted, and download_count.
+Notes:
+- If the uploader downloads their own model while authenticated, counted is false.
+- Public users can still get the download URL.
+
+5. CREATOR PROFILE
+Method: GET
+URL: {{base_url}}/api/creators/{username}
+Headers:
+- Accept: application/json
+Path Params:
+- {username}: creator username.
+Body:
+- Empty.
+Postman Steps:
+1. Get a username from /api/models response.
+2. Replace {username}.
+3. Send GET request.
+Expected Response:
+- 200 OK.
+- JSON containing user, stats, and creator models.
+Notes:
+- This matches the public creator profile page data.
+
+6. TERMS LINK
+Method: GET
+URL: {{base_url}}/api/terms
+Headers:
+- Accept: application/json
+Body:
+- Empty.
+Postman Steps:
+1. Create GET request.
+2. Set URL to {{base_url}}/api/terms.
+3. Send request.
+Expected Response:
+- 200 OK.
+- JSON containing title and url.
+Notes:
+- The full legal page is still available on the web route /terms.
+
+============================================================
+AUTHENTICATION ENDPOINTS
+============================================================
+
+7. REGISTER
+Method: POST
+URL: {{base_url}}/api/register
+Headers:
+- Accept: application/json
+- Content-Type: application/json
+Body:
+{
+  "username": "user123",
+  "email": "user@example.com",
+  "password": "secret123",
+  "terms_accepted": true,
+  "device_name": "postman"
+}
+Postman Steps:
+1. Create a POST request.
+2. Set URL to {{base_url}}/api/register.
+3. Go to Body > raw > JSON.
+4. Paste the JSON body above.
+5. Click Send.
+6. Copy token from response.
+7. Save token into Postman environment variable token.
+Expected Response:
+- 201 Created.
+- JSON containing message, user, token, and token_type.
+Notes:
+- username must contain at least one letter and one number.
+- password minimum is 6 characters.
+- terms_accepted must be true.
+
+8. LOGIN
+Method: POST
+URL: {{base_url}}/api/login
+Headers:
+- Accept: application/json
+- Content-Type: application/json
+Body:
+{
+  "email": "user123",
+  "password": "secret123",
+  "device_name": "postman"
+}
+Postman Steps:
+1. Create a POST request.
+2. Set URL to {{base_url}}/api/login.
+3. Go to Body > raw > JSON.
+4. Paste the JSON body above.
+5. Click Send.
+6. Copy token from response.
+7. Save token into Postman environment variable token.
+Expected Response:
+- 200 OK.
+- JSON containing message, redirect, user, token, and token_type.
+Notes:
+- The email field accepts either email or username.
+
+9. LOGOUT
+Method: POST
+URL: {{base_url}}/api/logout
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Body:
+- Empty.
+Postman Steps:
+1. Login first.
+2. Save token to environment.
+3. Create POST request to {{base_url}}/api/logout.
+4. Add Authorization: Bearer {{token}}.
+5. Click Send.
+6. Clear token from environment after success.
+Expected Response:
+- 200 OK.
+- JSON containing logout message.
+Notes:
+- This deletes the current Sanctum token.
+
+============================================================
+PROFILE ENDPOINTS
+============================================================
+
+10. CURRENT USER
+Method: GET
+URL: {{base_url}}/api/me
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Body:
+- Empty.
+Postman Steps:
+1. Login first.
+2. Create GET request.
+3. Set URL to {{base_url}}/api/me.
+4. Add Authorization header.
+5. Click Send.
+Expected Response:
+- 200 OK.
+- JSON containing current user.
+Notes:
+- Use this to test whether your token works.
+
+11. SHOW PROFILE
+Method: GET
+URL: {{base_url}}/api/profile
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Body:
+- Empty.
+Postman Steps:
+1. Login first.
+2. Create GET request to {{base_url}}/api/profile.
+3. Add Authorization header.
+4. Click Send.
+Expected Response:
+- 200 OK.
+- JSON containing current user.
+Notes:
+- Same data as /api/me.
+
+12. UPDATE PROFILE WITH POST
+Method: POST
+URL: {{base_url}}/api/profile
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Body Type:
+- form-data
+Body Fields:
+- nickname: Text, optional.
+- image: File, optional.
+Postman Steps:
+1. Login first.
+2. Create POST request to {{base_url}}/api/profile.
+3. Add Authorization header.
+4. Go to Body > form-data.
+5. Add nickname as Text if needed.
+6. Add image as File if needed.
+7. Click Send.
+Expected Response:
+- 200 OK.
+- JSON containing message and updated user.
+Notes:
+- Use form-data when uploading profile image.
+
+13. UPDATE PROFILE WITH PATCH
+Method: PATCH
+URL: {{base_url}}/api/profile
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Body Type:
+- form-data
+Body Fields:
+- nickname: Text, optional.
+- image: File, optional.
+Postman Steps:
+1. Login first.
+2. Create PATCH request to {{base_url}}/api/profile.
+3. Add Authorization header.
+4. Go to Body > form-data.
+5. Add fields you want to update.
+6. Click Send.
+Expected Response:
+- 200 OK.
+- JSON containing message and updated user.
+Notes:
+- Same behavior as POST /api/profile.
+
+============================================================
+UPLOAD AND MODEL MANAGEMENT ENDPOINTS
+============================================================
+
+14. GET UPLOAD INFO
+Method: GET
+URL: {{base_url}}/api/upload
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Body:
+- Empty.
+Postman Steps:
+1. Login first.
+2. Create GET request to {{base_url}}/api/upload.
+3. Add Authorization header.
+4. Click Send.
+5. Copy category id from categories for upload tests.
+Expected Response:
+- 200 OK.
+- JSON containing categories and upload_limit.
+Notes:
+- Basic users have 5 uploads per month.
+- Verified users have remaining_uploads as null.
+
+15. UPLOAD MODEL
+Method: POST
+URL: {{base_url}}/api/models
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Body Type:
+- form-data
+Body Fields:
+- title: Text, required.
+- description: Text, optional.
+- category_id: Text, required.
+- tags: Text, optional comma-separated tags. Example: anime, character, game.
+- model: File, required .glb file.
+- thumbnail: File, required image file.
+Postman Steps:
+1. Login first.
+2. Call GET {{base_url}}/api/upload.
+3. Copy a category id.
+4. Create POST request to {{base_url}}/api/models.
+5. Add Authorization header.
+6. Go to Body > form-data.
+7. Add title as Text.
+8. Add category_id as Text.
+9. Add description as Text if needed.
+10. Add tags as Text if needed.
+11. Add model as File and choose a .glb file.
+12. Add thumbnail as File and choose an image.
+13. Click Send.
+Expected Response:
+- 201 Created.
+- JSON containing created model.
+Notes:
+- Do not use raw JSON for model upload.
+- If upload fails with 422, check validation errors.
+
+16. UPDATE MODEL
+Method: PATCH
+URL: {{base_url}}/api/models/{model}
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {model}: model id.
+Body:
+{
+  "title": "Updated Model Title",
+  "description": "Updated model description.",
+  "category_id": 1,
+  "tags": "anime, character"
+}
+Postman Steps:
+1. Login as the model owner.
+2. Get your model id from /api/models or /api?filter=my_models.
+3. Replace {model}.
+4. Go to Body > raw > JSON.
+5. Paste and edit the JSON body.
+6. Click Send.
+Expected Response:
+- 200 OK.
+- JSON containing message and updated model.
+Notes:
+- Only model owner can edit.
+- The actual .glb model file cannot be edited here.
+- To replace the model file, delete the model and upload a new one.
+
+17. DELETE MODEL
+Method: DELETE
+URL: {{base_url}}/api/models/{model}
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {model}: model id.
+Body:
+- Empty.
+Postman Steps:
+1. Login as owner, admin, or moderator.
+2. Replace {model}.
+3. Send DELETE request.
+Expected Response:
+- 200 OK.
+- JSON containing deleted message.
+Notes:
+- Regular users can only delete their own models.
+- Admin/moderator can delete any model.
+
+============================================================
+INTERACTION ENDPOINTS
+============================================================
+
+18. TOGGLE STAR
+Method: POST
+URL: {{base_url}}/api/models/{model}/star
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {model}: model id.
+Body:
+- Empty.
+Postman Steps:
+1. Login first.
+2. Get a model id.
+3. Replace {model}.
+4. Send POST request once to star.
+5. Send the same request again to unstar.
+Expected Response:
+- 200 OK.
+- JSON containing stars count.
+Notes:
+- This endpoint toggles star and unstar.
+
+19. POST COMMENT
+Method: POST
+URL: {{base_url}}/api/models/{model}/comment
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {model}: model id.
+Body:
+{
+  "body": "Nice model!",
+  "parent_id": null
+}
+Postman Steps:
+1. Login first.
+2. Replace {model}.
+3. Go to Body > raw > JSON.
+4. Paste body above.
+5. Click Send.
+Expected Response:
+- 200 OK.
+- JSON containing created comment.
+Notes:
+- parent_id is optional.
+- For a reply, set parent_id to an existing comment id.
+
+20. DELETE COMMENT
+Method: DELETE
+URL: {{base_url}}/api/comments/{comment}
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {comment}: comment id.
+Body:
+- Empty.
+Postman Steps:
+1. Login as comment owner, admin, or moderator.
+2. Replace {comment}.
+3. Send DELETE request.
+Expected Response:
+- 200 OK.
+- JSON containing success and message.
+Notes:
+- Deletes the comment and all nested replies.
+
+============================================================
+REPORT ENDPOINTS
+============================================================
+
+21. REPORT MODEL
+Method: POST
+URL: {{base_url}}/api/models/{model}/report
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {model}: model id.
+Body:
+{
+  "reason": "broken_file",
+  "description": "The model cannot be opened."
+}
+Postman Steps:
+1. Login first.
+2. Choose a model that is not yours.
+3. Replace {model}.
+4. Go to Body > raw > JSON.
+5. Paste body above.
+6. Click Send.
+Expected Response:
+- 200 OK.
+- JSON containing reported message.
+Allowed reason values:
+- stolen_content
+- inappropriate_content
+- spam
+- broken_file
+- wrong_category
+- other
+Notes:
+- You cannot report your own model.
+- You cannot create multiple active reports for the same model.
+
+============================================================
+VERIFICATION ENDPOINTS
+============================================================
+
+22. CHECK VERIFICATION STATUS AND ELIGIBILITY
+Method: GET
+URL: {{base_url}}/api/verify
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Body:
+- Empty.
+Postman Steps:
+1. Login first.
+2. Create GET request to {{base_url}}/api/verify.
+3. Add Authorization header.
+4. Click Send.
+5. Read verification_check.eligible.
+Expected Response:
+- 200 OK.
+- JSON containing pending_request and verification_check.
+Notes:
+- Check this before submitting verification request.
+- Shows rules, reasons, account age, model count, cooldown, and model download requirements.
+
+23. SUBMIT VERIFICATION REQUEST
+Method: POST
+URL: {{base_url}}/api/verify-request
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Body:
+{
+  "note": "I want to be verified because I publish original 3D models."
+}
+Postman Steps:
+1. Login first.
+2. Call GET {{base_url}}/api/verify.
+3. Make sure eligible is true.
+4. Create POST request to {{base_url}}/api/verify-request.
+5. Go to Body > raw > JSON.
+6. Paste body above.
+7. Click Send.
+Expected Response:
+- 201 Created if accepted.
+- 403 Forbidden if requirements are not met.
+- 409 Conflict if there is already a pending request.
+Notes:
+- Verification rules come from config/env.
+- Current starter rules are model count, downloads per model, account age, and rejection cooldown.
+
+============================================================
+MODERATOR AND ADMIN ENDPOINTS
+============================================================
+
+24. ADMIN PANEL DATA
+Method: GET
+URL: {{base_url}}/api/panel
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Body:
+- Empty.
+Postman Steps:
+1. Login as admin or moderator.
+2. Create GET request to {{base_url}}/api/panel.
+3. Add Authorization header.
+4. Click Send.
+Expected Response:
+- 200 OK.
+- JSON containing stats, models, users, reports, requests, and categories.
+Notes:
+- Regular users get 403.
+
+25. ADMIN STATUS COUNTS
+Method: GET
+URL: {{base_url}}/api/admin/status
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Body:
+- Empty.
+Postman Steps:
+1. Login as admin or moderator.
+2. Create GET request to {{base_url}}/api/admin/status.
+3. Add Authorization header.
+4. Click Send.
+Expected Response:
+- 200 OK.
+- JSON containing models, users, reports, and verify counts.
+Notes:
+- Useful for external dashboard polling.
+
+26. MODERATION DELETE MODEL
+Method: DELETE
+URL: {{base_url}}/api/admin/delete-model/{id}
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {id}: model id.
+Body:
+- Empty.
+Postman Steps:
+1. Login as admin or moderator.
+2. Replace {id}.
+3. Send DELETE request.
+Expected Response:
+- 200 OK.
+- JSON containing takedown message.
+Notes:
+- This is the admin/moderator takedown route.
+
+27. MARK REPORT AS REVIEWED
+Method: POST
+URL: {{base_url}}/api/admin/reports/{report}/reviewed
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {report}: report id.
+Body:
+- Empty.
+Postman Steps:
+1. Login as admin or moderator.
+2. Call GET {{base_url}}/api/panel.
+3. Copy a report id.
+4. Replace {report}.
+5. Send POST request.
+Expected Response:
+- 200 OK.
+- JSON containing reviewed message.
+Notes:
+- Updates report_status to reviewed.
+
+28. MARK REPORT AS RESOLVED
+Method: POST
+URL: {{base_url}}/api/admin/reports/{report}/resolve
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {report}: report id.
+Body:
+- Empty.
+Postman Steps:
+1. Login as admin or moderator.
+2. Call GET {{base_url}}/api/panel.
+3. Copy a report id.
+4. Replace {report}.
+5. Send POST request.
+Expected Response:
+- 200 OK.
+- JSON containing done message.
+Notes:
+- Updates report_status to resolved.
+
+29. APPROVE VERIFICATION REQUEST
+Method: POST
+URL: {{base_url}}/api/verify/{id}/approve
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {id}: verification request id.
+Body:
+- Empty.
+Postman Steps:
+1. Login as admin or moderator.
+2. Call GET {{base_url}}/api/panel.
+3. Copy a pending verification request id.
+4. Replace {id}.
+5. Send POST request.
+Expected Response:
+- 200 OK.
+- JSON containing approved verification_request.
+Notes:
+- Also updates user upload_tier to verified.
+
+30. REJECT VERIFICATION REQUEST
+Method: POST
+URL: {{base_url}}/api/verify/{id}/reject
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {id}: verification request id.
+Body:
+- Empty.
+Postman Steps:
+1. Login as admin or moderator.
+2. Call GET {{base_url}}/api/panel.
+3. Copy a pending verification request id.
+4. Replace {id}.
+5. Send POST request.
+Expected Response:
+- 200 OK.
+- JSON containing rejected verification_request.
+Notes:
+- Rejected users must wait for cooldown before requesting again.
+
+31. CREATE CATEGORY
+Method: POST
+URL: {{base_url}}/api/admin/category
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+- Content-Type: application/json
+Body:
+{
+  "name": "New Category"
+}
+Postman Steps:
+1. Login as admin or moderator.
+2. Create POST request to {{base_url}}/api/admin/category.
+3. Go to Body > raw > JSON.
+4. Paste body above.
+5. Click Send.
+Expected Response:
+- 201 Created.
+- JSON containing message and category.
+Notes:
+- Category name must be unique.
+
+32. DELETE CATEGORY
+Method: DELETE
+URL: {{base_url}}/api/admin/category/{id}
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {id}: category id.
+Body:
+- Empty.
+Postman Steps:
+1. Login as admin or moderator.
+2. Get category id from /api/panel, /api/upload, or /api/models.
+3. Replace {id}.
+4. Send DELETE request.
+Expected Response:
+- 200 OK if deleted.
+- 409 Conflict if models still use this category.
+Notes:
+- Categories with existing models cannot be deleted.
+
+============================================================
+ADMIN ONLY ENDPOINTS
+============================================================
+
+33. PROMOTE USER TO MODERATOR
+Method: POST
+URL: {{base_url}}/api/admin/promote/{id}
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {id}: user id.
+Body:
+- Empty.
+Postman Steps:
+1. Login as admin.
+2. Call GET {{base_url}}/api/panel.
+3. Copy a user id.
+4. Replace {id}.
+5. Send POST request.
+Expected Response:
+- 200 OK.
+- JSON containing message and updated user.
+Notes:
+- Admin only.
+
+34. DEMOTE USER TO REGULAR USER
+Method: POST
+URL: {{base_url}}/api/admin/demote/{id}
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {id}: user id.
+Body:
+- Empty.
+Postman Steps:
+1. Login as admin.
+2. Call GET {{base_url}}/api/panel.
+3. Copy a user id.
+4. Replace {id}.
+5. Send POST request.
+Expected Response:
+- 200 OK.
+- JSON containing message and updated user.
+Notes:
+- Admin only.
+
+35. DELETE USER
+Method: DELETE
+URL: {{base_url}}/api/admin/delete-user/{id}
+Headers:
+- Accept: application/json
+- Authorization: Bearer {{token}}
+Path Params:
+- {id}: user id.
+Body:
+- Empty.
+Postman Steps:
+1. Login as admin.
+2. Call GET {{base_url}}/api/panel.
+3. Copy a user id.
+4. Replace {id}.
+5. Send DELETE request.
+Expected Response:
+- 200 OK.
+- JSON containing user deleted message.
+Notes:
+- Admin only.
+- Deletes the user and all models owned by the user.
+
+============================================================
+SUGGESTED POSTMAN TEST ORDER
+============================================================
+
+1. GET {{base_url}}/api
+2. POST {{base_url}}/api/register or POST {{base_url}}/api/login
+3. Save token into environment variable token
+4. GET {{base_url}}/api/me
+5. GET {{base_url}}/api/upload
+6. POST {{base_url}}/api/models with form-data
+7. GET {{base_url}}/api/models
+8. GET {{base_url}}/api/models/{model}
+9. POST {{base_url}}/api/models/{model}/star
+10. POST {{base_url}}/api/models/{model}/comment
+11. GET {{base_url}}/api/verify
+12. POST {{base_url}}/api/verify-request if eligible
+13. Login as admin/moderator
+14. GET {{base_url}}/api/panel
+15. Test approve/reject/report/category/admin endpoints

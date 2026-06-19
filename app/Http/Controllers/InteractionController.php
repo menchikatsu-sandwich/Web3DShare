@@ -142,6 +142,14 @@ class InteractionController extends Controller
             $model->increment('download_count');
         }
 
+        if ($r->wantsJson()) {
+            return response()->json([
+                'download_url' => $model->modelUrl(),
+                'counted' => !$isOwnerDownload,
+                'download_count' => $model->fresh()->download_count,
+            ]);
+        }
+
         return redirect($model->modelUrl());
     }
 }

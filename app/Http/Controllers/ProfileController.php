@@ -8,7 +8,7 @@ use App\Services\SupabaseStorage;
 
 class ProfileController extends Controller
 {
-    public function creator(User $user)
+    public function creator(Request $request, User $user)
     {
         $stats = [
             'models' => $user->models()->count(),
@@ -34,13 +34,31 @@ class ProfileController extends Controller
             ->paginate(12)
             ->withQueryString();
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'user' => $user->only([
+                    'id',
+                    'username',
+                    'nickname',
+                    'role',
+                    'upload_tier',
+                    'profile_image_path',
+                    'profile_image_url',
+                    'created_at',
+                    'updated_at',
+                ]),
+                'stats' => $stats,
+                'models' => $models,
+            ]);
+        }
+
         return view('creator.show', compact('user', 'stats', 'models'));
     }
 
     public function show(Request $r)
     {
         return $r->wantsJson()
-            ? response()->json($r->user())
+            ? response()->json(['user' => $r->user()])
             : view('profile.index', ['user'=>$r->user()]);
     }
 
@@ -79,7 +97,7 @@ class ProfileController extends Controller
         }
 
         return $r->wantsJson()
-            ? response()->json($user)
+            ? response()->json(['message' => 'Profile updated.', 'user' => $user])
             : back()->with('success', 'Profile updated.');
     }
 }

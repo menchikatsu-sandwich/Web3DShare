@@ -32,6 +32,10 @@ class User extends Authenticatable
         'updated_at' => 'datetime'
     ];
 
+    protected $appends = [
+        'profile_image_url',
+    ];
+
     public function models()
     {
         return $this->hasMany(Model3D::class);
@@ -92,5 +96,10 @@ class User extends Authenticatable
         if(!$this->profile_image_path) return null;
 
         return \App\Services\SupabaseStorage::getProfileUrl($this->profile_image_path);
+    }
+
+    public function getProfileImageUrlAttribute()
+    {
+        return $this->profileImageUrl();
     }
 }
