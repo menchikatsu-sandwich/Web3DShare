@@ -1,3 +1,4 @@
+<div data-comment-node="{{ $comment->id }}" data-parent-id="{{ $comment->parent_id }}" class="space-y-2 {{ $comment->parent_id ? '' : 'border-b border-gray-100 dark:border-gray-800/40 pb-4 last:border-0' }}">
 <div class="flex gap-3 bg-gray-50/30 dark:bg-darkPanel/20 p-3.5 rounded-xl border border-gray-100/50 dark:border-gray-800/40 items-start">
     <!-- Profile picture and reply thread guide -->
     <div class="flex flex-col items-center flex-shrink-0">
@@ -21,7 +22,7 @@
         </p>
 
         <!-- Comment actions -->
-        <div class="flex items-center gap-4 mt-2.5 flex-wrap">
+        <div class="flex items-center gap-4 mt-2.5 flex-wrap" data-comment-actions="{{ $comment->id }}">
             @auth
             <button type="button" 
                     onclick="toggleReplyForm('{{ $comment->id }}')"
@@ -35,15 +36,17 @@
             <button type="button" 
                     onclick="toggleRepliesDisplay('{{ $comment->id }}')" 
                     id="toggle-btn-{{ $comment->id }}"
+                    data-reply-toggle
+                    data-reply-count="{{ $allComments->where('parent_id', $comment->id)->count() }}"
                     class="text-[11px] font-bold text-green-600 dark:text-neon hover:underline flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3" style="transition: transform 0.2s;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
-                <span>Show Replies ({{ $allComments->where('parent_id', $comment->id)->count() }})</span>
+                <span><span data-reply-label>Show Replies</span> (<span data-reply-count-text>{{ $allComments->where('parent_id', $comment->id)->count() }}</span>)</span>
             </button>
             @endif
 
             @auth
                 @if(auth()->id() === $comment->user_id || in_array(auth()->user()->role, ['admin', 'moderator']))
-                <form action="/comments/{{ $comment->id }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this comment? All replies under it will also be permanently deleted.')" class="inline">
+                <form action="/comments/{{ $comment->id }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this comment? All replies under it will also be permanently deleted.')" class="inline" data-ajax-comment-delete>
                     @csrf
                     @method('DELETE')
                     <button type="submit" 
@@ -59,7 +62,7 @@
         <!-- Reply form kept inside the comment hierarchy for accurate spacing -->
         @auth
         <div id="reply-form-{{ $comment->id }}" class="hidden mt-3 pt-1">
-            <form action="/models/{{ $modelId }}/comment" method="POST">
+            <form action="/models/{{ $modelId }}/comment" method="POST" data-ajax-comment>
                 @csrf
                 <input type="hidden" name="parent_id" value="{{ $comment->id }}">
                 <div class="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-gray-800 rounded-xl focus-within:border-green-500 dark:focus-within:border-neon transition-all p-1.5 shadow-inner">
@@ -85,4 +88,5 @@
     @foreach($allComments->where('parent_id', $comment->id) as $subComment)
         @include('model.comment-item', ['comment' => $subComment, 'allComments' => $allComments, 'modelId' => $modelId])
     @endforeach
+</div>
 </div>

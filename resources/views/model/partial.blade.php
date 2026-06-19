@@ -1,8 +1,9 @@
 @php
     $isManageContext = $isManageContext ?? false;
+    $hasStarred = $hasStarred ?? false;
 @endphp
 
-<div class="flex flex-col lg:flex-row h-full min-h-0 w-full bg-white dark:bg-darkPanel text-gray-800 dark:text-gray-200">
+<div data-model-shell="{{ $model->id }}" class="flex flex-col lg:flex-row h-full min-h-0 w-full bg-white dark:bg-darkPanel text-gray-800 dark:text-gray-200">
 
     <div class="flex-1 min-h-0 flex flex-col overflow-y-auto overflow-x-hidden">
 
@@ -21,7 +22,7 @@
                     </summary>
                     <div class="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] z-30 bg-white dark:bg-darkPanel border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl p-4">
                         @auth
-                            <form method="POST" action="/models/{{ $model->id }}/report" class="space-y-3">
+                            <form method="POST" action="/models/{{ $model->id }}/report" class="space-y-3" data-ajax-report>
                                 @csrf
                                 <select name="reason" required class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-red-500">
                                     <option value="" disabled selected>Select reason...</option>
@@ -77,7 +78,7 @@
                             </a>
                             <div class="min-w-0">
                                 <a href="/creators/{{ $model->user->username }}" class="block font-bold text-gray-900 dark:text-white hover:text-green-600 dark:hover:text-neon leading-none truncate">{{ $model->user->nickname ?? $model->user->username }}</a>
-                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mt-1.5">{{ $model->user->models_count ?? 0 }} Models Published</p>
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mt-1.5">{{ $authorModelCount ?? $model->user->models_count ?? 0 }} Models Published</p>
                             </div>
                             @if($model->user->upload_tier === 'verified')
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 flex-shrink-0 text-green-500 dark:text-neon" title="Verified Creator">
@@ -88,21 +89,22 @@
                     </div>
 
                 <div class="flex items-center gap-3 flex-wrap lg:justify-end" data-tour="viewer-actions">
-                    <form method="POST" action="/models/{{ $model->id }}/star">
+                    <form method="POST" action="/models/{{ $model->id }}/star" data-ajax-star>
                         @csrf
-                        <button class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-lg hover:text-yellow-500 hover:border-yellow-300 dark:hover:text-yellow-400 transition-all shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                        <button data-star-button data-starred="{{ $hasStarred ? 'true' : 'false' }}" class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 {{ $hasStarred ? 'text-yellow-500 border-yellow-300 dark:text-yellow-400' : 'text-gray-700 dark:text-gray-300' }} font-semibold rounded-lg hover:text-yellow-500 hover:border-yellow-300 dark:hover:text-yellow-400 transition-all shadow-sm">
+                            <svg data-star-icon xmlns="http://www.w3.org/2000/svg" fill="{{ $hasStarred ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                             </svg>
-                            Star ({{ $model->stars_count }})
+                            <span data-star-label>{{ $hasStarred ? 'Starred' : 'Star' }}</span>
+                            (<span data-star-count>{{ $model->stars_count }}</span>)
                         </button>
                     </form>
 
-                    <a href="/models/{{ $model->id }}/download" class="flex items-center gap-2 px-4 py-2 bg-green-500 dark:bg-neon text-white dark:text-black font-semibold rounded-lg hover:bg-green-600 dark:hover:bg-[#00cc6a] transition-all shadow-sm">
+                    <a href="/models/{{ $model->id }}/download" data-ajax-download class="flex items-center gap-2 px-4 py-2 bg-green-500 dark:bg-neon text-white dark:text-black font-semibold rounded-lg hover:bg-green-600 dark:hover:bg-[#00cc6a] transition-all shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                         </svg>
-                        Download ({{ $model->download_count }})
+                        Download (<span data-download-count>{{ $model->download_count }}</span>)
                     </a>
 
                     @if($isManageContext)
@@ -170,12 +172,12 @@
             <div data-tour="viewer-comments" class="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800/60">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-green-500 dark:text-neon"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.222 3.419.169A1.751 1.751 0 0 1 10.5 18v2.25a2.25 2.25 0 0 0 3.935 1.507l2.812-2.812A1.75 1.75 0 0 0 18.5 17.75c1.002-.012 1.996-.143 2.96-.39a1.75 1.75 0 0 0 1.29-1.666V8.25a1.75 1.75 0 0 0-1.75-1.75h-3.536a4.466 4.466 0 0 1-.52-.805 4.75 4.75 0 0 0-7.38 0c-.15.244-.325.513-.52.805H3.75A1.75 1.75 0 0 0 2 8.25v3.76Z" /></svg>
-                    Comments ({{ $model->comments ? $model->comments->count() : 0 }})
+                    Comments (<span data-comments-count>{{ $model->comments ? $model->comments->count() : 0 }}</span>)
                 </h3>
 
                 @auth
                 <!-- Top-level comment form -->
-                <form action="/models/{{ $model->id }}/comment" method="POST" class="mb-8">
+                <form action="/models/{{ $model->id }}/comment" method="POST" class="mb-8" data-ajax-comment>
                     @csrf
                     <div class="w-full bg-gray-50 dark:bg-black/30 border border-gray-200 dark:border-gray-800 rounded-xl focus-within:border-green-500 dark:focus-within:border-neon transition-all p-2">
                         <textarea name="body" rows="3" required placeholder="Write a constructive comment..." 
@@ -194,18 +196,15 @@
                 @endauth
 
                 <!-- Threaded comments list -->
-                <div class="space-y-4 max-h-[550px] overflow-y-auto pr-2">
+                <div class="space-y-4 max-h-[550px] overflow-y-auto pr-2" data-comments-list>
                     @php
                         $allComments = $model->comments ?? collect();
                     @endphp
 
                     @forelse($allComments->where('parent_id', null) as $comment)
-                        <div class="space-y-2 border-b border-gray-100 dark:border-gray-800/40 pb-4 last:border-0">
-                            {{-- Memanggil komponen sub-view dengan melemparkan data yang dibutuhkan secara berantai --}}
-                            @include('model.comment-item', ['comment' => $comment, 'allComments' => $allComments, 'modelId' => $model->id])
-                        </div>
+                        @include('model.comment-item', ['comment' => $comment, 'allComments' => $allComments, 'modelId' => $model->id])
                     @empty
-                    <div class="text-center py-8 text-gray-400 dark:text-gray-600 text-sm">
+                    <div class="text-center py-8 text-gray-400 dark:text-gray-600 text-sm" data-comments-empty>
                         No comments yet. Be the first to share your thoughts!
                     </div>
                     @endforelse
@@ -278,6 +277,7 @@
                 <select name="category_id" required
                     class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all">
                     @foreach($categories as $cat)
+                        @continue(!is_object($cat) || !isset($cat->id, $cat->name))
                         <option value="{{ $cat->id }}" {{ $model->category_id == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
                     @endforeach
                 </select>

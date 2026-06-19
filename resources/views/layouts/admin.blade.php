@@ -39,21 +39,21 @@
 <body class="bg-gray-100 dark:bg-darkBg text-gray-800 dark:text-gray-200 font-sans antialiased transition-colors duration-300">
 
 @if(session('success') || session('error') || $errors->any())
-    <div class="fixed top-24 right-4 z-[200] w-[calc(100vw-2rem)] max-w-md space-y-3 pointer-events-none">
+    <div class="fixed bottom-4 right-4 w-[calc(100vw-2rem)] max-w-sm space-y-3 pointer-events-none sm:bottom-6 sm:right-6" style="z-index: 400;">
         @if(session('success'))
-            <div class="pointer-events-auto bg-green-50 dark:bg-green-950/95 border border-green-300 dark:border-neon/40 text-green-800 dark:text-neon px-4 py-3 rounded-xl text-sm font-medium shadow-xl">
+            <div data-flash-toast class="pointer-events-auto bg-green-50 dark:bg-green-950/95 border border-green-300 dark:border-neon/40 text-green-800 dark:text-neon px-4 py-3 rounded-xl text-sm font-medium shadow-xl transition-all">
                 {{ session('success') }}
             </div>
         @endif
 
         @if(session('error'))
-            <div class="pointer-events-auto bg-red-50 dark:bg-red-950/95 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-xl text-sm font-medium shadow-xl">
+            <div data-flash-toast class="pointer-events-auto bg-red-50 dark:bg-red-950/95 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-xl text-sm font-medium shadow-xl transition-all">
                 {{ session('error') }}
             </div>
         @endif
 
         @if($errors->any())
-            <div class="pointer-events-auto bg-red-50 dark:bg-red-950/95 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-xl text-sm shadow-xl">
+            <div data-flash-toast class="pointer-events-auto bg-red-50 dark:bg-red-950/95 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-xl text-sm shadow-xl transition-all">
                 <p class="font-semibold mb-1">Please fix the following:</p>
                 <ul class="list-disc ml-5 space-y-0.5">
                     @foreach($errors->all() as $error)
@@ -304,6 +304,13 @@ function closeAll(e) {
         history.go(-depth); 
     }
 }
+
+document.querySelectorAll('[data-flash-toast]').forEach((toast) => {
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-x-3');
+        setTimeout(() => toast.remove(), 250);
+    }, 3200);
+});
 
 </script>
 

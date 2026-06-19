@@ -7,7 +7,9 @@ use App\Models\Comment;
 use App\Models\Download;
 use App\Models\Model3D;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class InteractionController extends Controller
 {
@@ -25,6 +27,7 @@ class InteractionController extends Controller
 
             if ($exist) {
                 $exist->delete();
+                $starred = false;
 
                 if ($model->stars_count > 0) {
                     $model->decrement('stars_count');
@@ -36,12 +39,16 @@ class InteractionController extends Controller
                 ]);
 
                 $model->increment('stars_count');
+                $starred = true;
             }
 
             DB::commit();
 
             return $r->wantsJson()
-                ? response()->json(['stars' => $model->stars_count])
+                ? $this->apiData([
+                    'starred' => $starred,
+                    'stars' => $model->fresh()->stars_count,
+                ], $starred ? 'Model starred.' : 'Model unstarred.')
                 : back();
 
         } catch (\Exception $e) {
@@ -52,17 +59,35 @@ class InteractionController extends Controller
             ]);
 
             return $r->wantsJson()
-                ? response()->json(['error' => 'Failed to update star.'], 500)
+                ? $this->apiError('Failed to update star.', 500)
                 : back()->with('error', 'Failed to update star.');
         }
     }
 
     public function comment(Request $r, Model3D $model)
     {
-        $r->validate([
+        $validator = Validator::make($r->all(), [
             'body' => ['required', 'string', 'max:2000'],
             'parent_id' => ['nullable', 'exists:comments,id'],
         ]);
+
+        if ($validator->fails()) {
+            return $r->wantsJson()
+                ? $this->apiError('Comment validation failed.', 422, $validator->errors())
+                : back()->withErrors($validator)->withInput();
+        }
+
+        if ($r->filled('parent_id')) {
+            $parentBelongsToModel = Comment::where('id', $r->parent_id)
+                ->where('model_id', $model->id)
+                ->exists();
+
+            if (!$parentBelongsToModel) {
+                return $r->wantsJson()
+                    ? $this->apiError('Reply target does not belong to this model.', 422)
+                    : back()->with('error', 'Reply target does not belong to this model.');
+            }
+        }
 
         $comment = Comment::create([
             'model_id' => $model->id,
@@ -74,21 +99,28 @@ class InteractionController extends Controller
         $comment->load('user');
 
         return $r->wantsJson()
-            ? response()->json($comment)
+            ? $this->apiData([
+                'comment' => $comment,
+                'html' => $this->renderCommentHtml($comment, $model->id),
+                'comments_count' => Comment::where('model_id', $model->id)->count(),
+                'parent_id' => $comment->parent_id,
+                'parent_replies_count' => $comment->parent_id
+                    ? Comment::where('parent_id', $comment->parent_id)->count()
+                    : null,
+            ], 'Comment posted.')
             : back()->with('success', 'Comment posted.');
     }
 
     public function deleteComment(Request $r, Comment $comment)
     {
         $user = $r->user();
+        $deletedId = $comment->id;
+        $parentId = $comment->parent_id;
+        $modelId = $comment->model_id;
 
-        // Access check: admin, moderator, or comment owner.
-        $isAdminOrMod = $user && in_array($user->role, ['admin', 'moderator']);
-        $isOwner = $user && $user->id === $comment->user_id;
-
-        if (!$isOwner && !$isAdminOrMod) {
+        if (!$user || $user->cannot('delete', $comment)) {
             return $r->wantsJson()
-                ? response()->json(['error' => 'You do not have access to delete this comment.'], 403)
+                ? $this->apiError('You do not have access to delete this comment.', 403)
                 : back()->with('error', 'You do not have access to delete this comment.');
         }
 
@@ -102,7 +134,14 @@ class InteractionController extends Controller
             DB::commit();
 
             return $r->wantsJson()
-                ? response()->json(['success' => true, 'message' => 'Comment and replies deleted.'])
+                ? $this->apiData([
+                    'comment_id' => $deletedId,
+                    'parent_id' => $parentId,
+                    'comments_count' => Comment::where('model_id', $modelId)->count(),
+                    'parent_replies_count' => $parentId
+                        ? Comment::where('parent_id', $parentId)->count()
+                        : null,
+                ], 'Comment and replies deleted.')
                 : back()->with('success', 'Comment deleted.');
 
         } catch (\Exception $e) {
@@ -113,7 +152,7 @@ class InteractionController extends Controller
             ]);
 
             return $r->wantsJson()
-                ? response()->json(['error' => 'Failed to delete comment.'], 500)
+                ? $this->apiError('Failed to delete comment.', 500)
                 : back()->with('error', 'Failed to delete comment.');
         }
     }
@@ -129,27 +168,51 @@ class InteractionController extends Controller
         }
     }
 
+    private function renderCommentHtml(Comment $comment, int $modelId): string
+    {
+        return view('model.comment-item', [
+            'comment' => $comment,
+            'allComments' => collect([$comment]),
+            'modelId' => $modelId,
+        ])->render();
+    }
+
     public function download(Request $r, Model3D $model)
     {
         $isOwnerDownload = $r->user() && $r->user()->id === $model->user_id;
+        $counted = false;
 
-        if (!$isOwnerDownload) {
+        if (!$isOwnerDownload && $this->shouldCountDownload($r, $model)) {
             Download::create([
                 'model_id' => $model->id,
                 'downloaded_at' => now()
             ]);
 
             $model->increment('download_count');
+            $counted = true;
         }
 
         if ($r->wantsJson()) {
-            return response()->json([
+            return $this->apiData([
                 'download_url' => $model->modelUrl(),
-                'counted' => !$isOwnerDownload,
+                'counted' => $counted,
                 'download_count' => $model->fresh()->download_count,
             ]);
         }
 
         return redirect($model->modelUrl());
+    }
+
+    private function shouldCountDownload(Request $request, Model3D $model): bool
+    {
+        $viewer = $request->user()
+            ? 'u:'.$request->user()->id
+            : 'g:'.sha1($request->ip().'|'.substr((string) $request->userAgent(), 0, 120));
+
+        return Cache::store(config('web3dshare.cache.store'))->add(
+            'web3dshare:downloaded:'.$model->id.':'.$viewer,
+            true,
+            now()->addMinutes(config('web3dshare.engagement.download_cooldown_minutes'))
+        );
     }
 }

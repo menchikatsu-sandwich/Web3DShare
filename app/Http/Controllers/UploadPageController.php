@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Model3D;
+use App\Services\MetadataCache;
 use Illuminate\Http\Request;
 
 class UploadPageController extends Controller
 {
     public function index(Request $request)
     {
-        $categories = Category::all();
+        $categories = MetadataCache::categories();
         $user = $request->user();
-        $monthlyLimit = 5;
+        $monthlyLimit = config('web3dshare.limits.basic_monthly_uploads');
         $monthlyUploads = Model3D::where('user_id', $user->id)
             ->whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
@@ -24,7 +24,7 @@ class UploadPageController extends Controller
         $nextUploadReset = now()->addMonthNoOverflow()->startOfMonth();
 
         if ($request->wantsJson()) {
-            return response()->json([
+            return $this->apiData([
                 'categories' => $categories,
                 'upload_limit' => [
                     'monthly_limit' => $monthlyLimit,

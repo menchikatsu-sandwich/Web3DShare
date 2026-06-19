@@ -7,6 +7,7 @@ use App\Models\Model3D;
 use App\Models\Category;
 use App\Models\Report;
 use App\Models\VerificationRequest;
+use App\Services\MetadataCache;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -24,7 +25,7 @@ class AdminController extends Controller
         ];
 
         if ($request->wantsJson()) {
-            return response()->json($payload);
+            return $this->apiData($payload);
         }
 
         return view('admin.panel', $payload);
@@ -51,7 +52,7 @@ class AdminController extends Controller
         $model->delete();
 
         return request()->wantsJson()
-            ? response()->json(['message' => 'Model has been taken down.'])
+            ? $this->apiData([], 'Model has been taken down.')
             : back()->with('success', 'Model has been taken down.');
     }
 
@@ -62,7 +63,7 @@ class AdminController extends Controller
         $user->save();
 
         return request()->wantsJson()
-            ? response()->json(['message' => "{$user->username} promoted to moderator.", 'user' => $user])
+            ? $this->apiData(['user' => $user], "{$user->username} promoted to moderator.")
             : back()->with('success', "{$user->username} promoted to moderator.");
     }
 
@@ -73,7 +74,7 @@ class AdminController extends Controller
         $user->save();
 
         return request()->wantsJson()
-            ? response()->json(['message' => "{$user->username} demoted to user.", 'user' => $user])
+            ? $this->apiData(['user' => $user], "{$user->username} demoted to user.")
             : back()->with('success', "{$user->username} demoted to user.");
     }
 
@@ -87,7 +88,7 @@ class AdminController extends Controller
         $user->delete();
 
         return request()->wantsJson()
-            ? response()->json(['message' => 'User deleted.'])
+            ? $this->apiData([], 'User deleted.')
             : back()->with('success', 'User deleted.');
     }
 
@@ -101,8 +102,10 @@ class AdminController extends Controller
             'created_by' => $request->user()->id,
         ]);
 
+        MetadataCache::forgetCategories();
+
         return $request->wantsJson()
-            ? response()->json(['message' => 'Category added.', 'category' => $category], 201)
+            ? $this->apiData(['category' => $category], 'Category added.', 201)
             : back()->with('success', 'Category added.');
     }
 
@@ -112,14 +115,15 @@ class AdminController extends Controller
 
         if ($category->models_count > 0) {
             return request()->wantsJson()
-                ? response()->json(['error' => 'Category cannot be deleted while models are still using it.'], 409)
+                ? $this->apiError('Category cannot be deleted while models are still using it.', 409)
                 : back()->with('error', 'Category cannot be deleted while models are still using it.');
         }
 
         $category->delete();
+        MetadataCache::forgetCategories();
 
         return request()->wantsJson()
-            ? response()->json(['message' => 'Category deleted.'])
+            ? $this->apiData([], 'Category deleted.')
             : back()->with('success', 'Category deleted.');
     }
 
@@ -136,7 +140,7 @@ class AdminController extends Controller
         ]);
 
         return $r->wantsJson()
-            ? response()->json(['msg'=>'done'])
+            ? $this->apiData(['report' => $report->fresh('model3d.user', 'reporter', 'reviewer')], 'Report marked as resolved.')
             : back()->with('success', 'Report marked as resolved.');
     }
 
@@ -148,7 +152,7 @@ class AdminController extends Controller
         ]);
 
         return $r->wantsJson()
-            ? response()->json(['msg' => 'reviewed'])
+            ? $this->apiData(['report' => $report->fresh('model3d.user', 'reporter', 'reviewer')], 'Report marked as reviewed.')
             : back()->with('success', 'Report marked as reviewed.');
     }
 }

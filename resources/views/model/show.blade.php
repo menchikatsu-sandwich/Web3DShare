@@ -13,6 +13,8 @@
         'recommendations' => $recommendations,
         'categories' => $categories,
         'isManageContext' => $isManageContext,
+        'authorModelCount' => $authorModelCount,
+        'hasStarred' => $hasStarred,
     ])
 
 </div>

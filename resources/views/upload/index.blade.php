@@ -83,6 +83,7 @@
                             class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-green-500 dark:focus:border-neon focus:ring-1 focus:ring-green-500 dark:focus:ring-neon transition-all appearance-none">
                         <option value="" disabled selected>Select category...</option>
                         @foreach($categories as $c)
+                            @continue(!is_object($c) || !isset($c->id, $c->name))
                             <option value="{{ $c->id }}">{{ $c->name }}</option>
                         @endforeach
                     </select>

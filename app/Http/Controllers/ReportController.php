@@ -6,16 +6,19 @@ use App\Models\Report;
 use App\Models\Model3D;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ReportController extends Controller
 {
+    use AuthorizesRequests;
+
     public function store(Request $r, Model3D $model)
     {
-        if ($model->user_id === $r->user()->id) {
+        if ($r->user()->cannot('create', [Report::class, $model])) {
             $message = 'You cannot report your own model.';
 
             return $r->wantsJson()
-                ? response()->json(['error' => $message], 403)
+                ? $this->apiError($message, 403)
                 : back()->with('error', $message);
         }
 
@@ -26,10 +29,7 @@ class ReportController extends Controller
 
         if ($validator->fails()) {
             return $r->wantsJson()
-                ? response()->json([
-                    'message' => 'Report validation failed.',
-                    'errors' => $validator->errors(),
-                ], 422)
+                ? $this->apiError('Report validation failed.', 422, $validator->errors())
                 : back()->withErrors($validator)->withInput();
         }
 
@@ -42,11 +42,11 @@ class ReportController extends Controller
             $message = 'You already have an active report for this model.';
 
             return $r->wantsJson()
-                ? response()->json(['error' => $message], 409)
+                ? $this->apiError($message, 409)
                 : back()->with('error', $message);
         }
 
-        Report::create([
+        $report = Report::create([
             'model_id' => $model->id,
             'reported_by' => $r->user()->id,
             'reason' => $r->reason,
@@ -54,7 +54,7 @@ class ReportController extends Controller
         ]);
 
         return $r->wantsJson()
-            ? response()->json(['msg' => 'reported'])
+            ? $this->apiData(['report' => $report], 'Report submitted.')
             : back()->with('success', 'Report submitted. A moderator will review it.');
     }
 }

@@ -67,6 +67,7 @@
         </a>
         
         @foreach($categories as $cat)
+        @continue(!is_object($cat) || !isset($cat->id, $cat->name))
         <a href="{{ request()->fullUrlWithQuery(['category' => $cat->id]) }}" 
            class="px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 {{ request('category') == $cat->id ? 'bg-green-500 text-white dark:bg-neon dark:text-black shadow-md' : 'bg-gray-100 dark:bg-darkPanel/60 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 border border-gray-200/50 dark:border-gray-800/50' }}">
             {{ $cat->name }}
@@ -82,6 +83,7 @@
         </span>
         
         @foreach($tags as $t)
+        @continue(!is_object($t) || !isset($t->slug, $t->name))
         <a href="{{ request()->fullUrlWithQuery(['tag' => $t->slug]) }}" 
            class="px-2.5 py-0.5 rounded-md border text-[11px] font-medium transition-all {{ request('tag') == $t->slug ? 'border-green-500 bg-green-50/50 text-green-600 dark:border-neon dark:bg-neon/10 dark:text-neon' : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 bg-gray-50/30 dark:bg-darkPanel/30' }}">
             #{{ $t->name }}
@@ -128,7 +130,7 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     @forelse($models as $model)
-    <div @if($loop->first) data-tour="model-card" @endif class="bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden hover:border-green-400 dark:hover:border-neon/40 shadow-sm hover:shadow-md dark:hover:shadow-[0_0_20px_rgba(0,255,136,0.1)] transition-all duration-300 group flex flex-col">
+    <div @if($loop->first) data-tour="model-card" @endif data-model-card="{{ $model->id }}" class="bg-white dark:bg-darkBg border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden hover:border-green-400 dark:hover:border-neon/40 shadow-sm hover:shadow-md dark:hover:shadow-[0_0_20px_rgba(0,255,136,0.1)] transition-all duration-300 group flex flex-col">
         
         <a @if($loop->first) data-tour="model-open" @endif href="/models/{{ $model->id }}{{ $isMyModels ? '?from=my_models' : '' }}" onclick="openModel('{{ $model->id }}', event)" class="relative w-full h-48 overflow-hidden block bg-gray-100 dark:bg-black">
             <img src="{{ $model->thumbnailUrl() }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
@@ -210,6 +212,7 @@
                             <select name="category_id" required
                                 class="w-full bg-gray-50 dark:bg-darkBg border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:border-neon focus:ring-1 focus:ring-neon transition-all">
                                 @foreach($categories as $cat)
+                                    @continue(!is_object($cat) || !isset($cat->id, $cat->name))
                                     <option value="{{ $cat->id }}" {{ $model->category_id == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
                                 @endforeach
                             </select>
@@ -232,11 +235,11 @@
                 </div>
                 <div @if($loop->first) data-tour="model-stars" @endif class="flex items-center gap-1.5 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors" title="{{ $model->stars_count }} Stars">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
-                    {{ $model->stars_count }}
+                    <span data-card-star-count>{{ $model->stars_count }}</span>
                 </div>
                 <div @if($loop->first) data-tour="model-downloads" @endif class="flex items-center gap-1.5 hover:text-blue-500 dark:hover:text-blue-400 transition-colors" title="{{ $model->download_count }} Downloads">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                    {{ $model->download_count }}
+                    <span data-card-download-count>{{ $model->download_count }}</span>
                 </div>
             </div>
         </div>

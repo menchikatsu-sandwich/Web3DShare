@@ -28,12 +28,11 @@ class AuthController extends Controller
         if ($this->isApiRequest($r)) {
             $token = $user->createToken($r->input('device_name', 'api-token'))->plainTextToken;
 
-            return response()->json([
-                'message' => 'Account created.',
+            return $this->apiData([
                 'user' => $user,
                 'token' => $token,
                 'token_type' => 'Bearer',
-            ], 201);
+            ], 'Account created.', 201);
         }
 
         Auth::login($user);
@@ -54,19 +53,18 @@ class AuthController extends Controller
             $user = User::where($loginField, $r->input('email'))->first();
 
             if (!$user || !Hash::check($r->input('password'), $user->password)) {
-                return response()->json(['error' => 'Email/username or password is incorrect.'], 401);
+                return $this->apiError('Email/username or password is incorrect.', 401);
             }
 
             $token = $user->createToken($r->input('device_name', 'api-token'))->plainTextToken;
             $redirectUrl = in_array($user->role, ['admin', 'moderator']) ? '/panel' : '/';
 
-            return response()->json([
-                'message' => 'Logged in successfully.',
+            return $this->apiData([
                 'redirect' => $redirectUrl,
                 'user' => $user,
                 'token' => $token,
                 'token_type' => 'Bearer',
-            ]);
+            ], 'Logged in successfully.');
         }
     
         if (!Auth::attempt([$loginField => $r->input('email'), 'password' => $r->input('password')])) {
@@ -96,7 +94,7 @@ class AuthController extends Controller
         if ($this->isApiRequest($r)) {
             $r->user()?->currentAccessToken()?->delete();
 
-            return response()->json(['message' => 'Logged out successfully.']);
+            return $this->apiData([], 'Logged out successfully.');
         }
 
         Auth::logout();

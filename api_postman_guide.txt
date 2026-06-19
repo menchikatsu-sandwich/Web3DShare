@@ -21,7 +21,7 @@ For upload requests:
 Use Body > form-data. Do not use raw JSON for file upload.
 
 After login or register:
-1. Copy the token from the JSON response.
+1. Copy the token from data.token in the JSON response.
 2. Paste it into the Postman environment variable named token.
 3. Use Authorization: Bearer {{token}} for protected routes.
 
@@ -189,11 +189,11 @@ Postman Steps:
 3. Go to Body > raw > JSON.
 4. Paste the JSON body above.
 5. Click Send.
-6. Copy token from response.
+6. Copy token from response field data.token.
 7. Save token into Postman environment variable token.
 Expected Response:
 - 201 Created.
-- JSON containing message, user, token, and token_type.
+- JSON containing message and data.user, data.token, data.token_type.
 Notes:
 - username must contain at least one letter and one number.
 - password minimum is 6 characters.
@@ -217,11 +217,11 @@ Postman Steps:
 3. Go to Body > raw > JSON.
 4. Paste the JSON body above.
 5. Click Send.
-6. Copy token from response.
+6. Copy token from response field data.token.
 7. Save token into Postman environment variable token.
 Expected Response:
 - 200 OK.
-- JSON containing message, redirect, user, token, and token_type.
+- JSON containing message and data.redirect, data.user, data.token, data.token_type.
 Notes:
 - The email field accepts either email or username.
 
@@ -242,7 +242,7 @@ Postman Steps:
 6. Clear token from environment after success.
 Expected Response:
 - 200 OK.
-- JSON containing logout message.
+- JSON containing message and empty data.
 Notes:
 - This deletes the current Sanctum token.
 
@@ -266,7 +266,7 @@ Postman Steps:
 5. Click Send.
 Expected Response:
 - 200 OK.
-- JSON containing current user.
+- JSON containing data.user.
 Notes:
 - Use this to test whether your token works.
 
@@ -285,7 +285,7 @@ Postman Steps:
 4. Click Send.
 Expected Response:
 - 200 OK.
-- JSON containing current user.
+- JSON containing data.user.
 Notes:
 - Same data as /api/me.
 
@@ -310,7 +310,7 @@ Postman Steps:
 7. Click Send.
 Expected Response:
 - 200 OK.
-- JSON containing message and updated user.
+- JSON containing message and data.user.
 Notes:
 - Use form-data when uploading profile image.
 
@@ -334,7 +334,7 @@ Postman Steps:
 6. Click Send.
 Expected Response:
 - 200 OK.
-- JSON containing message and updated user.
+- JSON containing message and data.user.
 Notes:
 - Same behavior as POST /api/profile.
 
@@ -358,7 +358,7 @@ Postman Steps:
 5. Copy category id from categories for upload tests.
 Expected Response:
 - 200 OK.
-- JSON containing categories and upload_limit.
+- JSON containing data.categories and data.upload_limit.
 Notes:
 - Basic users have 5 uploads per month.
 - Verified users have remaining_uploads as null.
@@ -394,7 +394,7 @@ Postman Steps:
 13. Click Send.
 Expected Response:
 - 201 Created.
-- JSON containing created model.
+- JSON containing message and data.model.
 Notes:
 - Do not use raw JSON for model upload.
 - If upload fails with 422, check validation errors.
@@ -423,7 +423,7 @@ Postman Steps:
 6. Click Send.
 Expected Response:
 - 200 OK.
-- JSON containing message and updated model.
+- JSON containing message and data.model.
 Notes:
 - Only model owner can edit.
 - The actual .glb model file cannot be edited here.
@@ -445,7 +445,7 @@ Postman Steps:
 3. Send DELETE request.
 Expected Response:
 - 200 OK.
-- JSON containing deleted message.
+- JSON containing message and empty data.
 Notes:
 - Regular users can only delete their own models.
 - Admin/moderator can delete any model.
@@ -472,7 +472,7 @@ Postman Steps:
 5. Send the same request again to unstar.
 Expected Response:
 - 200 OK.
-- JSON containing stars count.
+- JSON containing message and data.starred plus data.stars.
 Notes:
 - This endpoint toggles star and unstar.
 
@@ -497,7 +497,7 @@ Postman Steps:
 5. Click Send.
 Expected Response:
 - 200 OK.
-- JSON containing created comment.
+- JSON containing message and data.comment.
 Notes:
 - parent_id is optional.
 - For a reply, set parent_id to an existing comment id.
@@ -518,7 +518,7 @@ Postman Steps:
 3. Send DELETE request.
 Expected Response:
 - 200 OK.
-- JSON containing success and message.
+- JSON containing message and empty data.
 Notes:
 - Deletes the comment and all nested replies.
 
@@ -548,7 +548,7 @@ Postman Steps:
 6. Click Send.
 Expected Response:
 - 200 OK.
-- JSON containing reported message.
+- JSON containing message and data.report.
 Allowed reason values:
 - stolen_content
 - inappropriate_content
@@ -580,7 +580,7 @@ Postman Steps:
 5. Read verification_check.eligible.
 Expected Response:
 - 200 OK.
-- JSON containing pending_request and verification_check.
+- JSON containing data.pending_request and data.verification_check.
 Notes:
 - Check this before submitting verification request.
 - Shows rules, reasons, account age, model count, cooldown, and model download requirements.
@@ -630,7 +630,7 @@ Postman Steps:
 4. Click Send.
 Expected Response:
 - 200 OK.
-- JSON containing stats, models, users, reports, requests, and categories.
+- JSON containing data.stats, data.models, data.users, data.reports, data.requests, and data.categories.
 Notes:
 - Regular users get 403.
 
@@ -669,7 +669,7 @@ Postman Steps:
 3. Send DELETE request.
 Expected Response:
 - 200 OK.
-- JSON containing takedown message.
+- JSON containing message and empty data.
 Notes:
 - This is the admin/moderator takedown route.
 
@@ -691,7 +691,7 @@ Postman Steps:
 5. Send POST request.
 Expected Response:
 - 200 OK.
-- JSON containing reviewed message.
+- JSON containing message and data.report.
 Notes:
 - Updates report_status to reviewed.
 
@@ -713,7 +713,7 @@ Postman Steps:
 5. Send POST request.
 Expected Response:
 - 200 OK.
-- JSON containing done message.
+- JSON containing message and data.report.
 Notes:
 - Updates report_status to resolved.
 
@@ -735,7 +735,7 @@ Postman Steps:
 5. Send POST request.
 Expected Response:
 - 200 OK.
-- JSON containing approved verification_request.
+- JSON containing message and data.verification_request.
 Notes:
 - Also updates user upload_tier to verified.
 
@@ -757,7 +757,7 @@ Postman Steps:
 5. Send POST request.
 Expected Response:
 - 200 OK.
-- JSON containing rejected verification_request.
+- JSON containing message and data.verification_request.
 Notes:
 - Rejected users must wait for cooldown before requesting again.
 
@@ -780,7 +780,7 @@ Postman Steps:
 5. Click Send.
 Expected Response:
 - 201 Created.
-- JSON containing message and category.
+- JSON containing message and data.category.
 Notes:
 - Category name must be unique.
 
@@ -827,7 +827,7 @@ Postman Steps:
 5. Send POST request.
 Expected Response:
 - 200 OK.
-- JSON containing message and updated user.
+- JSON containing message and data.user.
 Notes:
 - Admin only.
 
@@ -849,7 +849,7 @@ Postman Steps:
 5. Send POST request.
 Expected Response:
 - 200 OK.
-- JSON containing message and updated user.
+- JSON containing message and data.user.
 Notes:
 - Admin only.
 
@@ -871,7 +871,7 @@ Postman Steps:
 5. Send DELETE request.
 Expected Response:
 - 200 OK.
-- JSON containing user deleted message.
+- JSON containing message and empty data.
 Notes:
 - Admin only.
 - Deletes the user and all models owned by the user.
@@ -882,7 +882,7 @@ SUGGESTED POSTMAN TEST ORDER
 
 1. GET {{base_url}}/api
 2. POST {{base_url}}/api/register or POST {{base_url}}/api/login
-3. Save token into environment variable token
+3. Save data.token into environment variable token
 4. GET {{base_url}}/api/me
 5. GET {{base_url}}/api/upload
 6. POST {{base_url}}/api/models with form-data

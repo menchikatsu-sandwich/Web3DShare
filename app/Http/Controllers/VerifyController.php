@@ -19,7 +19,7 @@ class VerifyController extends Controller
         $verificationCheck = $this->verificationEligibility($user);
 
         if ($r->wantsJson()) {
-            return response()->json([
+            return $this->apiData([
                 'pending_request' => $pendingRequest,
                 'verification_check' => $verificationCheck,
             ]);
@@ -37,10 +37,13 @@ class VerifyController extends Controller
         $verificationCheck = $this->verificationEligibility($r->user());
         if (!$verificationCheck['eligible']) {
             return $r->wantsJson()
-                ? response()->json([
-                    'error' => $verificationCheck['message'],
+                ? $this->apiError(
+                    $verificationCheck['message'],
+                    403,
+                    [
                     'verification_check' => $verificationCheck,
-                ], 403)
+                    ]
+                )
                 : back()->with('error', $verificationCheck['message']);
         }
 
@@ -50,7 +53,7 @@ class VerifyController extends Controller
 
         if ($existing) {
             return $r->wantsJson()
-                ? response()->json(['error' => 'You already have a pending verification request.'], 409)
+                ? $this->apiError('You already have a pending verification request.', 409)
                 : back()->with('error', 'You already have a pending verification request.');
         }
 
@@ -61,10 +64,9 @@ class VerifyController extends Controller
         ]);
 
         return $r->wantsJson()
-            ? response()->json([
-                'message' => 'Verification request submitted.',
+            ? $this->apiData([
                 'verification_request' => $verificationRequest,
-            ], 201)
+            ], 'Verification request submitted.', 201)
             : back()->with('success', 'Verification request submitted.');
     }
 
@@ -82,10 +84,9 @@ class VerifyController extends Controller
         ]);
 
         return $r->wantsJson()
-            ? response()->json([
-                'message' => 'Verification request approved.',
+            ? $this->apiData([
                 'verification_request' => $req->fresh('user', 'reviewer'),
-            ])
+            ], 'Verification request approved.')
             : back()->with('success', 'Verification request approved.');
     }
 
@@ -99,10 +100,9 @@ class VerifyController extends Controller
         ]);
 
         return $r->wantsJson()
-            ? response()->json([
-                'message' => 'Verification request rejected.',
+            ? $this->apiData([
                 'verification_request' => $req->fresh('user', 'reviewer'),
-            ])
+            ], 'Verification request rejected.')
             : back()->with('success', 'Verification request rejected.');
     }
 

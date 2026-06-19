@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Model3D;
 use App\Models\ModelView;
-use App\Models\Download;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,8 +11,10 @@ use App\Services\SupabaseStorage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon; 
+use App\Services\MetadataCache;
 
 class ModelController extends Controller
 {
@@ -21,6 +22,8 @@ class ModelController extends Controller
 
     public function index(Request $r)
     {
+        $currentUser = $r->user() ?: Auth::guard('sanctum')->user();
+
         // 1. Base query with relationships.
         $q = Model3D::select([
                 'id',
@@ -71,8 +74,8 @@ class ModelController extends Controller
             $q->whereHas('tags', fn($t) => $t->where('slug', $r->tag));
         }
         // 4. My Models vs public Explore filter.
-        if ($r->filter == 'my_models' && Auth::check()) {
-            $q->where('user_id', Auth::id());
+        if ($r->filter == 'my_models' && $currentUser) {
+            $q->where('user_id', $currentUser->id);
         }
 
         // 5. Timeframe filter.
@@ -107,12 +110,12 @@ class ModelController extends Controller
         $models = $q->paginate(12)->withQueryString();
 
         // Load categories and tags for the home view filters.
-        $categories = \App\Models\Category::orderBy('name')->get(['id', 'name']);
-        $tags = \App\Models\Tag::orderBy('name')->limit(10)->get(['id', 'name', 'slug']);
+        $categories = $this->cachedCategories();
+        $tags = $this->cachedPopularTags();
 
         // 8. Return data in the requested format.
         if ($r->wantsJson()) {
-            return response()->json([
+            return $this->apiData([
                 'models' => $models,
                 'categories' => $categories,
                 'tags' => $tags,
@@ -132,12 +135,15 @@ class ModelController extends Controller
 
     public function store(Request $r)
     {
+        $limits = config('web3dshare.limits');
         $validator = Validator::make($r->all(), [
             'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:5000'],
+            'tags' => ['nullable', 'string', 'max:500'],
             'model' => [
                 'required',
                 'file',
-                'max:50000',
+                'max:'.$limits['model_upload_kb'],
                 function ($attribute, $value, $fail) {
                     if (!$value->isValid()) {
                         $fail('The model upload did not complete. Please choose the file again.');
@@ -152,7 +158,8 @@ class ModelController extends Controller
             'thumbnail' => [
                 'required',
                 'image',
-                'max:5000',
+                'mimes:jpg,jpeg,png,webp,gif',
+                'max:'.$limits['thumbnail_upload_kb'],
                 function ($attribute, $value, $fail) {
                     if (!$value->isValid()) {
                         $fail('The thumbnail upload did not complete. Please choose the image again.');
@@ -175,10 +182,7 @@ class ModelController extends Controller
                 'category_id' => $r->category_id,
             ]);
 
-            return response()->json([
-                'message' => 'Upload validation failed.',
-                'errors' => $validator->errors(),
-            ], 422);
+            return $this->apiError('Upload validation failed.', 422, $validator->errors());
         }
 
         $user = $r->user();
@@ -190,11 +194,14 @@ class ModelController extends Controller
                 ->whereMonth('created_at', now()->month)
                 ->count();
 
-            if ($count >= 5) {
-                return response()->json([
-                    'error' => 'Upload limit reached for this month. Please wait until next month or upgrade to verified uploader.',
+            if ($count >= $limits['basic_monthly_uploads']) {
+                return $this->apiError(
+                    'Upload limit reached for this month. Please wait until next month or upgrade to verified uploader.',
+                    403,
+                    [
                     'next_reset' => now()->addMonthNoOverflow()->startOfMonth()->toDateString(),
-                ], 403);
+                    ]
+                );
             }
         }
 
@@ -213,38 +220,20 @@ class ModelController extends Controller
                 'thumbnail_path' => $thumbPath
             ]);
 
-            // handle tags
-            if ($r->tags) {
-                $tagNames = explode(',', $r->tags);
-                $tagIds = [];
+            $this->syncTagsFromString($model, $r->tags, $user->id);
 
-                foreach ($tagNames as $name) {
-                    $name = trim(strtolower($name));
+            MetadataCache::forgetPopularTags();
 
-                    if (!$name) continue;
-
-                    $tag = Tag::firstOrCreate(
-                        ['slug' => Str::slug($name)],
-                        [
-                            'name' => $name,
-                            'created_by' => $user->id
-                        ]
-                    );
-
-                    $tagIds[] = $tag->id;
-                }
-
-                $model->tags()->sync(array_unique($tagIds));
-            }
-
-            return response()->json($model, 201);
+            return $this->apiData([
+                'model' => $model->fresh(['category', 'tags', 'user']),
+            ], 'Model uploaded.', 201);
         } catch (\Exception $e) {
             \Log::error('Model upload error: ' . $e->getMessage(), [
                 'user_id' => $user->id,
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ]);
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->apiError($e->getMessage(), 500);
         }
     }
 
@@ -260,14 +249,7 @@ class ModelController extends Controller
             }
         ]);
 
-        // TRACK VIEW
-        ModelView::create([
-            'model_id' => $model->id,
-            'user_id' => $r->user()?->id,
-            'viewed_at' => now()
-        ]);
-
-        $model->increment('view_count');
+        $viewCounted = $this->trackViewOncePerCooldown($r, $model);
 
         // $recommendations = Model3D::where('category_id', $model->category_id)
         //     ->where('id', '!=', $model->id)
@@ -282,7 +264,11 @@ class ModelController extends Controller
             ->limit(5)
             ->select('id', 'category_id', 'title', 'thumbnail_path')
             ->get();
-        $categories = \App\Models\Category::orderBy('name')->get(['id', 'name']);
+        $categories = $this->cachedCategories();
+        $authorModelCount = Model3D::where('user_id', $model->user_id)->count();
+        $hasStarred = $r->user()
+            ? $model->stars()->where('user_id', $r->user()->id)->exists()
+            : false;
         $isManageContext = $r->query('from') === 'my_models'
             && $r->user()
             && $r->user()->id === $model->user_id;
@@ -290,26 +276,29 @@ class ModelController extends Controller
         // Return the partial directly without wrapping it in an extra modal layout.
         // This keeps the modal response faster.
         if ($r->wantsJson()) {
-            return response()->json([
+            return $this->apiData([
                 'model' => $model,
                 'recommendations' => $recommendations,
                 'categories' => $categories,
                 'is_manage_context' => $isManageContext,
+                'view_counted' => $viewCounted,
+                'author_model_count' => $authorModelCount,
+                'has_starred' => $hasStarred,
             ]);
         }
 
         if ($r->ajax()) {
-            return view('model.partial', compact('model', 'recommendations', 'categories', 'isManageContext'));
+            return view('model.partial', compact('model', 'recommendations', 'categories', 'isManageContext', 'authorModelCount', 'hasStarred'));
         }
 
-        return view('model.show', compact('model', 'recommendations', 'categories', 'isManageContext'));
+        return view('model.show', compact('model', 'recommendations', 'categories', 'isManageContext', 'authorModelCount', 'hasStarred'));
     }
 
     public function update(Request $r, Model3D $model)
     {
-        if (!$r->user() || $r->user()->id !== $model->user_id) {
+        if (!$r->user() || $r->user()->cannot('update', $model)) {
             return $r->wantsJson()
-                ? response()->json(['error' => 'You do not have access to edit this model.'], 403)
+                ? $this->apiError('You do not have access to edit this model.', 403)
                 : back()->with('error', 'You do not have access to edit this model.');
         }
 
@@ -329,26 +318,23 @@ class ModelController extends Controller
         $this->syncTagsFromString($model, $data['tags'] ?? '', $r->user()->id);
 
         return $r->wantsJson()
-            ? response()->json(['message' => 'Model updated.', 'model' => $model->fresh('category', 'tags')])
+            ? $this->apiData(['model' => $model->fresh('category', 'tags')], 'Model updated.')
             : back()->with('success', 'Model updated.');
     }
 
     public function destroy(Request $r, Model3D $model)
     {
         $user = $r->user();
-        $isOwner = $user && $user->id === $model->user_id;
-        $isAdminOrMod = $user && in_array($user->role, ['admin', 'moderator']);
-
-        if (!$isOwner && !$isAdminOrMod) {
+        if (!$user || $user->cannot('delete', $model)) {
             return $r->wantsJson()
-                ? response()->json(['error' => 'You do not have access to delete this model.'], 403)
+                ? $this->apiError('You do not have access to delete this model.', 403)
                 : back()->with('error', 'You do not have access to delete this model.');
         }
 
         $model->delete();
 
         return $r->wantsJson()
-            ? response()->json(['msg' => 'deleted'])
+            ? $this->apiData([], 'Model deleted.')
             : redirect('/?filter=my_models')->with('success', 'Model deleted.');
     }
 
@@ -359,7 +345,7 @@ class ModelController extends Controller
             ->map(fn($name) => trim(strtolower($name)))
             ->filter()
             ->unique()
-            ->take(10);
+            ->take(config('web3dshare.limits.max_tags_per_model'));
 
         foreach ($tagNames as $name) {
             $tag = Tag::firstOrCreate(
@@ -374,5 +360,39 @@ class ModelController extends Controller
         }
 
         $model->tags()->sync($tagIds);
+    }
+
+    private function trackViewOncePerCooldown(Request $request, Model3D $model): bool
+    {
+        $viewer = $request->user()
+            ? 'u:'.$request->user()->id
+            : 'g:'.sha1($request->ip().'|'.substr((string) $request->userAgent(), 0, 120));
+
+        $key = 'web3dshare:viewed:'.$model->id.':'.$viewer;
+
+        if (!Cache::store(config('web3dshare.cache.store'))->add($key, true, now()->addMinutes(config('web3dshare.engagement.view_cooldown_minutes')))) {
+            return false;
+        }
+
+        ModelView::create([
+            'model_id' => $model->id,
+            'user_id' => $request->user()?->id,
+            'viewed_at' => now()
+        ]);
+
+        $model->increment('view_count');
+        $model->refresh();
+
+        return true;
+    }
+
+    private function cachedCategories()
+    {
+        return MetadataCache::categories();
+    }
+
+    private function cachedPopularTags()
+    {
+        return MetadataCache::popularTags();
     }
 }

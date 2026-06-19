@@ -35,7 +35,7 @@ class ProfileController extends Controller
             ->withQueryString();
 
         if ($request->wantsJson()) {
-            return response()->json([
+            return $this->apiData([
                 'user' => $user->only([
                     'id',
                     'username',
@@ -58,7 +58,7 @@ class ProfileController extends Controller
     public function show(Request $r)
     {
         return $r->wantsJson()
-            ? response()->json(['user' => $r->user()])
+            ? $this->apiData(['user' => $r->user()])
             : view('profile.index', ['user'=>$r->user()]);
     }
 
@@ -68,7 +68,7 @@ class ProfileController extends Controller
 
         $r->validate([
             'nickname'=>'nullable|string|max:100',
-            'image'=>'nullable|image|max:5000'
+            'image'=>'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:'.config('web3dshare.limits.profile_image_upload_kb')
         ]);
 
         try {
@@ -92,12 +92,12 @@ class ProfileController extends Controller
             ]);
 
             return $r->wantsJson()
-                ? response()->json(['error' => $e->getMessage()], 500)
+                ? $this->apiError($e->getMessage(), 500)
                 : back()->with('error', 'Profile update failed: ' . $e->getMessage());
         }
 
         return $r->wantsJson()
-            ? response()->json(['message' => 'Profile updated.', 'user' => $user])
+            ? $this->apiData(['user' => $user], 'Profile updated.')
             : back()->with('success', 'Profile updated.');
     }
 }

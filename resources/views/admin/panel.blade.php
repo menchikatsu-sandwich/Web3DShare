@@ -185,6 +185,7 @@
             </form>
             <div class="grid md:grid-cols-2 gap-4">
                 @foreach($categories as $c)
+                @continue(!is_object($c) || !isset($c->id, $c->name))
                 <div class="flex items-center justify-between bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 p-4 rounded-xl hover:border-green-300 dark:hover:border-neon/20 transition-colors shadow-sm">
                     <p class="font-medium text-gray-800 dark:text-gray-200">{{ $c->name }}</p>
                     <form method="POST" action="/admin/category/{{ $c->id }}">

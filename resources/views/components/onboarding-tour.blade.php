@@ -3,7 +3,7 @@
      data-user-id="{{ auth()->id() ?? 'guest' }}"
      data-home-url="{{ url('/') }}"
      class="hidden">
-    <div data-tour-welcome class="fixed inset-0 z-[300] hidden items-center justify-center bg-black/80 backdrop-blur-md p-4">
+    <div data-tour-welcome class="fixed inset-0 hidden items-center justify-center bg-black/80 backdrop-blur-md p-4" style="z-index: 300;">
         <div class="w-full max-w-2xl border border-green-400/40 bg-white dark:bg-darkPanel rounded-2xl p-8 sm:p-10 shadow-2xl dark:shadow-[0_0_60px_rgba(0,255,136,0.16)]">
             <p class="text-xs font-bold uppercase tracking-[0.22em] text-green-600 dark:text-neon mb-4">Web3DShare Tour</p>
             <h2 class="text-4xl sm:text-5xl font-bold text-gray-950 dark:text-white leading-tight">
@@ -26,7 +26,7 @@
         </div>
     </div>
 
-    <div data-tour-stage class="fixed inset-0 z-[300] hidden pointer-events-none">
+    <div data-tour-stage class="fixed inset-0 hidden pointer-events-none" style="z-index: 300;">
         <div data-tour-panel="top" class="web3d-tour-panel"></div>
         <div data-tour-panel="right" class="web3d-tour-panel"></div>
         <div data-tour-panel="bottom" class="web3d-tour-panel"></div>
@@ -72,7 +72,7 @@
     const isAuth = root.dataset.auth === '1';
     const userId = root.dataset.userId || 'guest';
     const audience = isAuth ? 'user' : 'guest';
-    const version = 'v1';
+    const version = 'v2';
     const activeKey = 'web3dshare_tour_active_' + version;
     const doneKey = audience === 'user'
         ? 'web3dshare_tour_done_user_' + userId + '_' + version
@@ -250,6 +250,10 @@
     let activeTarget = null;
     let resizeHandler = null;
     let scrollHandler = null;
+    let targetResizeObserver = null;
+    let layoutMutationObserver = null;
+    let spotlightFrame = null;
+    let renderToken = 0;
 
     function currentPath() {
         return window.location.pathname + window.location.search;
@@ -320,6 +324,7 @@
     }
 
     function finish(markDone = true) {
+        renderToken += 1;
         if (markDone) setDone();
         clearActive();
         cleanupListeners();
@@ -332,11 +337,29 @@
     function cleanupListeners() {
         if (resizeHandler) window.removeEventListener('resize', resizeHandler);
         if (scrollHandler) window.removeEventListener('scroll', scrollHandler, true);
+        if (targetResizeObserver) targetResizeObserver.disconnect();
+        if (layoutMutationObserver) layoutMutationObserver.disconnect();
+        if (spotlightFrame) cancelAnimationFrame(spotlightFrame);
         resizeHandler = null;
         scrollHandler = null;
+        targetResizeObserver = null;
+        layoutMutationObserver = null;
+        spotlightFrame = null;
     }
 
-    function waitForTarget(selector, timeout = 8000) {
+    function isUsableTarget(target) {
+        if (!target || !target.isConnected) return false;
+
+        const style = window.getComputedStyle(target);
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) {
+            return false;
+        }
+
+        const rect = target.getBoundingClientRect();
+        return rect.width >= 6 && rect.height >= 6;
+    }
+
+    function waitForTarget(selector, timeout = 15000) {
         return new Promise(resolve => {
             if (!selector) {
                 resolve(null);
@@ -344,7 +367,7 @@
             }
 
             const existing = document.querySelector(selector);
-            if (existing) {
+            if (isUsableTarget(existing)) {
                 resolve(existing);
                 return;
             }
@@ -352,15 +375,141 @@
             const startedAt = Date.now();
             const timer = setInterval(() => {
                 const found = document.querySelector(selector);
-                if (found) {
+                if (isUsableTarget(found)) {
                     clearInterval(timer);
                     resolve(found);
                 } else if (Date.now() - startedAt > timeout) {
                     clearInterval(timer);
-                    resolve(null);
+                    resolve(found || null);
                 }
             }, 120);
         });
+    }
+
+    function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function rectSnapshot(target) {
+        const rect = target.getBoundingClientRect();
+        return {
+            left: Math.round(rect.left),
+            top: Math.round(rect.top),
+            width: Math.round(rect.width),
+            height: Math.round(rect.height),
+        };
+    }
+
+    function rectsClose(a, b, tolerance = 2) {
+        if (!a || !b) return false;
+        return Math.abs(a.left - b.left) <= tolerance
+            && Math.abs(a.top - b.top) <= tolerance
+            && Math.abs(a.width - b.width) <= tolerance
+            && Math.abs(a.height - b.height) <= tolerance;
+    }
+
+    function waitForStableTarget(target, timeout = 8000) {
+        return new Promise(resolve => {
+            if (!target) {
+                resolve();
+                return;
+            }
+
+            const startedAt = Date.now();
+            let previous = null;
+            let stableFrames = 0;
+
+            function frame() {
+                if (!target.isConnected || Date.now() - startedAt > timeout) {
+                    resolve();
+                    return;
+                }
+
+                const current = rectSnapshot(target);
+                if (rectsClose(previous, current)) {
+                    stableFrames += 1;
+                } else {
+                    stableFrames = 0;
+                }
+
+                previous = current;
+
+                if (stableFrames >= 5 && current.width >= 6 && current.height >= 6) {
+                    resolve();
+                    return;
+                }
+
+                requestAnimationFrame(frame);
+            }
+
+            requestAnimationFrame(frame);
+        });
+    }
+
+    function waitForModelViewerReady(target, timeout = 18000) {
+        const viewer = target ? target.querySelector('model-viewer') : null;
+        if (!viewer) return Promise.resolve();
+
+        const loaded =
+            viewer.loaded === true ||
+            viewer.modelIsVisible === true ||
+            viewer.getAttribute('loaded') === 'true';
+
+        if (loaded) return Promise.resolve();
+
+        return new Promise(resolve => {
+            let done = false;
+            const startedAt = Date.now();
+
+            const finish = () => {
+                if (done) return;
+                done = true;
+                viewer.removeEventListener('load', finish);
+                viewer.removeEventListener('model-visibility', finish);
+                viewer.removeEventListener('error', finish);
+                viewer.removeEventListener('progress', onProgress);
+                resolve();
+            };
+
+            const onProgress = (event) => {
+                if ((event.detail?.totalProgress ?? 0) >= 0.98) {
+                    finish();
+                }
+            };
+
+            viewer.addEventListener('load', finish);
+            viewer.addEventListener('model-visibility', finish);
+            viewer.addEventListener('error', finish);
+            viewer.addEventListener('progress', onProgress);
+
+            const timer = setInterval(() => {
+                const nowLoaded =
+                    viewer.loaded === true ||
+                    viewer.modelIsVisible === true ||
+                    viewer.getAttribute('loaded') === 'true';
+
+                if (done) {
+                    clearInterval(timer);
+                } else if (nowLoaded || Date.now() - startedAt > timeout) {
+                    clearInterval(timer);
+                    finish();
+                }
+            }, 250);
+        });
+    }
+
+    async function waitForTargetReady(selector) {
+        const target = await waitForTarget(selector);
+        if (!target) return null;
+
+        await waitForStableTarget(target);
+
+        if (selector === '[data-tour="viewer-stage"]') {
+            await waitForModelViewerReady(target);
+            await waitForStableTarget(target, 5000);
+        }
+
+        return target;
     }
 
     function prepareForTarget(selector) {
@@ -460,7 +609,41 @@
         placeTooltip(rect);
     }
 
+    function scheduleSpotlightUpdate() {
+        if (spotlightFrame) cancelAnimationFrame(spotlightFrame);
+        spotlightFrame = requestAnimationFrame(() => {
+            spotlightFrame = null;
+            updateSpotlight();
+        });
+    }
+
+    function attachSpotlightListeners() {
+        cleanupListeners();
+        resizeHandler = scheduleSpotlightUpdate;
+        scrollHandler = scheduleSpotlightUpdate;
+        window.addEventListener('resize', resizeHandler);
+        window.addEventListener('scroll', scrollHandler, true);
+
+        if (window.ResizeObserver && activeTarget) {
+            targetResizeObserver = new ResizeObserver(scheduleSpotlightUpdate);
+            targetResizeObserver.observe(activeTarget);
+        }
+
+        if (window.MutationObserver && activeTarget) {
+            const observedRoot = activeTarget.closest('[data-model-shell]') || activeTarget.parentElement || document.body;
+            layoutMutationObserver = new MutationObserver(scheduleSpotlightUpdate);
+            layoutMutationObserver.observe(observedRoot, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class', 'style'],
+            });
+        }
+    }
+
     async function renderStep(index) {
+        const token = ++renderToken;
+
         if (index < 0) index = 0;
         if (index >= steps.length) {
             finish(true);
@@ -477,8 +660,10 @@
         }
 
         prepareForTarget(step.target);
-        showStage();
         hideWelcome();
+        hideStage();
+        cleanupListeners();
+        activeTarget = null;
 
         titleEl.textContent = step.title;
         bodyEl.textContent = step.body;
@@ -487,20 +672,22 @@
         backBtn.classList.toggle('opacity-50', index === 0);
         nextBtn.textContent = step.nextLabel || (index === steps.length - 1 ? 'Finish' : 'Next');
 
-        const target = await waitForTarget(step.target);
+        const target = await waitForTargetReady(step.target);
+        if (token !== renderToken) return;
+
         activeTarget = target;
 
         if (target) {
             target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-            await new Promise(resolve => setTimeout(resolve, 280));
+            await wait(320);
+            await waitForStableTarget(target, 5000);
         }
 
+        if (token !== renderToken) return;
+
+        showStage();
         updateSpotlight();
-        cleanupListeners();
-        resizeHandler = updateSpotlight;
-        scrollHandler = updateSpotlight;
-        window.addEventListener('resize', resizeHandler);
-        window.addEventListener('scroll', scrollHandler, true);
+        attachSpotlightListeners();
     }
 
     function openFirstModel(nextIndex) {
@@ -512,7 +699,7 @@
 
         saveActive(nextIndex);
         opener.click();
-        setTimeout(() => renderStep(nextIndex), 550);
+        renderStep(nextIndex);
     }
 
     function navigateTo(href, nextIndex) {
@@ -568,6 +755,14 @@
     };
 
     setTimeout(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('tour') === '1') {
+            localStorage.removeItem(doneKey);
+            clearActive();
+            showWelcome();
+            return;
+        }
+
         const active = readActive();
         if (active) {
             renderStep(active.index);
