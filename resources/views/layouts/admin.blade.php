@@ -379,5 +379,435 @@
             }, 3200);
         });
     </script>
+    <script>
+        function modelScopeFrom(element) {
+            return element.closest('[data-model-shell]') || document;
+        }
+
+        function modelIdFromScope(scope) {
+            return scope && scope.dataset ? scope.dataset.modelShell : null;
+        }
+
+        function setElementBusy(element, busy) {
+            if (!element) return;
+            element.disabled = busy;
+            element.classList.toggle('opacity-60', busy);
+            element.classList.toggle('pointer-events-none', busy);
+        }
+
+        function flattenAjaxErrors(errors) {
+            if (!errors || typeof errors !== 'object') return '';
+            return Object.values(errors).flat().filter(Boolean).join(' ');
+        }
+
+        async function parseAjaxResponse(response) {
+            const contentType = response.headers.get('content-type') || '';
+
+            if (!contentType.includes('application/json')) {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    throw new Error('Redirecting...');
+                }
+
+                throw new Error('The server returned a page instead of JSON. Please refresh and try again.');
+            }
+
+            const payload = await response.json();
+
+            if (!response.ok) {
+                const fieldErrors = flattenAjaxErrors(payload.errors);
+                throw new Error(fieldErrors || payload.message || 'Request failed.');
+            }
+
+            return payload;
+        }
+
+        async function submitAjaxForm(form) {
+            const response = await fetch(form.action, {
+                method: (form.method || 'POST').toUpperCase(),
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: new FormData(form),
+                credentials: 'same-origin',
+            });
+
+            return parseAjaxResponse(response);
+        }
+
+        window.showToast = function (message, type = 'success') {
+            if (!message) return;
+
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className =
+                    'fixed bottom-4 right-4 w-[calc(100vw-2rem)] max-w-sm space-y-3 pointer-events-none sm:bottom-6 sm:right-6';
+                container.style.zIndex = '400';
+                document.body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            const successClasses =
+                'pointer-events-auto bg-green-50 dark:bg-green-950/95 border border-green-300 dark:border-neon/40 text-green-800 dark:text-neon px-4 py-3 rounded-xl text-sm font-medium shadow-xl transition-all';
+            const errorClasses =
+                'pointer-events-auto bg-red-50 dark:bg-red-950/95 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-xl text-sm font-medium shadow-xl transition-all';
+            toast.className = type === 'error' ? errorClasses : successClasses;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-x-3');
+                setTimeout(() => toast.remove(), 250);
+            }, 3200);
+        };
+
+        document.querySelectorAll('[data-flash-toast]').forEach((toast) => {
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-x-3');
+                setTimeout(() => toast.remove(), 250);
+            }, 3200);
+        });
+
+        function updateHomeCardMetric(modelId, metric, value) {
+            if (!modelId && modelId !== 0) return;
+            const card = document.querySelector(`[data-model-card="${modelId}"]`);
+            if (!card) return;
+
+            const selector = metric === 'stars' ? '[data-card-star-count]' : '[data-card-download-count]';
+            const target = card.querySelector(selector);
+            if (target) target.textContent = value;
+        }
+
+        function updateStarUi(scope, data) {
+            const button = scope.querySelector('[data-star-button]');
+            const count = scope.querySelector('[data-star-count]');
+            const label = scope.querySelector('[data-star-label]');
+            const icon = scope.querySelector('[data-star-icon]');
+            const starred = !!data.starred;
+
+            if (count) count.textContent = data.stars;
+            if (label) label.textContent = starred ? 'Starred' : 'Star';
+            if (icon) icon.setAttribute('fill', starred ? 'currentColor' : 'none');
+
+            if (button) {
+                button.dataset.starred = starred ? 'true' : 'false';
+                button.classList.toggle('text-yellow-500', starred);
+                button.classList.toggle('border-yellow-300', starred);
+                button.classList.toggle('dark:text-yellow-400', starred);
+                button.classList.toggle('text-gray-700', !starred);
+                button.classList.toggle('dark:text-gray-300', !starred);
+            }
+
+            updateHomeCardMetric(modelIdFromScope(scope), 'stars', data.stars);
+        }
+
+        function updateDownloadUi(scope, data) {
+            const count = scope.querySelector('[data-download-count]');
+            if (count) count.textContent = data.download_count;
+            updateHomeCardMetric(modelIdFromScope(scope), 'downloads', data.download_count);
+        }
+
+        function updateCommentsCount(scope, count) {
+            const target = scope.querySelector('[data-comments-count]');
+            if (target) target.textContent = count;
+        }
+
+        function updateEmptyCommentsState(scope) {
+            const list = scope.querySelector('[data-comments-list]');
+            if (!list) return;
+
+            const hasComments = !!list.querySelector('[data-comment-node]');
+            const empty = list.querySelector('[data-comments-empty]');
+
+            if (hasComments && empty) {
+                empty.remove();
+            } else if (!hasComments && !empty) {
+                list.insertAdjacentHTML(
+                    'beforeend',
+                    '<div class="text-center py-8 text-gray-400 dark:text-gray-600 text-sm" data-comments-empty>No comments yet. Be the first to share your thoughts!</div>',
+                );
+            }
+        }
+
+        function syncReplyToggle(scope, parentId, count, expanded = null) {
+            const actions = scope.querySelector(`[data-comment-actions="${parentId}"]`);
+            const container = scope.querySelector(`#replies-container-${parentId}`);
+            let toggle = scope.querySelector(`#toggle-btn-${parentId}`);
+
+            if (!actions || !container) return;
+
+            if (count <= 0) {
+                if (toggle) toggle.remove();
+                container.classList.add('hidden');
+                return;
+            }
+
+            if (!toggle) {
+                actions.insertAdjacentHTML(
+                    'beforeend',
+                    `
+            <button type="button"
+                    onclick="toggleRepliesDisplay('${parentId}')"
+                    id="toggle-btn-${parentId}"
+                    data-reply-toggle
+                    data-reply-count="${count}"
+                    class="text-[11px] font-bold text-green-600 dark:text-neon hover:underline flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3" style="transition: transform 0.2s;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                <span><span data-reply-label>Show Replies</span> (<span data-reply-count-text>${count}</span>)</span>
+            </button>
+        `,
+                );
+                toggle = scope.querySelector(`#toggle-btn-${parentId}`);
+            }
+
+            toggle.dataset.replyCount = count;
+            const countText = toggle.querySelector('[data-reply-count-text]');
+            if (countText) countText.textContent = count;
+
+            if (expanded !== null) {
+                const label = toggle.querySelector('[data-reply-label]');
+                const svg = toggle.querySelector('svg');
+                if (label) label.textContent = expanded ? 'Hide Replies' : 'Show Replies';
+                if (svg) svg.style.transform = expanded ? 'rotate(180deg)' : 'rotate(0deg)';
+                container.classList.toggle('hidden', !expanded);
+            }
+        }
+
+        async function handleAjaxStar(form) {
+            const button = form.querySelector('[data-star-button]');
+            const scope = modelScopeFrom(form);
+            setElementBusy(button, true);
+
+            try {
+                const payload = await submitAjaxForm(form);
+                updateStarUi(scope, payload.data);
+                showToast(payload.message || 'Star updated.');
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                setElementBusy(button, false);
+            }
+        }
+
+        async function handleAjaxComment(form) {
+            const button = form.querySelector('button[type="submit"]');
+            const scope = modelScopeFrom(form);
+            setElementBusy(button, true);
+
+            try {
+                const payload = await submitAjaxForm(form);
+                const data = payload.data || {};
+                const parentId = data.parent_id;
+
+                if (parentId) {
+                    const replies = scope.querySelector(`#replies-container-${parentId}`);
+                    if (replies && data.html) {
+                        replies.insertAdjacentHTML('beforeend', data.html);
+                        syncReplyToggle(
+                            scope,
+                            parentId,
+                            data.parent_replies_count || replies.querySelectorAll('[data-comment-node]').length,
+                            true,
+                        );
+                    }
+
+                    const replyForm = form.closest('[id^="reply-form-"]');
+                    if (replyForm) replyForm.classList.add('hidden');
+                } else {
+                    const list = scope.querySelector('[data-comments-list]');
+                    if (list && data.html) {
+                        const empty = list.querySelector('[data-comments-empty]');
+                        if (empty) empty.remove();
+                        list.insertAdjacentHTML('afterbegin', data.html);
+                        list.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                }
+
+                updateCommentsCount(scope, data.comments_count);
+                updateEmptyCommentsState(scope);
+                form.reset();
+                showToast(payload.message || 'Comment posted.');
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                setElementBusy(button, false);
+            }
+        }
+
+        async function handleAjaxCommentDelete(form) {
+            const button = form.querySelector('button[type="submit"]');
+            const scope = modelScopeFrom(form);
+            setElementBusy(button, true);
+
+            try {
+                const payload = await submitAjaxForm(form);
+                const data = payload.data || {};
+                const node =
+                    scope.querySelector(`[data-comment-node="${data.comment_id}"]`) ||
+                    form.closest('[data-comment-node]');
+                if (node) node.remove();
+
+                if (data.parent_id) {
+                    syncReplyToggle(scope, data.parent_id, data.parent_replies_count || 0);
+                }
+
+                updateCommentsCount(scope, data.comments_count);
+                updateEmptyCommentsState(scope);
+                showToast(payload.message || 'Comment deleted.');
+            } catch (error) {
+                showToast(error.message, 'error');
+                setElementBusy(button, false);
+            }
+        }
+
+        async function handleAjaxReport(form) {
+            const button = form.querySelector('button[type="submit"]');
+            setElementBusy(button, true);
+
+            try {
+                const payload = await submitAjaxForm(form);
+                form.reset();
+                const details = form.closest('details');
+                if (details) details.open = false;
+                showToast(payload.message || 'Report submitted.');
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                setElementBusy(button, false);
+            }
+        }
+
+        async function handleAjaxDownload(link) {
+            const scope = modelScopeFrom(link);
+            setElementBusy(link, true);
+
+            try {
+                const response = await fetch(link.href, {
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                });
+                const payload = await parseAjaxResponse(response);
+                const data = payload.data || {};
+                updateDownloadUi(scope, data);
+
+                if (data.download_url) {
+                    window.location.href = data.download_url;
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                setElementBusy(link, false);
+            }
+        }
+
+        document.addEventListener('submit', function (event) {
+            const form = event.target.closest(
+                'form[data-ajax-star], form[data-ajax-comment], form[data-ajax-comment-delete], form[data-ajax-report]',
+            );
+            if (!form) return;
+            if (event.defaultPrevented) return;
+
+            event.preventDefault();
+            if (form.dataset.ajaxBusy === 'true') return;
+
+            form.dataset.ajaxBusy = 'true';
+            const cleanup = () => {
+                form.dataset.ajaxBusy = 'false';
+            };
+
+            if (form.matches('[data-ajax-star]')) {
+                handleAjaxStar(form).finally(cleanup);
+            } else if (form.matches('[data-ajax-comment]')) {
+                handleAjaxComment(form).finally(cleanup);
+            } else if (form.matches('[data-ajax-comment-delete]')) {
+                handleAjaxCommentDelete(form).finally(cleanup);
+            } else if (form.matches('[data-ajax-report]')) {
+                handleAjaxReport(form).finally(cleanup);
+            }
+        });
+
+        document.addEventListener('click', function (event) {
+            const link = event.target.closest('a[data-ajax-download]');
+            if (!link) return;
+
+            event.preventDefault();
+            if (link.dataset.ajaxBusy === 'true') return;
+
+            link.dataset.ajaxBusy = 'true';
+            handleAjaxDownload(link).finally(() => {
+                link.dataset.ajaxBusy = 'false';
+            });
+        });
+
+        // 1. Safe copy URL helper.
+        window.copyModelUrl = function (url, buttonEl) {
+            navigator.clipboard
+                .writeText(url)
+                .then(() => {
+                    const textSpan = buttonEl.querySelector('.share-text');
+                    const originalText = textSpan ? textSpan.innerText : 'Share';
+
+                    if (textSpan) textSpan.innerText = 'Copied!';
+                    buttonEl.classList.remove('border-gray-200', 'dark:border-gray-800');
+                    buttonEl.classList.add('border-green-500', 'text-green-500', 'dark:text-neon', 'dark:border-neon');
+
+                    setTimeout(() => {
+                        if (textSpan) textSpan.innerText = originalText;
+                        buttonEl.classList.add('border-gray-200', 'dark:border-gray-800');
+                        buttonEl.classList.remove(
+                            'border-green-500',
+                            'text-green-500',
+                            'dark:text-neon',
+                            'dark:border-neon',
+                        );
+                    }, 2000);
+                })
+                .catch((err) => {
+                    console.error('Failed to copy text: ', err);
+                });
+        };
+
+        // 2. Safe reply form toggle helper.
+        window.toggleReplyForm = function (commentId) {
+            const form = document.getElementById(`reply-form-${commentId}`);
+            if (form) {
+                form.classList.toggle('hidden');
+                if (!form.classList.contains('hidden')) {
+                    const textarea = form.querySelector('textarea');
+                    if (textarea) textarea.focus();
+                }
+            }
+        };
+
+        // 3. Safe replies list toggle helper.
+        window.toggleRepliesDisplay = function (commentId) {
+            const container = document.getElementById(`replies-container-${commentId}`);
+            const btn = document.getElementById(`toggle-btn-${commentId}`);
+
+            if (container && btn) {
+                const label = btn.querySelector('[data-reply-label]');
+                const svgIcon = btn.querySelector('svg');
+
+                container.classList.toggle('hidden');
+
+                if (container.classList.contains('hidden')) {
+                    if (label) label.innerText = 'Show Replies';
+                    if (svgIcon) svgIcon.style.transform = 'rotate(0deg)';
+                } else {
+                    if (label) label.innerText = 'Hide Replies';
+                    if (svgIcon) {
+                        svgIcon.style.transform = 'rotate(180deg)';
+                        svgIcon.style.transition = 'transform 0.2s';
+                    }
+                }
+            }
+        };
+    </script>
 </body>
 </html>
