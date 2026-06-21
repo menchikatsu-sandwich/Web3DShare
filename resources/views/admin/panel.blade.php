@@ -439,22 +439,56 @@
             </div>
 
             <div id="reports" class="tab-content">
-                <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
-                    User <span class="text-green-600 dark:text-neon">Reports</span>
-                </h2>
+                <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                            User <span class="text-green-600 dark:text-neon">Reports</span>
+                        </h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Manage and moderate reported 3D models.</p>
+                    </div>
+
+                    <!-- TAB FILTER SYSTEM -->
+                    <div class="inline-flex rounded-xl bg-black/40 p-1 border border-gray-800 backdrop-blur-sm shadow-inner">
+                        <button 
+                            type="button"
+                            onclick="filterReports('ongoing')" 
+                            id="tab-ongoing"
+                            class="report-tab-btn flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 border border-transparent"
+                        >
+                            <span>Pending & On Going</span>
+                            <span id="count-ongoing" class="rounded px-1.5 py-0.5 text-[10px] font-black transition-colors duration-300">0</span>
+                        </button>
+                        <button 
+                            type="button"
+                            onclick="filterReports('resolved')" 
+                            id="tab-resolved"
+                            class="report-tab-btn flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 border border-transparent"
+                        >
+                            <span>Resolved</span>
+                            <span id="count-resolved" class="rounded px-1.5 py-0.5 text-[10px] font-black transition-colors duration-300">0</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CARDS CONTAINER -->
                 <div class="space-y-3">
                     @forelse ($reports as $r)
+                        @php
+                            // Tentukan grup data untuk filter JS nanti
+                            $group = ($r->report_status === 'resolved') ? 'resolved' : 'ongoing';
+                        @endphp
                         <div
-                            class="rounded-xl border border-gray-200 bg-gray-50 p-5 shadow-sm dark:border-gray-800 dark:bg-darkBg"
+                            data-report-group="{{ $group }}"
+                            class="report-card rounded-xl border border-gray-200 bg-gray-50 p-5 shadow-sm dark:border-gray-800 dark:bg-darkBg transition-all duration-200"
                         >
                             <div class="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
-                                <div class="min-w-0">
+                                <div class="min-w-0 flex-1">
                                     <div class="flex flex-wrap items-center gap-2">
                                         <p class="text-lg font-semibold text-gray-800 dark:text-gray-200">
                                             {{ $r->model3d->title ?? 'Deleted model' }}
                                         </p>
                                         <span
-                                            class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border
+                                            class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border font-medium
                                     {{ $r->report_status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-500/20' : ($r->report_status === 'reviewed' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500/20' : 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-neon border-green-300 dark:border-green-500/20') }}"
                                         >
                                             {{ $r->report_status === 'reviewed' ? 'In review' : $r->report_status }}
@@ -462,10 +496,10 @@
                                     </div>
                                     <p class="mt-2 flex items-center gap-2 text-sm text-red-600 dark:text-red-500">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                        Reason: {{ ucwords(str_replace('_', ' ', $r->reason)) }}
+                                        Reason: <span class="font-medium text-gray-900 dark:text-gray-100">{{ ucwords(str_replace('_', ' ', $r->reason)) }}</span>
                                     </p>
                                     <div
-                                        class="mt-3 grid gap-2 text-xs text-gray-500 sm:grid-cols-2 dark:text-gray-400"
+                                        class="mt-3 grid gap-2 text-xs text-gray-500 sm:grid-cols-2 dark:text-gray-400 border-t border-gray-200/60 dark:border-gray-800/60 pt-3"
                                     >
                                         <p>Reporter: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $r->reporter->username ?? 'Deleted user' }}</span></p>
                                         <p>Model owner: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $r->model3d->user->username ?? 'Deleted user' }}</span></p>
@@ -473,15 +507,18 @@
                                         <p>Reviewer: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $r->reviewer->username ?? '-' }}</span></p>
                                     </div>
                                     @if ($r->description)
-                                        <p class="mt-3 rounded-lg border border-gray-200 bg-white p-3 text-sm text-gray-700 dark:border-gray-800 dark:bg-black/30 dark:text-gray-300">{{ $r->description }}</p>
+                                        <div class="mt-3 rounded-lg border border-gray-200 bg-white p-3 text-xs text-gray-600 dark:border-gray-800/80 dark:bg-black/20 dark:text-gray-400">
+                                            <span class="block font-bold text-[10px] text-gray-400 uppercase tracking-wide mb-1">Details:</span>
+                                            {{ $r->description }}
+                                        </div>
                                     @endif
                                 </div>
 
-                                <div class="flex flex-shrink-0 flex-col gap-2 sm:flex-row lg:w-44 lg:flex-col">
+                                <div class="flex flex-shrink-0 flex-col gap-2 sm:flex-row lg:w-44 lg:flex-col justify-end">
                                     @if ($r->model3d)
                                         <a
                                             href="/models/{{ $r->model_id }}"
-                                            class="rounded-lg border border-gray-200 bg-gray-100 px-4 py-2 text-center text-sm font-medium text-gray-700 transition-colors hover:border-green-400 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-neon/40"
+                                            class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700/50"
                                             >Open Model</a
                                         >
                                     @endif
@@ -527,8 +564,13 @@
                             </div>
                         </div>
                     @empty
-                        <div class="py-10 text-center text-gray-500">No reports yet.</div>
+                        <div id="report-empty-state" class="py-10 text-center text-gray-500">No reports yet.</div>
                     @endforelse
+
+                    <!-- DYNAMIC EMPTY STATE (Akan muncul via JS jika data filter kosong) -->
+                    <div id="report-filter-empty" class="hidden py-10 text-center text-gray-500 dark:text-gray-400">
+                        No data found for this filter.
+                    </div>
                 </div>
             </div>
 
@@ -843,4 +885,64 @@
             });
         }
     </script>
+
+    <!-- JAVASCRIPT ENGINE UNTUK FILTER REPORTS-->
+<script>
+    function filterReports(status) {
+        // 1. Atur Style Active Tab Button
+        const buttons = document.querySelectorAll('.report-tab-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm', 'dark:bg-gray-700', 'dark:text-white');
+            btn.classList.add('text-gray-500', 'dark:text-gray-400', 'dark:hover:text-gray-200');
+        });
+
+        const activeBtn = document.getElementById(`tab-${status}`);
+        if(activeBtn) {
+            activeBtn.classList.remove('text-gray-500', 'dark:text-gray-400', 'dark:hover:text-gray-200');
+            activeBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm', 'dark:bg-gray-700', 'dark:text-white');
+        }
+
+        // 2. Sembunyikan/Tampilkan Card Sesuai Group
+        const cards = document.querySelectorAll('.report-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            if (card.getAttribute('data-report-group') === status) {
+                card.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+
+        // 3. Handle Tampilan Kosong (Empty State Filter)
+        const filterEmptyState = document.getElementById('report-filter-empty');
+        if(filterEmptyState) {
+            if (visibleCount === 0 && cards.length > 0) {
+                filterEmptyState.classList.remove('hidden');
+            } else {
+                filterEmptyState.classList.add('hidden');
+            }
+        }
+    }
+
+    // Fungsi Otomatis Hitung Badge & Set Default View saat halaman ke-load
+    document.addEventListener("DOMContentLoaded", function() {
+        const cards = document.querySelectorAll('.report-card');
+        let ongoingCount = 0;
+        let resolvedCount = 0;
+
+        cards.forEach(card => {
+            if(card.getAttribute('data-report-group') === 'ongoing') ongoingCount++;
+            if(card.getAttribute('data-report-group') === 'resolved') resolvedCount++;
+        });
+
+        // Tulis total data ke bagde tab
+        if(document.getElementById('count-ongoing')) document.getElementById('count-ongoing').innerText = ongoingCount;
+        if(document.getElementById('count-resolved')) document.getElementById('count-resolved').innerText = resolvedCount;
+
+        // Jalankan default view ke tab ongoing pertama kali buka
+        filterReports('ongoing');
+    });
+</script>
 @endsection

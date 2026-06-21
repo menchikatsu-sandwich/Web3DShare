@@ -7,7 +7,7 @@
     data-model-shell="{{ $model->id }}"
     class="flex h-full min-h-0 w-full flex-col bg-white text-gray-800 lg:flex-row dark:bg-darkPanel dark:text-gray-200"
 >
-    <div class="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
+    <div class="flex min-h-0 flex-1 flex-col overflow-x-hidden ">
         <div
             class="flex flex-shrink-0 items-center justify-between gap-3 border-b border-gray-100 bg-white px-4 py-4 sm:px-6 lg:px-8 dark:border-gray-800 dark:bg-darkPanel"
         >
@@ -314,15 +314,15 @@
                     @endauth
 
                     <!-- Threaded comments list -->
-                    <div class="max-h-[550px] space-y-4 overflow-y-auto pr-2" data-comments-list>
+                    <div class="w-full space-y-4 pr-1 mt-4" data-comments-list>
                         @php
-                        $allComments = $model->comments ?? collect();
-                    @endphp
+                            $allComments = $model->comments ?? collect();
+                        @endphp
 
                         @forelse ($allComments->where('parent_id', null) as $comment)
-                            @include ('model.comment-item', ['comment' => $comment, 'allComments' => $allComments, 'modelId' => $model->id])
+                            @include('model.comment-item', ['comment' => $comment, 'allComments' => $allComments, 'modelId' => $model->id])
                         @empty
-                            <div class="py-8 text-center text-sm text-gray-400 dark:text-gray-600" data-comments-empty>
+                            <div class="py-8 text-center text-sm text-gray-500" data-comments-empty>
                                 No comments yet. Be the first to share your thoughts!
                             </div>
                         @endforelse
