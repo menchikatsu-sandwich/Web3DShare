@@ -177,6 +177,8 @@
         </main>
     </div>
 
+    <x-ui.confirmation-dialog />
+
     <script>
         // --- Profile Menu Logic ---
         function toggleMenu() {

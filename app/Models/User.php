@@ -92,6 +92,16 @@ class User extends Authenticatable
         return $this->upload_tier === 'verified';
     }
 
+    public function isStaff(): bool
+    {
+        return in_array($this->role, ['admin', 'moderator'], true);
+    }
+
+    public function hasUnlimitedUploads(): bool
+    {
+        return $this->isVerifiedUploader() || $this->isStaff();
+    }
+
     public function profileImageUrl()
     {
         if (! $this->profile_image_path) {

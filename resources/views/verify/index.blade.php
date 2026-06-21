@@ -12,8 +12,26 @@
                 </svg>
             </a>
 
-            {{-- PENGECEKAN STATUS VERIFIED --}}
-            @if (auth()->user()->upload_tier === 'verified')
+            @if (auth()->user()->isStaff())
+                <div class="flex flex-col items-center py-8 text-center">
+                    <div class="mb-6 rounded-full bg-blue-100 p-5 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-16 w-16">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9A2.25 2.25 0 0 1 5.25 16.5v-9A2.25 2.25 0 0 1 7.5 5.25h9a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25ZM9 9.75h6m-6 3h6" />
+                        </svg>
+                    </div>
+                    <h2 class="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
+                        Staff Access Is <span class="text-blue-600 dark:text-blue-400">Already Active</span>
+                    </h2>
+                    <p class="max-w-sm text-gray-500 dark:text-gray-400">Your {{ auth()->user()->role }} account already has unlimited uploads and staff access. A verified creator request is not needed.</p>
+
+                    <a
+                        href="/"
+                        class="mt-8 rounded-xl bg-gray-100 px-8 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-200 dark:bg-darkBg dark:text-white dark:hover:bg-gray-800"
+                    >
+                        Back to Home
+                    </a>
+                </div>
+            @elseif (auth()->user()->upload_tier === 'verified')
                 <div class="flex flex-col items-center py-8 text-center">
                     <div
                         class="mb-6 animate-bounce rounded-full bg-green-100 p-5 text-green-600 dark:bg-neon/10 dark:text-neon"
@@ -53,7 +71,7 @@
                     >
                         <p class="mb-2 text-xs font-semibold tracking-wider text-yellow-700 uppercase dark:text-yellow-400">Submitted note</p>
                         <p class="text-sm whitespace-pre-wrap text-gray-700 dark:text-gray-300">{{ $pendingRequest->note }}</p>
-                        <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">Submitted on {{ $pendingRequest->created_at->format('F j, Y H:i') }}</p>
+                        <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">Submitted on {{ $pendingRequest->created_at?->format('F j, Y H:i') ?? 'Unknown' }}</p>
                     </div>
 
                     <a
@@ -102,9 +120,9 @@
                                 >
                             </p>
                             <p class="flex items-center justify-between gap-3">
-                                <span>Downloads per model</span>
+                                <span>Total downloads</span>
                                 <span class="font-semibold"
-                                    >{{ $verificationCheck['rules']['min_downloads_per_model'] }} minimum</span
+                                    >{{ $verificationCheck['total_download_count'] }} / {{ $verificationCheck['rules']['min_total_downloads'] }}</span
                                 >
                             </p>
                             <p class="flex items-center justify-between gap-3">

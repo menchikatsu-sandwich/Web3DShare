@@ -138,7 +138,7 @@
                         <div class="space-y-4 text-sm">
                             <div>
                                 <p class="mb-1 text-xs font-semibold tracking-wider text-gray-400 uppercase">Category</p>
-                                <p class="text-gray-800 dark:text-gray-200">{{ ucfirst($user->upload_tier) }} Creator</p>
+                                <p class="text-gray-800 dark:text-gray-200">{{ $user->isStaff() ? ucfirst($user->role).' Staff' : ucfirst($user->upload_tier).' Creator' }}</p>
                             </div>
                             <div>
                                 <p class="mb-1 text-xs font-semibold tracking-wider text-gray-400 uppercase">Role</p>
@@ -146,7 +146,7 @@
                             </div>
                             <div>
                                 <p class="mb-1 text-xs font-semibold tracking-wider text-gray-400 uppercase">Member since</p>
-                                <p class="text-gray-800 dark:text-gray-200">{{ $user->created_at->format('F j, Y') }}</p>
+                                <p class="text-gray-800 dark:text-gray-200">{{ $user->created_at?->format('F j, Y') ?? 'Unknown' }}</p>
                             </div>
                         </div>
                     </div>

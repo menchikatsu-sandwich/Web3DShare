@@ -34,14 +34,14 @@
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Share your 3D creation with the world</p>
                 </div>
 
-                @if ($isVerifiedUploader)
+                @if ($hasUnlimitedUploads)
                     <div
                         data-tour="upload-limit"
                         class="flex items-center justify-between gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-800 dark:border-neon/20 dark:bg-neon/10 dark:text-neon"
                     >
                         <div>
-                            <p class="text-sm font-semibold">Verified uploader</p>
-                            <p class="mt-0.5 text-xs text-green-700 dark:text-neon/80">Unlimited uploads are active for your account.</p>
+                            <p class="text-sm font-semibold">{{ $isStaff ? ucfirst(auth()->user()->role).' staff account' : 'Verified uploader' }}</p>
+                            <p class="mt-0.5 text-xs text-green-700 dark:text-neon/80">{{ $isStaff ? 'Unlimited uploads are active for staff maintenance and debugging.' : 'Unlimited uploads are active for your account.' }}</p>
                         </div>
                         <span
                             class="rounded-lg bg-green-100 px-3 py-1 text-xs font-bold tracking-wider uppercase dark:bg-neon/20"
@@ -214,9 +214,9 @@
                     size="lg"
                     block
                     class="mt-4 shadow-md dark:shadow-[0_0_15px_rgba(0,255,136,0.3)]"
-                    :disabled="!$isVerifiedUploader && $remainingUploads <= 0"
+                    :disabled="!$hasUnlimitedUploads && $remainingUploads <= 0"
                 >
-                    {{ !$isVerifiedUploader && $remainingUploads <= 0 ? 'Upload Limit Reached' : 'Upload Model' }}
+                    {{ !$hasUnlimitedUploads && $remainingUploads <= 0 ? 'Upload Limit Reached' : 'Upload Model' }}
                 </x-ui.button>
             </form>
         </div>

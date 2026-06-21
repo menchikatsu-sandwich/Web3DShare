@@ -18,7 +18,9 @@ class UploadPageController extends Controller
             ->whereMonth('created_at', now()->month)
             ->count();
         $isVerifiedUploader = $user->isVerifiedUploader();
-        $remainingUploads = $isVerifiedUploader
+        $isStaff = $user->isStaff();
+        $hasUnlimitedUploads = $user->hasUnlimitedUploads();
+        $remainingUploads = $hasUnlimitedUploads
             ? null
             : max(0, $monthlyLimit - $monthlyUploads);
         $nextUploadReset = now()->addMonthNoOverflow()->startOfMonth();
@@ -31,6 +33,8 @@ class UploadPageController extends Controller
                     'monthly_uploads' => $monthlyUploads,
                     'remaining_uploads' => $remainingUploads,
                     'is_verified_uploader' => $isVerifiedUploader,
+                    'is_staff' => $isStaff,
+                    'has_unlimited_uploads' => $hasUnlimitedUploads,
                     'next_reset' => $nextUploadReset,
                 ],
             ]);
@@ -42,6 +46,8 @@ class UploadPageController extends Controller
             'monthlyUploads',
             'remainingUploads',
             'isVerifiedUploader',
+            'isStaff',
+            'hasUnlimitedUploads',
             'nextUploadReset'
         ));
     }

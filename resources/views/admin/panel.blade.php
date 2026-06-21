@@ -19,6 +19,25 @@
                 transform: translateY(0);
             }
         }
+        @keyframes growCategoryBar {
+            from {
+                opacity: 0;
+                transform: scaleY(0);
+            }
+            to {
+                opacity: 1;
+                transform: scaleY(1);
+            }
+        }
+        .category-chart-bar {
+            animation: growCategoryBar 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+            transform-origin: bottom;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .category-chart-bar {
+                animation: none;
+            }
+        }
     </style>
     <div class="flex flex-col items-start gap-8 lg:flex-row">
         <div
@@ -94,19 +113,262 @@
         <div
             class="min-h-[600px] w-full flex-1 rounded-2xl border border-gray-200 bg-white p-6 shadow-md transition-colors duration-300 lg:p-8 dark:border-neon/10 dark:bg-darkPanel dark:shadow-none"
         >
-            <div id="dashboard" class="tab-content">
-                <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
-                    Overview <span class="text-green-600 dark:text-neon">Statistics</span>
-                </h2>
-                <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-                    @foreach ($stats as $k => $v)
+            <div id="dashboard" class="tab-content space-y-6">
+                <div
+                    class="flex flex-col justify-between gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-end dark:border-gray-800"
+                >
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
+                            Overview <span class="text-green-600 dark:text-neon">Statistics</span>
+                        </h2>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">A live operational snapshot of the Web3DShare community.</p>
+                    </div>
+                    <span
+                        class="inline-flex items-center rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                        ><span class="mr-1.5 h-2 w-2 rounded-full bg-green-500 dark:bg-neon"></span>All time</span
+                    >
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach ([['Published models', $stats['models']], ['Community members', $stats['users']], ['Open reports', $stats['reports']], ['Verification queue', $stats['verify']]] as [$label, $value])
                         <div
-                            class="flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-gray-50 p-6 text-center shadow-sm transition-colors hover:border-green-400 dark:border-gray-800 dark:bg-darkBg dark:hover:border-neon/50"
+                            class="rounded-lg border border-gray-200 bg-gray-50 p-5 transition-colors hover:border-green-400 dark:border-gray-800 dark:bg-darkBg dark:hover:border-neon/50"
                         >
-                            <p class="mb-2 text-sm tracking-wider text-gray-500 uppercase dark:text-gray-400">{{ $k }}</p>
-                            <h2 class="text-4xl font-bold text-green-600 dark:text-neon">{{ $v }}</h2>
+                            <p class="text-xs font-bold tracking-widest text-gray-500 uppercase dark:text-gray-400">{{ $label }}</p>
+                            <p class="mt-3 text-4xl font-bold text-green-600 dark:text-neon">{{ $value }}</p>
                         </div>
                     @endforeach
+                </div>
+
+                <div class="grid gap-6 xl:grid-cols-3">
+                    <section
+                        class="flex flex-col rounded-lg border border-gray-200 bg-gray-50 p-6 xl:col-span-2 dark:border-gray-800 dark:bg-darkBg"
+                    >
+                        <div class="flex items-center justify-between gap-4">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 dark:text-white">
+                                    Published models by category
+                                </h3>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">The five largest categories by published model count.</p>
+                            </div>
+                            <div
+                                class="hidden items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-500 sm:flex dark:border-gray-700 dark:text-gray-400"
+                            >
+                                <span class="inline-flex items-center gap-1.5"
+                                    ><span class="h-2 w-2 rounded-full bg-green-500 dark:bg-neon"></span>Models</span
+                                >
+                            </div>
+                        </div>
+
+                        @if ($dashboard['category_distribution']->isNotEmpty())
+                            <div
+                                class="mt-8 flex flex-1 items-end gap-3 border-b border-gray-200 pb-3 dark:border-gray-800"
+                                style="height: 320px"
+                            >
+                                @foreach ($dashboard['category_distribution'] as $category)
+                                    <div
+                                        class="group flex min-w-0 flex-1 flex-col justify-end gap-3 text-center"
+                                        title="{{ $category->name }}"
+                                    >
+                                        <div
+                                            style="
+                                                display: flex;
+                                                height: 280px;
+                                                align-items: flex-end;
+                                                justify-content: center;
+                                            "
+                                        >
+                                            <div
+                                                class="category-chart-bar flex w-full max-w-12 items-start justify-center rounded-t-lg pt-2 text-xs font-bold text-black transition-opacity group-hover:opacity-80"
+                                                style="height: {{ 140 + (($category->models_count / $dashboard['category_distribution_max']) * 140) }}px; background-color: #00e983; animation-delay: {{ $loop->index * 100 }}ms"
+                                                title="{{ $category->models_count }} published models"
+                                            >
+                                                {{ $category->models_count }}
+                                            </div>
+                                        </div>
+                                        <span
+                                            class="truncate text-[11px] font-semibold text-gray-500 dark:text-gray-400"
+                                            >{{ $category->name }}</span
+                                        >
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div
+                                class="mt-6 flex min-h-64 flex-1 items-center justify-center rounded-lg border border-dashed border-gray-300 text-center text-sm font-medium text-gray-500 dark:border-gray-700 dark:text-gray-400"
+                            >
+                                No published models are available for category reporting yet.
+                            </div>
+                        @endif
+                    </section>
+
+                    <section
+                        class="rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-800 dark:bg-darkBg"
+                    >
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Moderation queue</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Items that need staff attention.</p>
+                        <dl class="mt-6 space-y-3">
+                            <div
+                                class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm dark:border-gray-800 dark:bg-darkPanel"
+                            >
+                                <dt class="text-gray-600 dark:text-gray-300">Pending reports</dt>
+                                <dd
+                                    class="rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-bold text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-400"
+                                >
+                                    {{ $dashboard['queue']['pending_reports'] }}
+                                </dd>
+                            </div>
+                            <div
+                                class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm dark:border-gray-800 dark:bg-darkPanel"
+                            >
+                                <dt class="text-gray-600 dark:text-gray-300">Reports in review</dt>
+                                <dd
+                                    class="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-bold text-blue-800 dark:bg-blue-500/20 dark:text-blue-400"
+                                >
+                                    {{ $dashboard['queue']['reviewed_reports'] }}
+                                </dd>
+                            </div>
+                            <div
+                                class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm dark:border-gray-800 dark:bg-darkPanel"
+                            >
+                                <dt class="text-gray-600 dark:text-gray-300">Verification requests</dt>
+                                <dd
+                                    class="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-bold text-green-800 dark:bg-neon/20 dark:text-neon"
+                                >
+                                    {{ $dashboard['queue']['verification_requests'] }}
+                                </dd>
+                            </div>
+                        </dl>
+                    </section>
+
+                    <section
+                        class="rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-800 dark:bg-darkBg"
+                    >
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Creator and staff access</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Access status across {{ $dashboard['tiers']['total'] }} accounts.</p>
+                        @php
+                            $tierTotal = max(1, $dashboard['tiers']['total']);
+                        @endphp
+                        <div class="mt-6 space-y-5">
+                            <div>
+                                <div class="mb-1.5 flex justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-300">Verified</span
+                                    ><span
+                                        class="font-semibold text-green-600 dark:text-neon"
+                                        >{{ $dashboard['tiers']['verified'] }}</span
+                                    >
+                                </div>
+                                <div class="h-2.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                                    <div
+                                        class="h-full rounded-full"
+                                        style="width: {{ ($dashboard['tiers']['verified'] / $tierTotal) * 100 }}%; background-color: #00e983"
+                                    ></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="mb-1.5 flex justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-300">Basic</span
+                                    ><span
+                                        class="font-semibold text-gray-700 dark:text-gray-300"
+                                        >{{ $dashboard['tiers']['basic'] }}</span
+                                    >
+                                </div>
+                                <div class="h-2.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                                    <div
+                                        class="h-full rounded-full"
+                                        style="width: {{ ($dashboard['tiers']['basic'] / $tierTotal) * 100 }}%; background-color: #cbd5e1"
+                                    ></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="mb-1.5 flex justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-300">Staff</span
+                                    ><span
+                                        class="font-semibold text-blue-600 dark:text-blue-400"
+                                        >{{ $dashboard['tiers']['staff'] }}</span
+                                    >
+                                </div>
+                                <div class="h-2.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                                    <div
+                                        class="h-full rounded-full"
+                                        style="width: {{ ($dashboard['tiers']['staff'] / $tierTotal) * 100 }}%; background-color: #60a5fa"
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section
+                        class="rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-800 dark:bg-darkBg"
+                    >
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Lifetime engagement</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Total interactions across all models.</p>
+                        <dl class="mt-6 space-y-4">
+                            <div
+                                class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-darkPanel"
+                            >
+                                <dt class="text-sm font-semibold text-gray-600 dark:text-gray-300">Total views</dt>
+                                <dd class="text-2xl font-bold text-gray-900 dark:text-white">
+                                    {{ number_format($dashboard['engagement']['views']) }}
+                                </dd>
+                            </div>
+                            <div
+                                class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-darkPanel"
+                            >
+                                <dt class="text-sm font-semibold text-gray-600 dark:text-gray-300">Downloads</dt>
+                                <dd class="text-2xl font-bold text-gray-900 dark:text-white">
+                                    {{ number_format($dashboard['engagement']['downloads']) }}
+                                </dd>
+                            </div>
+                        </dl>
+                    </section>
+
+                    <section
+                        class="rounded-lg border border-gray-200 bg-gray-50 p-6 xl:col-span-3 dark:border-gray-800 dark:bg-darkBg"
+                    >
+                        <div
+                            class="flex items-center justify-between gap-4 border-b border-gray-200 pb-4 dark:border-gray-800"
+                        >
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Most viewed models</h3>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Top published models by counted views, then downloads.</p>
+                            </div>
+                            <button
+                                type="button"
+                                onclick="changeTab('models', document.querySelector('button[onclick*=\'models\']'))"
+                                class="rounded-lg bg-green-100 px-4 py-2 text-sm font-bold text-green-700 transition-colors hover:bg-green-200 dark:bg-neon/10 dark:text-neon dark:hover:bg-neon/20"
+                            >
+                                Manage models
+                            </button>
+                        </div>
+                        <div class="mt-2 divide-y divide-gray-200 dark:divide-gray-800">
+                            @forelse ($dashboard['top_models'] as $model)
+                                <a
+                                    href="/models/{{ $model->id }}"
+                                    onclick="openModel('{{ $model->id }}', event)"
+                                    class="group flex flex-col justify-between gap-3 rounded-lg px-2 py-4 transition-colors hover:bg-white sm:flex-row sm:items-center dark:hover:bg-white/5"
+                                >
+                                    <div class="min-w-0">
+                                        <p class="truncate font-bold text-gray-900 group-hover:text-green-600 dark:text-white dark:group-hover:text-neon">{{ $model->title }}</p>
+                                        <p class="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">Uploaded by {{ $model->user->username }}</p>
+                                    </div>
+                                    <div
+                                        class="flex shrink-0 gap-2 text-xs font-medium text-gray-600 dark:text-gray-300"
+                                    >
+                                        <span
+                                            class="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 dark:border-gray-700 dark:bg-gray-800"
+                                            >{{ number_format($model->view_count) }} views</span
+                                        ><span
+                                            class="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 dark:border-gray-700 dark:bg-gray-800"
+                                            >{{ number_format($model->download_count) }} downloads</span
+                                        >
+                                    </div>
+                                </a>
+                            @empty
+                                <p class="py-10 text-center text-sm font-medium text-gray-500 dark:text-gray-400">No published models yet.</p>
+                            @endforelse
+                        </div>
+                    </section>
                 </div>
             </div>
 
@@ -158,7 +420,10 @@
                             <form
                                 method="POST"
                                 action="/admin/delete-model/{{ $m->id }}"
-                                onsubmit="return confirm('Are you sure you want to permanently delete this model?');"
+                                onsubmit="return confirmFormSubmission(this);"
+                                data-confirm-title="Take down this model?"
+                                data-confirm-message="This permanently deletes the model and related activity. This action cannot be undone."
+                                data-confirm-action="Take down model"
                             >
                                 @csrf
                                 @method ('DELETE')
@@ -192,7 +457,7 @@
                                             class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border
                                     {{ $r->report_status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-500/20' : ($r->report_status === 'reviewed' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500/20' : 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-neon border-green-300 dark:border-green-500/20') }}"
                                         >
-                                            {{ $r->report_status }}
+                                            {{ $r->report_status === 'reviewed' ? 'In review' : $r->report_status }}
                                         </span>
                                     </div>
                                     <p class="mt-2 flex items-center gap-2 text-sm text-red-600 dark:text-red-500">
@@ -204,7 +469,7 @@
                                     >
                                         <p>Reporter: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $r->reporter->username ?? 'Deleted user' }}</span></p>
                                         <p>Model owner: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $r->model3d->user->username ?? 'Deleted user' }}</span></p>
-                                        <p>Created: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $r->created_at->format('M j, Y H:i') }}</span></p>
+                                        <p>Created: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $r->created_at?->format('M j, Y H:i') ?? 'Unknown' }}</span></p>
                                         <p>Reviewer: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $r->reviewer->username ?? '-' }}</span></p>
                                     </div>
                                     @if ($r->description)
@@ -226,7 +491,7 @@
                                             <button
                                                 class="w-full rounded-lg border border-blue-200 bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-600 hover:text-white dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400"
                                             >
-                                                Mark Reviewed
+                                                Start Review
                                             </button>
                                         </form>
                                     @endif
@@ -240,15 +505,14 @@
                                             </button>
                                         </form>
                                     @endif
-                                    @if ($r->model3d)
+                                    @if ($r->model3d && $r->report_status !== 'resolved')
                                         <form
                                             method="POST"
                                             action="/admin/delete-model/{{ $r->model_id }}"
-                                            onsubmit="
-                                                return confirm(
-                                                    'Take down this model? This will delete the model and its reports.',
-                                                );
-                                            "
+                                            onsubmit="return confirmFormSubmission(this);"
+                                            data-confirm-title="Take down this model?"
+                                            data-confirm-message="This will permanently delete the model and its reports. This action cannot be undone."
+                                            data-confirm-action="Take down model"
                                         >
                                             @csrf
                                             @method ('DELETE')
@@ -357,73 +621,101 @@
 
             @can ('admin')
                 <div id="users" class="tab-content">
-                    <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
-                        User <span class="text-green-600 dark:text-neon">Management</span>
-                    </h2>
+                    <div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                                User <span class="text-green-600 dark:text-neon">Management</span>
+                            </h2>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage member roles and remove accounts when necessary.</p>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Administrator accounts are protected.</p>
+                    </div>
 
-                    <div class="mb-6">
+                    <div class="mt-6 mb-6">
                         <input
                             type="text"
                             id="searchUsers"
                             onkeyup="filterUsers()"
-                            placeholder="Search username or role..."
+                            placeholder="Search username, role, or uploader tier..."
                             class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-gray-900 transition-all focus:border-green-500 focus:outline-none md:w-80 dark:border-gray-800 dark:bg-darkBg dark:text-gray-200 dark:focus:border-neon"
                         />
                     </div>
 
                     <div class="space-y-3" id="usersList">
                         @forelse ($users as $u)
+                            @php
+                                $isStaffAccount = $u->isStaff();
+                                $accessLabel = $isStaffAccount ? 'staff' : $u->upload_tier;
+                                $accessClasses = $isStaffAccount
+                                    ? ($u->role === 'admin'
+                                        ? 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400'
+                                        : 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400')
+                                    : ($u->upload_tier === 'verified'
+                                        ? 'bg-green-100 text-green-700 dark:bg-neon/15 dark:text-neon'
+                                        : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300');
+                            @endphp
                             <div
                                 class="user-item flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm transition-colors hover:border-gray-300 md:flex-row md:items-center dark:border-gray-800 dark:bg-darkBg dark:hover:border-gray-700"
                             >
-                                <div class="mb-4 flex items-center gap-3 md:mb-0">
+                                <div class="mb-4 flex min-w-0 items-center gap-3 md:mb-0">
                                     <div
-                                        class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 font-bold text-green-700 dark:bg-gray-800 dark:text-neon"
+                                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold {{ $accessClasses }}"
                                     >
                                         {{ substr($u->username, 0, 1) }}
                                     </div>
-                                    <div>
-                                        <p class="user-name font-semibold text-gray-800 dark:text-gray-200">{{ $u->username }}</p>
-                                        <span
-                                            class="user-role text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full {{ $u->role === 'admin' ? 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400' : ($u->role === 'moderator' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300') }}"
-                                            >{{ $u->role }}</span
-                                        >
+                                    <div class="min-w-0">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <p class="user-name truncate font-semibold text-gray-800 dark:text-gray-200">{{ $u->username }}</p>
+                                            <span
+                                                class="user-role rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase {{ $u->role === 'admin' ? 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400' : ($u->role === 'moderator' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300') }}"
+                                                >{{ $u->role }}</span
+                                            >
+                                            <span
+                                                class="user-tier rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase {{ $accessClasses }}"
+                                                >{{ $accessLabel }}</span
+                                            >
+                                        </div>
+                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $u->models_count }} models · {{ number_format($u->models_sum_download_count ?? 0) }} downloads · Joined {{ $u->created_at?->format('M j, Y') ?? 'Unknown' }}</p>
                                     </div>
                                 </div>
-                                <div class="flex gap-2">
-                                    {{-- Tombol Promote ke Mod --}}
+                                <div class="flex flex-wrap gap-2">
                                     @if ($u->role === 'user')
                                         <form method="POST" action="/admin/promote/{{ $u->id }}">
                                             @csrf
                                             <button
-                                                class="flex w-28 justify-center rounded-lg border border-gray-300 bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-green-100 hover:text-green-700 dark:border-transparent dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-green-500/20 dark:hover:text-neon"
+                                                class="flex min-w-28 justify-center rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-600 hover:text-white dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:bg-blue-600 dark:hover:text-white"
                                             >
-                                                Make Mod
+                                                Promote
                                             </button>
                                         </form>
                                     @endif
 
-                                    {{-- Tombol Demote ke User (Style disamakan, hover baru kuning) --}}
                                     @if ($u->role === 'moderator')
                                         <form method="POST" action="/admin/demote/{{ $u->id }}">
                                             @csrf
                                             <button
-                                                class="flex w-28 justify-center rounded-lg border border-gray-300 bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-yellow-100 hover:text-yellow-600 dark:border-transparent dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-yellow-500/20 dark:hover:text-yellow-500"
+                                                class="flex min-w-28 justify-center rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm font-semibold text-yellow-700 transition-colors hover:bg-yellow-400 hover:text-black dark:border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400 dark:hover:bg-yellow-400 dark:hover:text-black"
                                             >
                                                 Demote
                                             </button>
                                         </form>
                                     @endif
 
-                                    {{-- Tombol Ban --}}
-                                    @if ($u->id !== auth()->id())
-                                        <form method="POST" action="/admin/delete-user/{{ $u->id }}">
+                                    @if ($u->id !== auth()->id() && $u->role !== 'admin')
+                                        <form
+                                            method="POST"
+                                            action="/admin/delete-user/{{ $u->id }}"
+                                            onsubmit="return confirmFormSubmission(this);"
+                                            data-confirm-title="Delete {{ $u->username }}?"
+                                            data-confirm-message="This permanently deletes the account and its uploaded models. This action cannot be undone."
+                                            data-confirm-action="Delete user"
+                                        >
                                             @csrf
                                             @method ('DELETE')
                                             <button
-                                                class="flex w-28 justify-center rounded-lg border border-gray-300 bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-red-100 hover:text-red-600 dark:border-transparent dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-red-500/20 dark:hover:text-red-400"
+                                                class="flex min-w-28 justify-center rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white"
                                             >
-                                                Ban User
+                                                Delete user
                                             </button>
                                         </form>
                                     @endif
@@ -541,8 +833,9 @@
             items.forEach((item) => {
                 const name = item.querySelector('.user-name').innerText.toLowerCase();
                 const role = item.querySelector('.user-role').innerText.toLowerCase();
+                const tier = item.querySelector('.user-tier').innerText.toLowerCase();
 
-                if (name.includes(input) || role.includes(input)) {
+                if (name.includes(input) || role.includes(input) || tier.includes(input)) {
                     item.style.display = '';
                 } else {
                     item.style.display = 'none';

@@ -312,8 +312,8 @@ class ModelController extends Controller
 
     private function hasReachedBasicUploadLimit($user, int $monthlyLimit): bool
     {
-        // Verified uploaders are intentionally exempt from the monthly limit.
-        if ($user->isVerifiedUploader()) {
+        // Verified uploaders and staff accounts are intentionally exempt from the monthly limit.
+        if ($user->hasUnlimitedUploads()) {
             return false;
         }
 

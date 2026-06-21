@@ -66,11 +66,10 @@
                         <form
                             action="/comments/{{ $comment->id }}"
                             method="POST"
-                            onsubmit="
-                                return confirm(
-                                    'Are you sure you want to delete this comment? All replies under it will also be permanently deleted.',
-                                );
-                            "
+                            onsubmit="return confirmFormSubmission(this);"
+                            data-confirm-title="Delete this comment?"
+                            data-confirm-message="All replies under this comment will also be permanently deleted. This action cannot be undone."
+                            data-confirm-action="Delete comment"
                             class="inline"
                             data-ajax-comment-delete
                         >

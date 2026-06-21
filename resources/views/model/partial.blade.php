@@ -196,7 +196,10 @@
                                 <form
                                     method="POST"
                                     action="/models/{{ $model->id }}"
-                                    onsubmit="return confirm('Delete this model permanently from your list?');"
+                                    onsubmit="return confirmFormSubmission(this);"
+                                    data-confirm-title="Delete this model?"
+                                    data-confirm-message="This permanently deletes the model, its files, comments, and related activity. This action cannot be undone."
+                                    data-confirm-action="Delete model"
                                 >
                                     @csrf
                                     @method ('DELETE')
@@ -217,7 +220,10 @@
                             <form
                                 method="POST"
                                 action="/admin/delete-model/{{ $model->id }}"
-                                onsubmit="return confirm('Are you sure you want to permanently delete this model?');"
+                                onsubmit="return confirmFormSubmission(this);"
+                                data-confirm-title="Permanently delete this model?"
+                                data-confirm-message="This removes the model and all related reports. This action cannot be undone."
+                                data-confirm-action="Delete model"
                             >
                                 @csrf
                                 @method ('DELETE')

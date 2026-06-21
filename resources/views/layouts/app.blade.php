@@ -253,7 +253,7 @@
                     <div
                         class="mb-8 rounded-xl border border-green-300 bg-green-100 p-3 text-center text-xs font-semibold tracking-widest text-green-700 uppercase shadow-inner dark:border-neon/20 dark:bg-neon/5 dark:text-neon"
                     >
-                        Tier: {{ auth()->check() ? strtoupper(auth()->user()->upload_tier) : 'GUEST' }}
+                        {{ auth()->user()->isStaff() ? 'Staff: '.strtoupper(auth()->user()->role) : 'Tier: '.strtoupper(auth()->user()->upload_tier) }}
                     </div>
                     <ul class="flex-1 space-y-2">
                         <li>
@@ -303,6 +303,8 @@
             </main>
         </div>
     </div>
+
+    <x-ui.confirmation-dialog />
 
     <script>
         function toggleSidebar() {

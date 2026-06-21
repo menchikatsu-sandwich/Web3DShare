@@ -199,13 +199,13 @@ See [api_postman_guide.txt](api_postman_guide.txt) for full request headers, bod
 
 ## Roles And Access
 
-| Role              | Access                                                                           |
-| ----------------- | -------------------------------------------------------------------------------- |
-| Guest             | Browse models, creator profiles, and public model pages.                         |
-| User              | Upload, manage own models, interact, report, and request verification.           |
-| Verified uploader | Exempt from the basic monthly upload limit.                                      |
-| Moderator         | Review reports, verification requests, categories, and model moderation actions. |
-| Admin             | All moderator access plus user promotion, demotion, and deletion.                |
+| Role              | Access                                                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Guest             | Browse models, creator profiles, and public model pages.                                                                  |
+| User              | Upload, manage own models, interact, report, and request verification.                                                    |
+| Verified uploader | Exempt from the basic monthly upload limit.                                                                               |
+| Moderator         | Staff access with unlimited uploads; can review reports, verification requests, categories, and model moderation actions. |
+| Admin             | Staff access with unlimited uploads; has all moderator access plus user promotion, demotion, and deletion.                |
 
 Authorization is enforced on the server through route middleware and policies; hiding a UI control is not treated as authorization.
 

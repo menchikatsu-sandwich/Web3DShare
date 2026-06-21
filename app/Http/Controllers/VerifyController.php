@@ -23,6 +23,7 @@ class VerifyController extends Controller
             return $this->apiData([
                 'pending_request' => $pendingRequest,
                 'verification_check' => $verificationCheck,
+                'is_staff' => $user->isStaff(),
             ]);
         }
 
@@ -31,6 +32,14 @@ class VerifyController extends Controller
 
     public function store(StoreVerificationRequest $request)
     {
+        if ($request->user()->isStaff()) {
+            $message = 'Staff accounts already have elevated access and do not need to request verification.';
+
+            return $request->wantsJson()
+                ? $this->apiError($message, 403)
+                : back()->with('error', $message);
+        }
+
         $data = $request->validated();
 
         $verificationCheck = $this->verificationEligibility($request->user());
@@ -108,6 +117,7 @@ class VerifyController extends Controller
     private function verificationEligibility($user): array
     {
         $rules = config('web3dshare.verification');
+        $rules['min_total_downloads'] = $rules['min_total_downloads'] ?? $rules['min_downloads_per_model'] ?? 1;
         $reasons = [];
 
         $accountAgeDays = $user->created_at ? (int) floor($user->created_at->diffInDays(now())) : 0;
@@ -123,12 +133,9 @@ class VerifyController extends Controller
             $reasons[] = 'You need at least '.$rules['min_models'].' published model(s).';
         }
 
-        $modelsBelowDownloadRule = $models
-            ->filter(fn ($model) => $model->download_count < $rules['min_downloads_per_model'])
-            ->values();
-
-        if ($models->isNotEmpty() && $modelsBelowDownloadRule->isNotEmpty()) {
-            $reasons[] = 'Every model must have at least '.$rules['min_downloads_per_model'].' counted download(s).';
+        $totalDownloadCount = (int) $models->sum('download_count');
+        if ($totalDownloadCount < $rules['min_total_downloads']) {
+            $reasons[] = 'You need at least '.$rules['min_total_downloads'].' counted download(s) across your published models.';
         }
 
         $latestRejectedRequest = VerificationRequest::where('user_id', $user->id)
@@ -150,7 +157,7 @@ class VerifyController extends Controller
             'reasons' => $reasons,
             'rules' => $rules,
             'model_count' => $models->count(),
-            'models_below_download_rule' => $modelsBelowDownloadRule,
+            'total_download_count' => $totalDownloadCount,
             'account_age_days' => $accountAgeDays,
             'cooldown_until' => $cooldownUntil,
         ];
