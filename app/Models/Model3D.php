@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Services\SupabaseStorage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Model3D extends Model
@@ -21,13 +22,13 @@ class Model3D extends Model
         'thumbnail_path',
         'download_count',
         'stars_count',
-        'view_count'
+        'view_count',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'deleted_at' => 'datetime'
+        'deleted_at' => 'datetime',
     ];
 
     protected $appends = [
@@ -92,7 +93,7 @@ class Model3D extends Model
 
     public function modelUrl()
     {
-        return \App\Services\SupabaseStorage::getModelUrl($this->model_path);
+        return SupabaseStorage::getModelUrl($this->model_path);
     }
 
     public function getModelUrlAttribute()
@@ -102,7 +103,7 @@ class Model3D extends Model
 
     public function thumbnailUrl()
     {
-        return \App\Services\SupabaseStorage::getThumbnailUrl($this->thumbnail_path);
+        return SupabaseStorage::getThumbnailUrl($this->thumbnail_path);
     }
 
     public function getThumbnailUrlAttribute()

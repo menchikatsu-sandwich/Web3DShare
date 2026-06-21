@@ -12,12 +12,12 @@ class Report extends Model
         'reviewed_by',
         'reason',
         'description',
-        'report_status'
+        'report_status',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     public function model3d()

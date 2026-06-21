@@ -10,12 +10,12 @@ class Comment extends Model
         'model_id',
         'user_id',
         'parent_id',
-        'body'
+        'body',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     public function model3d()

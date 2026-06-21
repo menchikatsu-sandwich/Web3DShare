@@ -19,7 +19,7 @@ return new class extends Migration
                 ->constrained('models')
                 ->cascadeOnDelete();
 
-            $table->unique(['user_id','model_id']);
+            $table->unique(['user_id', 'model_id']);
 
             $table->timestamps();
         });

@@ -8,12 +8,12 @@ class Category extends Model
 {
     protected $fillable = [
         'name',
-        'created_by'
+        'created_by',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     public function models()

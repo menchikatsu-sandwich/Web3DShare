@@ -1,0 +1,8 @@
+{
+    "plugins": ["prettier-plugin-blade", "prettier-plugin-tailwindcss"],
+    "printWidth": 120,
+    "singleQuote": true,
+    "tabWidth": 4,
+    "useTabs": false,
+    "tailwindStylesheet": "resources/css/app.css"
+}

@@ -9,12 +9,12 @@ class Tag extends Model
     protected $fillable = [
         'name',
         'slug',
-        'created_by'
+        'created_by',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     public function models()

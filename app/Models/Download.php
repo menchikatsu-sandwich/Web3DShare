@@ -10,11 +10,11 @@ class Download extends Model
 
     protected $fillable = [
         'model_id',
-        'downloaded_at'
+        'downloaded_at',
     ];
 
     protected $casts = [
-        'downloaded_at' => 'datetime'
+        'downloaded_at' => 'datetime',
     ];
 
     public function model3d()

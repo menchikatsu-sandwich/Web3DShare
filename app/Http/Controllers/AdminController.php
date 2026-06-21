@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Model3D;
+use App\Http\Requests\StoreCategoryRequest;
 use App\Models\Category;
+use App\Models\Model3D;
 use App\Models\Report;
+use App\Models\User;
 use App\Models\VerificationRequest;
 use App\Services\MetadataCache;
 use Illuminate\Http\Request;
@@ -35,9 +36,9 @@ class AdminController extends Controller
     {
         return [
             'models' => Model3D::count(),
-            'users'  => User::count(),
-            'reports'=> Report::whereIn('report_status', ['pending', 'reviewed'])->count(),
-            'verify' => VerificationRequest::where('request_status', 'pending')->count()
+            'users' => User::count(),
+            'reports' => Report::whereIn('report_status', ['pending', 'reviewed'])->count(),
+            'verify' => VerificationRequest::where('request_status', 'pending')->count(),
         ];
     }
 
@@ -93,12 +94,12 @@ class AdminController extends Controller
     }
 
     // CATEGORY
-    public function storeCategory(Request $request)
+    public function storeCategory(StoreCategoryRequest $request)
     {
-        $request->validate(['name' => ['required', 'string', 'max:100', 'unique:categories,name']]);
+        $data = $request->validated();
 
         $category = Category::create([
-            'name' => $request->input('name'),
+            'name' => $data['name'],
             'created_by' => $request->user()->id,
         ]);
 
@@ -135,8 +136,8 @@ class AdminController extends Controller
     public function resolveReport(Request $r, Report $report)
     {
         $report->update([
-            'report_status'=>'resolved',
-            'reviewed_by'=>$r->user()->id
+            'report_status' => 'resolved',
+            'reviewed_by' => $r->user()->id,
         ]);
 
         return $r->wantsJson()

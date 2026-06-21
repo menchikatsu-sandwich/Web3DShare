@@ -18,7 +18,7 @@ return new class extends Migration
                 ->constrained('tags')
                 ->cascadeOnDelete();
 
-            $table->primary(['model_id','tag_id']);
+            $table->primary(['model_id', 'tag_id']);
         });
     }
 

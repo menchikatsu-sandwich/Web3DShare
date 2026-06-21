@@ -3,21 +3,21 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
 
 class RoleMiddleware
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param  Request  $request
      * @param  string  ...$roles
      * @return mixed
      */
     public function handle($request, Closure $next, ...$roles)
     {
         // 1. Check whether the user is logged in and has a role.
-        if (!$request->user()) {
+        if (! $request->user()) {
             abort(403, 'Unauthorized.');
         }
 
@@ -30,7 +30,6 @@ class RoleMiddleware
         abort(403, 'You do not have permission to access this page.');
     }
 }
-
 
 // namespace App\Http\Middleware;
 

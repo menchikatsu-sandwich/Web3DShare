@@ -13,7 +13,7 @@ class SupabaseStorage
         $ext = $file->getClientOriginalExtension();
 
         $safeName = Str::slug($original);
-        $name = $safeName . '_' . time() . '_' . Str::random(4) . '.' . $ext;
+        $name = $safeName.'_'.time().'_'.Str::random(4).'.'.$ext;
 
         return "assets/user-$userId/$name";
     }
@@ -24,7 +24,7 @@ class SupabaseStorage
         $ext = $file->getClientOriginalExtension();
 
         $safeName = Str::slug($original);
-        $name = 'thumb_' . $safeName . '_' . time() . '_' . Str::random(4) . '.' . $ext;
+        $name = 'thumb_'.$safeName.'_'.time().'_'.Str::random(4).'.'.$ext;
 
         return "thumbnails/user-$userId/$name";
     }
@@ -32,7 +32,7 @@ class SupabaseStorage
     protected static function profilePath($userId, $file)
     {
         $ext = $file->getClientOriginalExtension();
-        $name = 'profile_' . $userId . '.' . $ext;
+        $name = 'profile_'.$userId.'.'.$ext;
 
         return "thumbnails/user-$userId/profile/$name";
     }
@@ -43,7 +43,7 @@ class SupabaseStorage
         $url = env('SUPABASE_URL');
         $serviceKey = env('SUPABASE_SECRET_KEY') ?: env('SUPABASE_SERVICE_ROLE_KEY');
 
-        if (!$bucket || !$url || !$serviceKey) {
+        if (! $bucket || ! $url || ! $serviceKey) {
             throw new \Exception('Supabase configuration missing');
         }
 
@@ -57,17 +57,17 @@ class SupabaseStorage
             : ($file->getClientMimeType() ?: 'application/octet-stream');
 
         $response = Http::withHeaders([
-            'apikey'        => $serviceKey,
-            'Authorization' => 'Bearer ' . $serviceKey,
-            'Content-Type'  => $mimeType,
-            'x-upsert'      => 'true',
+            'apikey' => $serviceKey,
+            'Authorization' => 'Bearer '.$serviceKey,
+            'Content-Type' => $mimeType,
+            'x-upsert' => 'true',
         ])->withBody(
             $fileContent,
             $mimeType
         )->timeout(120)->post("{$url}/storage/v1/object/{$bucket}/{$path}");
 
-        if (!$response->successful()) {
-            throw new \Exception('Supabase upload failed: ' . $response->status() . ' - ' . $response->body());
+        if (! $response->successful()) {
+            throw new \Exception('Supabase upload failed: '.$response->status().' - '.$response->body());
         }
 
         return $path;
@@ -75,21 +75,23 @@ class SupabaseStorage
 
     private static function supabaseDelete($path)
     {
-        if (!$path) return;
+        if (! $path) {
+            return;
+        }
 
         $bucket = env('AWS_BUCKET');
         $url = env('SUPABASE_URL');
         $serviceKey = env('SUPABASE_SECRET_KEY') ?: env('SUPABASE_SERVICE_ROLE_KEY');
 
         Http::withHeaders([
-            'apikey'        => $serviceKey,
-            'Authorization' => 'Bearer ' . $serviceKey,
+            'apikey' => $serviceKey,
+            'Authorization' => 'Bearer '.$serviceKey,
         ])->delete("{$url}/storage/v1/object/{$bucket}/{$path}");
     }
 
     private static function publicUrl($path)
     {
-        $url    = env('SUPABASE_URL');
+        $url = env('SUPABASE_URL');
         $bucket = env('AWS_BUCKET');
 
         return "{$url}/storage/v1/object/public/{$bucket}/{$path}";
@@ -98,12 +100,14 @@ class SupabaseStorage
     public static function uploadModel($userId, $file)
     {
         $path = self::modelPath($userId, $file);
+
         return self::supabaseUpload($path, $file);
     }
 
     public static function uploadThumbnail($userId, $file)
     {
         $path = self::thumbPath($userId, $file);
+
         return self::supabaseUpload($path, $file);
     }
 
@@ -114,31 +118,31 @@ class SupabaseStorage
         }
 
         $path = self::profilePath($userId, $file);
+
         return self::supabaseUpload($path, $file);
     }
 
     public static function updateThumbnail($model, $file)
     {
-        $userId = $model->user_id;
-    
-        // 1. Delete the old file if one is stored in the database.
-        if ($model->thumbnail_path) {
-            // Delete the path stored in the thumbnail_path column.
-            self::supabaseDelete($model->thumbnail_path);
-        }
-    
-        // 2. Generate a new unique path.
-        $path = self::thumbPath($userId, $file);
-    
-        // 3. Upload the new file.
+        $oldPath = $model->thumbnail_path;
+        $path = self::thumbPath($model->user_id, $file);
         $uploadStatus = self::supabaseUpload($path, $file);
-    
-        if ($uploadStatus) {
-            // 4. Keep the database path in sync.
-            $model->update(['thumbnail_path' => $path]);
+
+        if (! $uploadStatus) {
+            return false;
         }
-    
-        return $uploadStatus;
+
+        // Keep the stored reference in sync only after the upload succeeds.
+        $model->update(['thumbnail_path' => $path]);
+
+        // New models have no stale file to clean up.
+        if (! $oldPath) {
+            return true;
+        }
+
+        self::supabaseDelete($oldPath);
+
+        return true;
     }
 
     public static function getModelUrl($path)

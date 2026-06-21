@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Services\SupabaseStorage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
     use HasApiTokens;
+    use HasFactory, Notifiable;
 
     protected $fillable = [
         'username',
@@ -19,17 +20,17 @@ class User extends Authenticatable
         'role',
         'upload_tier',
         'nickname',
-        'profile_image_path'
+        'profile_image_path',
     ];
 
     protected $hidden = [
         'password',
-        'remember_token'
+        'remember_token',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     protected $appends = [
@@ -93,9 +94,11 @@ class User extends Authenticatable
 
     public function profileImageUrl()
     {
-        if(!$this->profile_image_path) return null;
+        if (! $this->profile_image_path) {
+            return null;
+        }
 
-        return \App\Services\SupabaseStorage::getProfileUrl($this->profile_image_path);
+        return SupabaseStorage::getProfileUrl($this->profile_image_path);
     }
 
     public function getProfileImageUrlAttribute()

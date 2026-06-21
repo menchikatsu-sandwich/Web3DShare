@@ -1,58 +1,343 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Web3DShare
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> A community platform for publishing, discovering, previewing, and downloading 3D models.
 
-## About Laravel
+Web3DShare is a Laravel application built around shareable GLB assets. Creators can upload models, manage their published work, build a public profile, and request verified-uploader status. Community members can browse models, star them, download them, join discussions, and report content that needs moderation.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Table Of Contents
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- [Features](#features)
+- [Technology Stack](#technology-stack)
+- [Architecture](#architecture)
+- [Requirements](#requirements)
+- [Local Setup](#local-setup)
+- [Environment Configuration](#environment-configuration)
+- [Database](#database)
+- [API](#api)
+- [Roles And Access](#roles-and-access)
+- [Project Structure](#project-structure)
+- [Quality Checks](#quality-checks)
+- [Deployment Notes](#deployment-notes)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Features
 
-## Learning Laravel
+### Community And Discovery
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- Explore models by search term, category, tag, timeframe, and popularity.
+- Preview GLB models in the browser with `model-viewer`.
+- View creator profiles with published-model and engagement statistics.
+- Light and dark themes, onboarding guidance, and responsive Blade views.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Creator Workflow
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- Upload GLB models with thumbnail images, categories, descriptions, and tags.
+- Manage owned models from **My Models**; metadata can be edited and models can be deleted.
+- Configurable monthly upload limit for basic uploaders.
+- Verification request flow with minimum model, download, account-age, pending-request, and rejection-cooldown rules.
+- Profile nickname and image updates.
 
-## Agentic Development
+### Engagement And Moderation
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+- Stars, download metrics, threaded comments, and comment deletion permissions.
+- Download and view cooldowns to reduce repeated metric inflation; owners do not increase their own download count.
+- Model reporting with duplicate-report protection.
+- Moderator and admin panel for reports, verification requests, categories, users, and model moderation.
 
-```bash
-composer require laravel/boost --dev
+### API
 
-php artisan boost:install
+- Web routes for the Blade application and versionless JSON routes under `/api`.
+- Laravel Sanctum token authentication for protected API routes.
+- Consistent JSON responses and rate limiting for authentication, uploads, comments, reports, downloads, and administrative actions.
+- A Postman walkthrough is available in [api_postman_guide.txt](api_postman_guide.txt).
+
+## Technology Stack
+
+| Layer           | Technology                                        |
+| --------------- | ------------------------------------------------- |
+| Backend         | Laravel 13, PHP 8.3+                              |
+| Database        | PostgreSQL                                        |
+| Authentication  | Laravel session auth and Laravel Sanctum          |
+| Storage         | Supabase Storage through its HTTP API             |
+| Frontend        | Blade, Tailwind CSS 4, Vite                       |
+| 3D Preview      | Google `model-viewer`                             |
+| Testing         | PHPUnit                                           |
+| Code Quality    | Laravel Pint, Prettier, Prettier Tailwind plugin  |
+| Container Build | Dockerfile for PHP 8.3 with PostgreSQL extensions |
+
+## Architecture
+
+```text
+Browser / API Client
+        |
+        v
+Routes -> Middleware -> Controllers -> Services / Policies / Models
+        |                                  |
+        |                                  +-> Supabase Storage
+        v
+PostgreSQL <-> Eloquent Models
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+- **Controllers** coordinate requests and responses.
+- **Form Requests** hold input validation for forms and API commands.
+- **Policies** authorize model, comment, and report actions.
+- **Services** contain Supabase storage and cached metadata behavior.
+- **Observers** clean model files from storage when models are removed.
 
-## Contributing
+## Requirements
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- PHP `8.3` or newer with PostgreSQL extensions (`pdo_pgsql`, `pgsql`)
+- Composer 2
+- Node.js and npm
+- PostgreSQL database
+- Supabase project and a storage bucket for model assets
 
-## Code of Conduct
+## Local Setup
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+1. Clone the repository and enter the project directory.
 
-## Security Vulnerabilities
+    ```bash
+    git clone <your-repository-url> web3dshare
+    cd web3dshare
+    ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+2. Install backend and frontend dependencies.
+
+    ```bash
+    composer install
+    npm install
+    ```
+
+3. Create the local environment file and application key.
+
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
+
+4. Configure the database and Supabase values in `.env`. See [Environment Configuration](#environment-configuration).
+
+5. Run migrations and build frontend assets.
+
+    ```bash
+    php artisan migrate
+    npm run build
+    ```
+
+6. Start the development stack.
+
+    ```bash
+    composer dev
+    ```
+
+    This starts Laravel, the queue listener, Laravel Pail, and Vite together. For a minimal server-only session, use:
+
+    ```bash
+    php artisan serve
+    ```
+
+Open `http://127.0.0.1:8000` in the browser.
+
+## Environment Configuration
+
+Start from `.env.example`. Keep `.env` local and never commit its secret values.
+
+| Variable              | Purpose                                                                        |
+| --------------------- | ------------------------------------------------------------------------------ |
+| `APP_ENV`             | Use `local` for development and `production` when deployed.                    |
+| `APP_DEBUG`           | Keep `true` locally; set to `false` in production.                             |
+| `APP_URL`             | Public application URL.                                                        |
+| `DB_CONNECTION`       | Database driver; this project uses `pgsql`.                                    |
+| `DB_URL`              | PostgreSQL connection URL.                                                     |
+| `SUPABASE_URL`        | Supabase project URL.                                                          |
+| `SUPABASE_SECRET_KEY` | Server-only key used for storage operations. Never expose it in frontend code. |
+| `AWS_BUCKET`          | Supabase Storage bucket name. Defaults to `model-assets`.                      |
+| `WEB3D_*`             | Upload limits, engagement cooldowns, and metadata-cache settings.              |
+| `VERIFY_*`            | Verification eligibility and cooldown settings.                                |
+
+The storage service also accepts the legacy `SUPABASE_SERVICE_ROLE_KEY` fallback. Prefer the current server-only secret key configuration and keep both forms of privileged credentials out of Git.
+
+## Database
+
+The application has migrations for users, models, categories, tags, comments, stars, downloads, views, reports, verification requests, sessions, personal access tokens, and performance indexes.
+
+```bash
+php artisan migrate
+```
+
+To rebuild only a disposable local database:
+
+```bash
+php artisan migrate:fresh
+```
+
+Do not run `migrate:fresh` against a database containing data you want to keep.
+
+## API
+
+Public API endpoints are served under `/api`. Protected endpoints use a Sanctum bearer token obtained from `POST /api/login` or `POST /api/register`.
+
+```http
+Authorization: Bearer <token>
+Accept: application/json
+```
+
+Common endpoints:
+
+| Method | Endpoint                      | Description                                  |
+| ------ | ----------------------------- | -------------------------------------------- |
+| `GET`  | `/api/models`                 | Browse and filter models.                    |
+| `GET`  | `/api/models/{model}`         | Get a model and related data.                |
+| `POST` | `/api/register`               | Register and receive a token.                |
+| `POST` | `/api/login`                  | Authenticate and receive a token.            |
+| `POST` | `/api/models`                 | Upload a model. Requires a token.            |
+| `POST` | `/api/models/{model}/star`    | Toggle a star. Requires a token.             |
+| `POST` | `/api/models/{model}/comment` | Create a comment or reply. Requires a token. |
+| `POST` | `/api/models/{model}/report`  | Report a model. Requires a token.            |
+| `GET`  | `/api/creators/{username}`    | View a creator profile.                      |
+
+See [api_postman_guide.txt](api_postman_guide.txt) for full request headers, bodies, authentication, and Postman steps.
+
+## Roles And Access
+
+| Role              | Access                                                                           |
+| ----------------- | -------------------------------------------------------------------------------- |
+| Guest             | Browse models, creator profiles, and public model pages.                         |
+| User              | Upload, manage own models, interact, report, and request verification.           |
+| Verified uploader | Exempt from the basic monthly upload limit.                                      |
+| Moderator         | Review reports, verification requests, categories, and model moderation actions. |
+| Admin             | All moderator access plus user promotion, demotion, and deletion.                |
+
+Authorization is enforced on the server through route middleware and policies; hiding a UI control is not treated as authorization.
+
+## Project Structure
+
+```text
+web3dshare/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Auth/                  # Registration, login, logout
+│   │   │   ├── Concerns/              # Shared controller response helpers
+│   │   │   ├── AdminController.php    # Moderator and admin workflows
+│   │   │   ├── InteractionController.php # Stars, comments, downloads
+│   │   │   ├── ModelController.php    # Explore, upload, edit, delete, viewer
+│   │   │   ├── ProfileController.php  # Profile and creator pages
+│   │   │   ├── ReportController.php   # Model reports
+│   │   │   ├── UploadPageController.php
+│   │   │   └── VerifyController.php   # Uploader verification lifecycle
+│   │   ├── Middleware/                # Roles, JSON, security headers
+│   │   └── Requests/                  # Validation contracts per command
+│   ├── Models/                        # Eloquent models and relationships
+│   ├── Observers/                     # Model lifecycle cleanup
+│   ├── Policies/                      # Server-side authorization rules
+│   ├── Providers/                     # Policies, observers, rate limiters
+│   └── Services/                      # Supabase storage and metadata cache
+│
+├── bootstrap/
+│   ├── app.php                        # Application routing and middleware setup
+│   └── providers.php                  # Registered service providers
+│
+├── config/
+│   ├── auth.php                       # Browser authentication guard
+│   ├── cache.php / queue.php           # Runtime storage and queue settings
+│   ├── database.php                   # PostgreSQL connection configuration
+│   ├── filesystems.php                # Filesystem and S3-compatible settings
+│   ├── sanctum.php                    # API token configuration
+│   ├── services.php                   # External service configuration
+│   └── web3dshare.php                 # Product limits, cooldowns, cache, verification
+│
+├── database/
+│   ├── factories/                     # Test model factories
+│   ├── migrations/                    # Schema, relationships, and performance indexes
+│   └── seeders/                       # Optional initial database data
+│
+├── docker/
+│   └── render-start.sh                # Container startup and optional migration script
+├── docs/
+│   └── CODE_STYLE.md                  # SDLC, formatting, and code ownership conventions
+│
+├── public/
+│   ├── build/                         # Generated Vite production assets; do not edit manually
+│   └── index.php                      # Public Laravel entry point
+│
+├── resources/
+│   ├── css/app.css                    # Tailwind theme, custom utilities, shared visual styles
+│   ├── js/app.js                      # Vite JavaScript entry point
+│   └── views/
+│       ├── admin/                     # Moderator and admin panel
+│       ├── auth/                      # Login and registration pages
+│       ├── components/                # Reusable Blade controls and onboarding tour
+│       ├── creator/                   # Public creator profile page
+│       ├── layouts/                   # Shared application and admin shells
+│       ├── legal/                     # Terms, access rules, and agreement text
+│       ├── model/                     # Viewer, partial modal, and threaded comments
+│       ├── profile/                   # Signed-in user profile editor
+│       ├── upload/                    # Upload workflow
+│       └── verify/                    # Verification request workflow
+│
+├── routes/
+│   ├── api.php                        # JSON API for Postman and external clients
+│   ├── console.php                    # Artisan console routes
+│   └── web.php                        # Browser routes, auth groups, role groups
+│
+├── storage/                           # Logs, cached views, sessions, framework files
+├── tests/
+│   ├── Feature/                       # End-to-end HTTP and workflow tests
+│   └── Unit/                          # Isolated domain tests
+│
+├── .env.example                       # Safe environment-variable template
+├── api_postman_guide.txt              # Endpoint-by-endpoint Postman instructions
+├── composer.json / composer.lock       # PHP dependencies and Composer scripts
+├── Dockerfile                          # PHP 8.3 container build
+├── package.json / package-lock.json    # Frontend dependencies and npm scripts
+├── phpunit.xml                         # PHPUnit configuration
+├── vite.config.js                     # Vite and Laravel asset integration
+└── README.md                           # Project handover and onboarding document
+```
+
+### Handover Map
+
+When taking over the project, trace a feature in this order:
+
+1. Start in `routes/web.php` or `routes/api.php` to find the public contract and middleware.
+2. Read the matching controller to understand orchestration and response behavior.
+3. Check `app/Http/Requests` for validation, `app/Policies` for authorization, and `app/Services` for shared or external integration logic.
+4. Inspect the relevant model, migration, and index before changing stored data or queries.
+5. Update the matching Blade view or component for browser behavior, then add focused coverage under `tests/`.
+6. Run the checks in [Quality Checks](#quality-checks) before opening a pull request or deploying.
+
+Avoid changing generated files under `public/build/`, cached files under `storage/framework/`, or secret values in `.env` directly in a commit.
+
+## Quality Checks
+
+```bash
+# Run tests
+composer test
+
+# Format or verify PHP formatting
+composer format
+composer format:check
+
+# Format or verify Blade, CSS, JavaScript, and Tailwind class order
+npm run format
+npm run format:check
+
+# Build production assets
+npm run build
+```
+
+Follow the conventions in [docs/CODE_STYLE.md](docs/CODE_STYLE.md) when extending the application.
+
+## Deployment Notes
+
+- Build frontend assets with `npm run build` before deployment.
+- Use `composer install --no-dev --optimize-autoloader` for production dependencies.
+- Set `APP_ENV=production` and `APP_DEBUG=false`.
+- Run migrations deliberately with `php artisan migrate --force`.
+- Ensure the runtime has write access to `storage/` and `bootstrap/cache/`.
+- Configure the same PostgreSQL and Supabase Storage credentials as the target environment.
+- The repository contains a `Dockerfile` and `docker/render-start.sh` for container-oriented deployment workflows.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+No license has been specified for this repository.

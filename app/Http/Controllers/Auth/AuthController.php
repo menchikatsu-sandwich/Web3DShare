@@ -2,31 +2,28 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(Request $r)
+    public function register(RegisterRequest $request)
     {
-        $r->validate([
-            'username' => ['required', 'string', 'max:50', 'regex:/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]+$/', 'unique:users,username'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:6'],
-            'terms_accepted' => ['accepted'],
-        ]);
+        $data = $request->validated();
 
         $user = User::create([
-            'username'=>$r->username,
-            'email'=>$r->email,
-            'password'=>bcrypt($r->password)
+            'username' => $data['username'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password']),
         ]);
 
-        if ($this->isApiRequest($r)) {
-            $token = $user->createToken($r->input('device_name', 'api-token'))->plainTextToken;
+        if ($this->isApiRequest($request)) {
+            $token = $user->createToken($data['device_name'] ?? 'api-token')->plainTextToken;
 
             return $this->apiData([
                 'user' => $user,
@@ -40,23 +37,20 @@ class AuthController extends Controller
         return redirect('/')->with('success', 'Account created. Welcome to Web3DShare.');
     }
 
-    public function login(Request $r)
+    public function login(LoginRequest $request)
     {
-        $r->validate([
-            'email' => ['required', 'string'],
-            'password' => ['required', 'string'],
-        ]);
+        $data = $request->validated();
 
-        $loginField = filter_var($r->input('email'), FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $loginField = filter_var($data['email'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-        if ($this->isApiRequest($r)) {
-            $user = User::where($loginField, $r->input('email'))->first();
+        if ($this->isApiRequest($request)) {
+            $user = User::where($loginField, $data['email'])->first();
 
-            if (!$user || !Hash::check($r->input('password'), $user->password)) {
+            if (! $user || ! Hash::check($data['password'], $user->password)) {
                 return $this->apiError('Email/username or password is incorrect.', 401);
             }
 
-            $token = $user->createToken($r->input('device_name', 'api-token'))->plainTextToken;
+            $token = $user->createToken($data['device_name'] ?? 'api-token')->plainTextToken;
             $redirectUrl = in_array($user->role, ['admin', 'moderator']) ? '/panel' : '/';
 
             return $this->apiData([
@@ -66,26 +60,23 @@ class AuthController extends Controller
                 'token_type' => 'Bearer',
             ], 'Logged in successfully.');
         }
-    
-        if (!Auth::attempt([$loginField => $r->input('email'), 'password' => $r->input('password')])) {
+
+        if (! Auth::attempt([$loginField => $data['email'], 'password' => $data['password']])) {
             return back()
                 ->withErrors(['login' => 'Email/username or password is incorrect.'])
-                ->withInput($r->only('email'));
+                ->withInput($request->only('email'));
         }
-    
-        $r->session()->regenerate();
 
-        // 1. Get the authenticated user.
+        $request->session()->regenerate();
+
         $user = Auth::user();
 
-        // 2. Set the default destination for regular users.
         $redirectUrl = '/';
 
-        // 3. Check whether the user is an admin or moderator.
         if ($user->role === 'admin' || $user->role === 'moderator') {
             $redirectUrl = '/panel';
         }
-    
+
         return redirect($redirectUrl)->with('success', 'Logged in successfully.');
     }
 
@@ -109,4 +100,3 @@ class AuthController extends Controller
         return $request->is('api/*') || $request->wantsJson();
     }
 }
-

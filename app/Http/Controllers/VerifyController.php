@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\VerificationRequest;
+use App\Http\Requests\StoreVerificationRequest;
 use App\Models\Model3D;
+use App\Models\VerificationRequest;
+use Illuminate\Http\Request;
 
 class VerifyController extends Controller
 {
@@ -28,42 +29,40 @@ class VerifyController extends Controller
         return view('verify.index', compact('pendingRequest', 'verificationCheck'));
     }
 
-    public function store(Request $r)
+    public function store(StoreVerificationRequest $request)
     {
-        $r->validate([
-            'note' => ['required', 'string', 'max:2000'],
-        ]);
+        $data = $request->validated();
 
-        $verificationCheck = $this->verificationEligibility($r->user());
-        if (!$verificationCheck['eligible']) {
-            return $r->wantsJson()
+        $verificationCheck = $this->verificationEligibility($request->user());
+        if (! $verificationCheck['eligible']) {
+            return $request->wantsJson()
                 ? $this->apiError(
                     $verificationCheck['message'],
                     403,
                     [
-                    'verification_check' => $verificationCheck,
+                        'verification_check' => $verificationCheck,
                     ]
                 )
                 : back()->with('error', $verificationCheck['message']);
         }
 
-        $existing = VerificationRequest::where('user_id', $r->user()->id)
+        $existing = VerificationRequest::where('user_id', $request->user()->id)
             ->where('request_status', 'pending')
             ->first();
 
         if ($existing) {
-            return $r->wantsJson()
+            return $request->wantsJson()
                 ? $this->apiError('You already have a pending verification request.', 409)
                 : back()->with('error', 'You already have a pending verification request.');
         }
 
         $verificationRequest = VerificationRequest::create([
-            'user_id'=>$r->user()->id,
-            'note'=>$r->note,
-            'request_status'=>'pending'
+            'user_id' => $request->user()->id,
+            'note' => $data['note'],
+            'request_status' => 'pending',
         ]);
 
-        return $r->wantsJson()
+        return $request->wantsJson()
             ? $this->apiData([
                 'verification_request' => $verificationRequest,
             ], 'Verification request submitted.', 201)
@@ -72,10 +71,10 @@ class VerifyController extends Controller
 
     public function approve(Request $r, $id)
     {
-        $req = \App\Models\VerificationRequest::findOrFail($id);
+        $req = VerificationRequest::findOrFail($id);
 
         $req->user->update([
-            'upload_tier'=>'verified'
+            'upload_tier' => 'verified',
         ]);
 
         $req->update([
@@ -92,7 +91,7 @@ class VerifyController extends Controller
 
     public function reject(Request $r, $id)
     {
-        $req = \App\Models\VerificationRequest::findOrFail($id);
+        $req = VerificationRequest::findOrFail($id);
 
         $req->update([
             'request_status' => 'rejected',
@@ -113,7 +112,7 @@ class VerifyController extends Controller
 
         $accountAgeDays = $user->created_at ? (int) floor($user->created_at->diffInDays(now())) : 0;
         if ($accountAgeDays < $rules['min_account_age_days']) {
-            $reasons[] = 'Your account must be at least ' . $rules['min_account_age_days'] . ' day(s) old.';
+            $reasons[] = 'Your account must be at least '.$rules['min_account_age_days'].' day(s) old.';
         }
 
         $models = Model3D::where('user_id', $user->id)
@@ -121,15 +120,15 @@ class VerifyController extends Controller
             ->get();
 
         if ($models->count() < $rules['min_models']) {
-            $reasons[] = 'You need at least ' . $rules['min_models'] . ' published model(s).';
+            $reasons[] = 'You need at least '.$rules['min_models'].' published model(s).';
         }
 
         $modelsBelowDownloadRule = $models
-            ->filter(fn($model) => $model->download_count < $rules['min_downloads_per_model'])
+            ->filter(fn ($model) => $model->download_count < $rules['min_downloads_per_model'])
             ->values();
 
         if ($models->isNotEmpty() && $modelsBelowDownloadRule->isNotEmpty()) {
-            $reasons[] = 'Every model must have at least ' . $rules['min_downloads_per_model'] . ' counted download(s).';
+            $reasons[] = 'Every model must have at least '.$rules['min_downloads_per_model'].' counted download(s).';
         }
 
         $latestRejectedRequest = VerificationRequest::where('user_id', $user->id)
@@ -141,7 +140,7 @@ class VerifyController extends Controller
         if ($latestRejectedRequest) {
             $cooldownUntil = $latestRejectedRequest->updated_at->copy()->addHours($rules['rejection_cooldown_hours']);
             if (now()->lt($cooldownUntil)) {
-                $reasons[] = 'Your last request was rejected. Please wait until ' . $cooldownUntil->format('F j, Y H:i') . ' before trying again.';
+                $reasons[] = 'Your last request was rejected. Please wait until '.$cooldownUntil->format('F j, Y H:i').' before trying again.';
             }
         }
 

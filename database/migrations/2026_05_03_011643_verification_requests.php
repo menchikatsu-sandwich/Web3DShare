@@ -20,7 +20,7 @@ return new class extends Migration
                 ->constrained('users')
                 ->nullOnDelete();
 
-            $table->enum('request_status',['pending','approved','rejected'])
+            $table->enum('request_status', ['pending', 'approved', 'rejected'])
                 ->default('pending');
 
             $table->text('note')->nullable();

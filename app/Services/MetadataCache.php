@@ -57,17 +57,17 @@ class MetadataCache
 
     private static function isValidCollection(mixed $value, array $requiredFields): bool
     {
-        if (!$value instanceof Collection) {
+        if (! $value instanceof Collection) {
             return false;
         }
 
         return $value->every(function ($item) use ($requiredFields) {
-            if (!is_object($item)) {
+            if (! is_object($item)) {
                 return false;
             }
 
             foreach ($requiredFields as $field) {
-                if (!isset($item->{$field})) {
+                if (! isset($item->{$field})) {
                     return false;
                 }
             }

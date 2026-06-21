@@ -10,12 +10,12 @@ class VerificationRequest extends Model
         'user_id',
         'reviewed_by',
         'request_status',
-        'note'
+        'note',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     public function user()

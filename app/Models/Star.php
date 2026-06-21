@@ -8,12 +8,12 @@ class Star extends Model
 {
     protected $fillable = [
         'user_id',
-        'model_id'
+        'model_id',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     public function user()

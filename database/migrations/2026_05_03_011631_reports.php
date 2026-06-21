@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('reason');
             $table->text('description')->nullable();
 
-            $table->enum('report_status',['pending','reviewed','resolved'])
+            $table->enum('report_status', ['pending', 'reviewed', 'resolved'])
                 ->default('pending');
 
             $table->timestamps();

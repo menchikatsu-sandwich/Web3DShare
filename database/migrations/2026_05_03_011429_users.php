@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('password');
             $table->string('profile_image_path')->nullable();
 
-            $table->enum('role', ['user','moderator','admin'])->default('user');
-            $table->enum('upload_tier', ['basic','verified'])->default('basic');
+            $table->enum('role', ['user', 'moderator', 'admin'])->default('user');
+            $table->enum('upload_tier', ['basic', 'verified'])->default('basic');
 
             $table->rememberToken();
             $table->timestamps();

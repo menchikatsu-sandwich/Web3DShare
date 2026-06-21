@@ -8,7 +8,7 @@ class EnsureModerator
 {
     public function handle($request, Closure $next)
     {
-        if(!$request->user() || !$request->user()->isModerator()){
+        if (! $request->user() || ! $request->user()->isModerator()) {
             abort(403);
         }
 

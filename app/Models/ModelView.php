@@ -13,11 +13,11 @@ class ModelView extends Model
     protected $fillable = [
         'model_id',
         'user_id',
-        'viewed_at'
+        'viewed_at',
     ];
 
     protected $casts = [
-        'viewed_at' => 'datetime'
+        'viewed_at' => 'datetime',
     ];
 
     public function model3d()
