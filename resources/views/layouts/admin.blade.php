@@ -234,19 +234,12 @@
         });
 
         let modalOpen = false;
-        let isInternalNavigation = false;
 
         // 1. Main model modal opener.
         async function openModel(id, event) {
             if (event) event.preventDefault();
             const url = `/models/${id}`;
 
-            // Opening another model while a modal is already stacked.
-            if (modalOpen && history.state) {
-                const currentState = history.state;
-                // Mark the previous state as non-final so browser Forward can skip it.
-                history.replaceState({ ...currentState, isFinal: false }, '', window.location.href);
-            }
             loadModal(url, true);
         }
 
@@ -266,7 +259,6 @@
                             {
                                 isModal: true,
                                 depth: currentDepth + 1,
-                                isFinal: true, // Latest/final state in the modal stack.
                             },
                             '',
                             url,
@@ -334,25 +326,7 @@
 
         function closeTop() {
             if (!modalOpen) return;
-            isInternalNavigation = true;
-
-            const currentDepth = history.state && history.state.depth ? history.state.depth : 1;
-
-            if (currentDepth > 1) {
-                history.back();
-
-                // Use popstate timing to replace the destination state.
-                setTimeout(() => {
-                    if (history.state) {
-                        // Mark the new current state as final.
-                        history.replaceState({ ...history.state, isFinal: true }, '', window.location.href);
-                        // Reset the flag after replaceState finishes.
-                        isInternalNavigation = false;
-                    }
-                }, 100); // Slight delay keeps this stable across browsers.
-            } else {
-                closeAll();
-            }
+            closeAll();
         }
 
         function closeAll(e) {
@@ -367,25 +341,13 @@
                 modalOpen = false;
 
                 const depth = history.state && history.state.depth ? history.state.depth : 1;
-                isInternalNavigation = true;
                 history.go(-depth);
             }
         }
-
-        document.querySelectorAll('[data-flash-toast]').forEach((toast) => {
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-x-3');
-                setTimeout(() => toast.remove(), 250);
-            }, 3200);
-        });
     </script>
     <script>
         function modelScopeFrom(element) {
             return element.closest('[data-model-shell]') || document;
-        }
-
-        function modelIdFromScope(scope) {
-            return scope && scope.dataset ? scope.dataset.modelShell : null;
         }
 
         function setElementBusy(element, busy) {
@@ -471,16 +433,6 @@
             }, 3200);
         });
 
-        function updateHomeCardMetric(modelId, metric, value) {
-            if (!modelId && modelId !== 0) return;
-            const card = document.querySelector(`[data-model-card="${modelId}"]`);
-            if (!card) return;
-
-            const selector = metric === 'stars' ? '[data-card-star-count]' : '[data-card-download-count]';
-            const target = card.querySelector(selector);
-            if (target) target.textContent = value;
-        }
-
         function updateStarUi(scope, data) {
             const button = scope.querySelector('[data-star-button]');
             const count = scope.querySelector('[data-star-count]');
@@ -500,14 +452,11 @@
                 button.classList.toggle('text-gray-700', !starred);
                 button.classList.toggle('dark:text-gray-300', !starred);
             }
-
-            updateHomeCardMetric(modelIdFromScope(scope), 'stars', data.stars);
         }
 
         function updateDownloadUi(scope, data) {
             const count = scope.querySelector('[data-download-count]');
             if (count) count.textContent = data.download_count;
-            updateHomeCardMetric(modelIdFromScope(scope), 'downloads', data.download_count);
         }
 
         function updateCommentsCount(scope, count) {
