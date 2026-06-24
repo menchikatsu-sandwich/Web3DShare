@@ -7,7 +7,7 @@
     data-model-shell="{{ $model->id }}"
     class="flex h-full min-h-0 w-full flex-col bg-white text-gray-800 lg:flex-row dark:bg-darkPanel dark:text-gray-200"
 >
-    <div class="flex min-h-0 flex-1 flex-col overflow-x-hidden ">
+    <div class="flex min-h-0 flex-1 flex-col overflow-x-hidden">
         <div
             class="flex flex-shrink-0 items-center justify-between gap-3 border-b border-gray-100 bg-white px-4 py-4 sm:px-6 lg:px-8 dark:border-gray-800 dark:bg-darkPanel"
         >
@@ -241,32 +241,50 @@
                     </div>
                 </div>
 
-                <div
-                    class="space-y-4 rounded-2xl border border-gray-100 bg-gray-50 p-5 dark:border-gray-800 dark:bg-darkBg/50"
-                >
+                <div class="rounded-2xl border border-gray-100 bg-gray-50 p-5 dark:border-gray-800 dark:bg-darkBg/50">
                     <div>
                         <h3 class="mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">About</h3>
                         <p class="text-sm leading-relaxed whitespace-pre-wrap text-gray-700 dark:text-gray-300">{{ $model->description ?? 'No description available for this model.' }}</p>
                     </div>
+                </div>
 
-                    <div class="flex flex-wrap gap-2">
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">Category</h4>
                         @if (isset($model->category))
                             <a
                                 href="/?category={{ $model->category_id }}"
-                                class="inline-flex items-center rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-800 shadow-sm transition-colors hover:bg-green-100 hover:text-green-600 dark:border-gray-800 dark:bg-gray-900/60 dark:text-gray-200 dark:hover:bg-neon/20 dark:hover:text-neon"
+                                class="inline-flex items-center rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-800 shadow-sm transition-colors hover:border-green-400 hover:bg-green-50 hover:text-green-600 dark:border-gray-800 dark:bg-gray-900/60 dark:text-gray-100 dark:hover:border-neon/40 dark:hover:bg-neon/10 dark:hover:text-neon"
                             >
                                 {{ $model->category->name }}
                             </a>
-                        @endif
-
-                        @foreach ($model->tags as $tag)
-                            <a
-                                href="/?tag={{ $tag->slug }}"
-                                class="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-600 shadow-sm transition-all hover:border-green-400 hover:text-green-600 dark:border-gray-800 dark:bg-gray-900/60 dark:text-gray-400 dark:hover:border-neon/40 dark:hover:text-neon"
+                        @else
+                            <span
+                                class="inline-flex items-center rounded-md border border-dashed border-gray-200 px-2.5 py-1 text-xs text-gray-400 dark:border-gray-800"
                             >
-                                <span class="text-gray-400">#</span>{{ $tag->name }}
-                            </a>
-                        @endforeach
+                                Uncategorized
+                            </span>
+                        @endif
+                    </div>
+
+                    <div>
+                        <h4 class="mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">Tags</h4>
+                        <div class="flex flex-wrap gap-2">
+                            @forelse ($model->tags as $tag)
+                                <a
+                                    href="/?tag={{ $tag->slug }}"
+                                    class="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-600 shadow-sm transition-all hover:border-green-400 hover:text-green-600 dark:border-gray-800 dark:bg-gray-900/60 dark:text-gray-400 dark:hover:border-neon/40 dark:hover:text-neon"
+                                >
+                                    <span class="text-gray-400">#</span>{{ $tag->name }}
+                                </a>
+                            @empty
+                                <span
+                                    class="inline-flex items-center rounded-md border border-dashed border-gray-200 px-2.5 py-1 text-xs text-gray-400 dark:border-gray-800"
+                                >
+                                    No tags
+                                </span>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
 
@@ -314,13 +332,13 @@
                     @endauth
 
                     <!-- Threaded comments list -->
-                    <div class="w-full space-y-4 pr-1 mt-4" data-comments-list>
+                    <div class="mt-4 w-full space-y-4 pr-1" data-comments-list>
                         @php
                             $allComments = $model->comments ?? collect();
                         @endphp
 
                         @forelse ($allComments->where('parent_id', null) as $comment)
-                            @include('model.comment-item', ['comment' => $comment, 'allComments' => $allComments, 'modelId' => $model->id])
+                            @include ('model.comment-item', ['comment' => $comment, 'allComments' => $allComments, 'modelId' => $model->id])
                         @empty
                             <div class="py-8 text-center text-sm text-gray-500" data-comments-empty>
                                 No comments yet. Be the first to share your thoughts!
