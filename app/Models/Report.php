@@ -22,7 +22,7 @@ class Report extends Model
 
     public function model3d()
     {
-        return $this->belongsTo(Model3D::class, 'model_id');
+        return $this->belongsTo(Model3D::class, 'model_id')->withTrashed();
     }
 
     public function reporter()

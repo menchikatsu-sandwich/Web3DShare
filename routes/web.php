@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/comments/{comment}', [InteractionController::class, 'deleteComment'])->middleware('throttle:interactions');
 
     // report
+    Route::get('/my-reports', [ReportController::class, 'index']);
     Route::post('/models/{model}/report', [ReportController::class, 'store'])->middleware('throttle:reports');
 
     // verify request (user)

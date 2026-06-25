@@ -71,7 +71,7 @@
     @if (session('success') || session('error') || $errors->any())
         <div
             class="pointer-events-none fixed right-4 bottom-4 w-[calc(100vw-2rem)] max-w-sm space-y-3 sm:right-6 sm:bottom-6"
-            style="z-index: 400"
+            style="z-index: 1000"
         >
             @if (session('success'))
                 <div
@@ -214,8 +214,13 @@
                             >
                             <a
                                 href="/profile"
-                                class="block px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-green-600 dark:text-gray-300 dark:hover:bg-neon/10 dark:hover:text-neon"
+                                class="block border-b border-gray-100 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-green-600 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-neon/10 dark:hover:text-neon"
                                 >Edit Profile</a
+                            >
+                            <a
+                                href="/my-reports"
+                                class="block px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-green-600 dark:text-gray-300 dark:hover:bg-neon/10 dark:hover:text-neon"
+                                >My Reports</a
                             >
                             <form method="POST" action="/logout">
                                 @csrf
@@ -752,7 +757,7 @@
                 container.id = 'toast-container';
                 container.className =
                     'fixed bottom-4 right-4 w-[calc(100vw-2rem)] max-w-sm space-y-3 pointer-events-none sm:bottom-6 sm:right-6';
-                container.style.zIndex = '400';
+                container.style.zIndex = '1000';
                 document.body.appendChild(container);
             }
 
@@ -972,14 +977,25 @@
 
         async function handleAjaxReport(form) {
             const button = form.querySelector('button[type="submit"]');
+            const details = form.closest('details');
+            const summary = details ? details.querySelector('summary') : null;
+            const originalSummaryText = summary ? summary.textContent : '';
             setElementBusy(button, true);
 
             try {
                 const payload = await submitAjaxForm(form);
+                const message = payload.message || 'Report submitted.';
                 form.reset();
-                const details = form.closest('details');
                 if (details) details.open = false;
-                showToast(payload.message || 'Report submitted.');
+                if (summary) {
+                    summary.textContent = message;
+                    summary.classList.add('border-green-300', 'text-green-600', 'dark:text-neon');
+                    setTimeout(() => {
+                        summary.textContent = originalSummaryText || 'Report';
+                        summary.classList.remove('border-green-300', 'text-green-600', 'dark:text-neon');
+                    }, 3200);
+                }
+                showToast(message);
             } catch (error) {
                 showToast(error.message, 'error');
             } finally {

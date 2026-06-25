@@ -90,6 +90,20 @@ class AdminController extends Controller
     public function deleteModel($id)
     {
         $model = Model3D::findOrFail($id);
+        Report::where('model_id', $model->id)
+            ->whereIn('report_status', ['pending', 'reviewed'])
+            ->get()
+            ->each(function (Report $report): void {
+                $report->update([
+                    'report_status' => 'resolved',
+                    'reviewed_by' => request()->user()->id,
+                    'description' => $this->appendModerationReply(
+                        $report->description,
+                        'Our moderation team reviewed this report and found it relevant. The reported model has been taken down because it violated the community rules.'
+                    ),
+                ]);
+            });
+
         $model->delete();
 
         return request()->wantsJson()
@@ -193,6 +207,10 @@ class AdminController extends Controller
         $report->update([
             'report_status' => 'resolved',
             'reviewed_by' => $r->user()->id,
+            'description' => $this->appendModerationReply(
+                $report->description,
+                'Our moderation team reviewed this report and found that the reported model does not violate the current community rules. The report has been resolved without taking the model down.'
+            ),
         ]);
 
         return $r->wantsJson()
@@ -217,5 +235,19 @@ class AdminController extends Controller
         return request()->wantsJson()
             ? $this->apiError($message, 422)
             : back()->with('error', $message);
+    }
+
+    private function appendModerationReply(?string $description, string $reply): string
+    {
+        $description = trim((string) $description);
+        $replyBlock = 'Reply: '.$reply;
+
+        if (str_contains($description, $replyBlock)) {
+            return $description;
+        }
+
+        return $description === ''
+            ? $replyBlock
+            : $description."\n\n".$replyBlock;
     }
 }
