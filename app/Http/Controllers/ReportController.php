@@ -18,8 +18,14 @@ class ReportController extends Controller
             ->where('reported_by', $request->user()->id)
             ->latest()
             ->get();
+        $ownerReports = Report::with(['model3d.user', 'reporter', 'reviewer'])
+            ->whereNotNull('owner_message')
+            ->whereHas('model3d', fn ($query) => $query->withTrashed()->where('user_id', $request->user()->id))
+            ->latest('owner_notified_at')
+            ->latest()
+            ->get();
 
-        return view('reports.index', compact('reports'));
+        return view('reports.index', compact('reports', 'ownerReports'));
     }
 
     public function store(StoreReportRequest $request, Model3D $model)

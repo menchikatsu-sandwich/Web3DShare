@@ -12,12 +12,16 @@ class Report extends Model
         'reviewed_by',
         'reason',
         'description',
+        'owner_message',
+        'owner_action',
+        'owner_notified_at',
         'report_status',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'owner_notified_at' => 'datetime',
     ];
 
     public function model3d()

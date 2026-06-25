@@ -220,7 +220,7 @@
                             <a
                                 href="/my-reports"
                                 class="block px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-green-600 dark:text-gray-300 dark:hover:bg-neon/10 dark:hover:text-neon"
-                                >My Reports</a
+                                >Reports</a
                             >
                             <form method="POST" action="/logout">
                                 @csrf

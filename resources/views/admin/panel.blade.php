@@ -422,11 +422,22 @@
                                 action="/admin/delete-model/{{ $m->id }}"
                                 onsubmit="return confirmFormSubmission(this);"
                                 data-confirm-title="Take down this model?"
-                                data-confirm-message="This permanently deletes the model and related activity. This action cannot be undone."
+                                data-confirm-message="This permanently deletes the model and sends the reason below to the owner. This action cannot be undone."
                                 data-confirm-action="Take down model"
                             >
                                 @csrf
                                 @method ('DELETE')
+                                <label class="mb-2 block text-[10px] font-bold tracking-widest text-gray-500 uppercase dark:text-gray-400">
+                                    Notice to owner
+                                </label>
+                                <textarea
+                                    name="owner_message"
+                                    required
+                                    maxlength="2000"
+                                    rows="3"
+                                    placeholder="Explain why this model is being taken down."
+                                    class="mb-3 w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-800 focus:border-red-400 focus:outline-none dark:border-gray-800 dark:bg-black/20 dark:text-gray-200"
+                                ></textarea>
                                 <button
                                     class="w-full rounded-lg border border-red-200 bg-red-100 py-2 text-sm font-medium text-red-600 shadow-sm transition-all duration-300 hover:border-red-600 hover:bg-red-600 hover:text-white hover:shadow-md hover:shadow-red-500/20 active:scale-[0.98] dark:border-transparent dark:bg-red-500/10 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white"
                                 >
@@ -511,12 +522,22 @@
                                         <p class="text-lg font-semibold text-gray-800 dark:text-gray-200">
                                             {{ $r->model3d->title ?? 'Deleted model' }}
                                         </p>
-                                        <span
-                                            class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border font-medium
-                                    {{ $r->report_status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-500/20' : ($r->report_status === 'reviewed' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500/20' : 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-neon border-green-300 dark:border-green-500/20') }}"
-                                        >
+
+                                        <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border font-medium
+                                            {{ $r->report_status === 'pending' 
+                                                ? 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-500/20' 
+                                                : ($r->report_status === 'reviewed' 
+                                                    ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500/20' 
+                                                    : 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-neon border-green-300 dark:border-green-500/20') 
+                                            }}">
                                             {{ $r->report_status === 'reviewed' ? 'In review' : $r->report_status }}
                                         </span>
+
+                                        @if(!$r->model3d || !is_null($r->model3d->deleted_at))
+                                            <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border font-medium bg-red-500/10 text-red-500 border-red-500/20">
+                                                Taken down
+                                            </span>
+                                        @endif
                                     </div>
                                     <p class="mt-2 flex items-center gap-2 text-sm text-red-600 dark:text-red-500">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -561,6 +582,23 @@
                                             @endif
                                         </div>
                                     @endif
+                                    @if ($r->owner_message)
+                                        <div
+                                            class="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs text-blue-900 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-200"
+                                        >
+                                            <span
+                                                class="mb-1 block text-[10px] font-bold tracking-wide text-blue-700 uppercase dark:text-blue-300"
+                                                >Notice sent to owner:</span
+                                            >
+                                            <p class="leading-relaxed whitespace-pre-wrap">{{ $r->owner_message }}</p>
+                                            <p class="mt-2 text-[10px] font-semibold uppercase tracking-wide text-blue-700/70 dark:text-blue-300/70">
+                                                {{ $r->owner_action === 'model_taken_down' ? 'Model taken down' : 'Report resolved' }}
+                                                @if ($r->owner_notified_at)
+                                                    &middot; {{ $r->owner_notified_at->format('M j, Y H:i') }}
+                                                @endif
+                                            </p>
+                                        </div>
+                                    @endif
                                 </div>
 
                                 <div
@@ -586,6 +624,13 @@
                                     @if ($r->report_status !== 'resolved')
                                         <form method="POST" action="/admin/reports/{{ $r->id }}/resolve">
                                             @csrf
+                                            <textarea
+                                                name="owner_message"
+                                                maxlength="2000"
+                                                rows="3"
+                                                placeholder="Optional notice to model owner."
+                                                class="mb-2 w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-800 focus:border-green-400 focus:outline-none dark:border-gray-800 dark:bg-black/20 dark:text-gray-200"
+                                            ></textarea>
                                             <button
                                                 class="w-full rounded-lg border border-green-300 bg-green-100 px-4 py-2 text-sm font-semibold text-green-700 transition-colors hover:bg-green-600 hover:text-white dark:border-green-500/20 dark:bg-green-500/10 dark:text-neon dark:hover:text-black"
                                             >
@@ -599,11 +644,19 @@
                                             action="/admin/delete-model/{{ $r->model_id }}"
                                             onsubmit="return confirmFormSubmission(this);"
                                             data-confirm-title="Take down this model?"
-                                            data-confirm-message="This will permanently delete the model and its reports. This action cannot be undone."
+                                            data-confirm-message="This will permanently delete the model and send the reason below to the owner. This action cannot be undone."
                                             data-confirm-action="Take down model"
                                         >
                                             @csrf
                                             @method ('DELETE')
+                                            <textarea
+                                                name="owner_message"
+                                                required
+                                                maxlength="2000"
+                                                rows="3"
+                                                placeholder="Required reason for the model owner."
+                                                class="mb-2 w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-800 focus:border-red-400 focus:outline-none dark:border-gray-800 dark:bg-black/20 dark:text-gray-200"
+                                            ></textarea>
                                             <button
                                                 class="w-full rounded-lg border border-red-200 bg-red-100 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-500 hover:text-white dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-500"
                                             >

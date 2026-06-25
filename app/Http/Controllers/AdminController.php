@@ -89,11 +89,14 @@ class AdminController extends Controller
 
     public function deleteModel($id)
     {
+        $data = request()->validate([
+            'owner_message' => ['required', 'string', 'max:2000'],
+        ]);
         $model = Model3D::findOrFail($id);
-        Report::where('model_id', $model->id)
+        $reports = Report::where('model_id', $model->id)
             ->whereIn('report_status', ['pending', 'reviewed'])
             ->get()
-            ->each(function (Report $report): void {
+            ->each(function (Report $report) use ($data): void {
                 $report->update([
                     'report_status' => 'resolved',
                     'reviewed_by' => request()->user()->id,
@@ -101,8 +104,28 @@ class AdminController extends Controller
                         $report->description,
                         'Our moderation team reviewed this report and found it relevant. The reported model has been taken down because it violated the community rules.'
                     ),
+                    'owner_message' => $data['owner_message'],
+                    'owner_action' => 'model_taken_down',
+                    'owner_notified_at' => now(),
                 ]);
             });
+
+        if ($reports->isEmpty()) {
+            Report::create([
+                'model_id' => $model->id,
+                'reported_by' => request()->user()->id,
+                'reviewed_by' => request()->user()->id,
+                'reason' => 'admin_takedown',
+                'description' => $this->appendModerationReply(
+                    null,
+                    'This model was taken down directly by the moderation team.'
+                ),
+                'owner_message' => $data['owner_message'],
+                'owner_action' => 'model_taken_down',
+                'owner_notified_at' => now(),
+                'report_status' => 'resolved',
+            ]);
+        }
 
         $model->delete();
 
@@ -204,6 +227,11 @@ class AdminController extends Controller
 
     public function resolveReport(Request $r, Report $report)
     {
+        $data = $r->validate([
+            'owner_message' => ['nullable', 'string', 'max:2000'],
+        ]);
+        $ownerMessage = trim((string) ($data['owner_message'] ?? ''));
+
         $report->update([
             'report_status' => 'resolved',
             'reviewed_by' => $r->user()->id,
@@ -211,6 +239,9 @@ class AdminController extends Controller
                 $report->description,
                 'Our moderation team reviewed this report and found that the reported model does not violate the current community rules. The report has been resolved without taking the model down.'
             ),
+            'owner_message' => $ownerMessage !== '' ? $ownerMessage : $report->owner_message,
+            'owner_action' => $ownerMessage !== '' ? 'report_resolved' : $report->owner_action,
+            'owner_notified_at' => $ownerMessage !== '' ? now() : $report->owner_notified_at,
         ]);
 
         return $r->wantsJson()
