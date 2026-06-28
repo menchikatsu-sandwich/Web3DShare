@@ -2,10 +2,11 @@
 
 > A community platform for publishing, discovering, previewing, and downloading 3D models.
 
-Web3DShare is a Laravel application built around shareable GLB assets. Creators can upload models, manage their published work, build a public profile, and request verified-uploader status. Community members can browse models, star them, download them, join discussions, and report content that needs moderation.
+Web3DShare is a Laravel application built around shareable GLB assets. Creators can upload models, manage their published work, build a public profile, and request verified-uploader status. Community members can browse models, star them, download them, join discussions, report content that needs moderation, view creator analytics, and moderate flagged items through the admin / moderator panels.
 
 ## Table Of Contents
 
+- [Changelog](#changelog)
 - [Features](#features)
 - [Technology Stack](#technology-stack)
 - [Architecture](#architecture)
@@ -18,6 +19,10 @@ Web3DShare is a Laravel application built around shareable GLB assets. Creators 
 - [Project Structure](#project-structure)
 - [Quality Checks](#quality-checks)
 - [Deployment Notes](#deployment-notes)
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## Features
 
@@ -216,17 +221,17 @@ web3dshare/
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/
-│   │   │   ├── Auth/                  # Registration, login, logout
-│   │   │   ├── Concerns/              # Shared controller response helpers
-│   │   │   ├── AdminController.php    # Moderator and admin workflows
-│   │   │   ├── InteractionController.php # Stars, comments, downloads
-│   │   │   ├── ModelController.php    # Explore, upload, edit, delete, viewer
-│   │   │   ├── ProfileController.php  # Profile and creator pages
-│   │   │   ├── ReportController.php   # Model reports
-│   │   │   ├── UploadPageController.php
-│   │   │   └── VerifyController.php   # Uploader verification lifecycle
-│   │   ├── Middleware/                # Roles, JSON, security headers
-│   │   └── Requests/                  # Validation contracts per command
+│   │   │   ├── AdminController.php      # Moderator and admin workflows
+│   │   │   ├── Auth/                    # Registration, login, logout
+│   │   │   ├── Concerns/                # Shared controller response helpers
+│   │   │   ├── InteractionController.php# Stars, comments, downloads
+│   │   │   ├── ModelController.php      # Explore, upload, edit, delete, viewer
+│   │   │   ├── ProfileController.php    # Profile and creator pages
+│   │   │   ├── ReportController.php     # Model reports
+│   │   │   ├── UploadPageController.php # Upload workflow UI page
+│   │   │   └── VerifyController.php     # Uploader verification lifecycle
+│   │   ├── Middleware/                  # Roles, JSON, security headers
+│   │   └── Requests/                   # Validation contracts per command
 │   ├── Models/                        # Eloquent models and relationships
 │   ├── Observers/                     # Model lifecycle cleanup
 │   ├── Policies/                      # Server-side authorization rules
@@ -272,6 +277,7 @@ web3dshare/
 │       ├── legal/                     # Terms, access rules, and agreement text
 │       ├── model/                     # Viewer, partial modal, and threaded comments
 │       ├── profile/                   # Signed-in user profile editor
+│       ├── reports/                   # Reports history and notification
 │       ├── upload/                    # Upload workflow
 │       └── verify/                    # Verification request workflow
 │
