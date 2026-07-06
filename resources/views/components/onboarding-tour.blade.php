@@ -11,13 +11,13 @@
         style="z-index: 300"
     >
         <div
-            class="w-full max-w-2xl rounded-2xl border border-green-400/40 bg-white p-8 shadow-2xl sm:p-10 dark:bg-darkPanel dark:shadow-[0_0_60px_rgba(0,255,136,0.16)]"
+            class="max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto rounded-xl border border-green-400/40 bg-white p-5 shadow-2xl sm:rounded-2xl sm:p-10 dark:bg-darkPanel dark:shadow-[0_0_60px_rgba(0,255,136,0.16)]"
         >
             <p class="mb-4 text-xs font-bold tracking-[0.22em] text-green-600 uppercase dark:text-neon">Web3DShare Tour</p>
-            <h2 class="text-4xl leading-tight font-bold text-gray-950 sm:text-5xl dark:text-white">
+            <h2 class="text-3xl leading-tight font-bold text-gray-950 sm:text-5xl dark:text-white">
                 Welcome to <span class="text-green-600 dark:text-neon">Web3DShare</span>
             </h2>
-            <p class="mt-5 text-base leading-relaxed text-gray-600 sm:text-lg dark:text-gray-300">Take a quick tour through the main Web3DShare workflow. You will learn how to explore models, read stats, open the viewer, and use creator features without awkward page reloads.</p>
+            <p class="mt-4 text-sm leading-relaxed text-gray-600 sm:mt-5 sm:text-lg dark:text-gray-300">Take a quick tour through the main Web3DShare workflow. You will learn how to explore models, read stats, open the viewer, and use creator features without awkward page reloads.</p>
             <p class="mt-3 text-sm leading-relaxed text-gray-500 dark:text-gray-400">You can move forward or backward at any time, or skip the tour if you already know your way around.</p>
             <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <button
@@ -47,7 +47,7 @@
 
         <section
             data-tour-tooltip
-            class="web3d-tour-tooltip pointer-events-auto w-[min(420px,calc(100vw-2rem))] rounded-2xl border border-green-400/40 bg-white p-5 shadow-2xl dark:bg-darkPanel dark:shadow-[0_0_45px_rgba(0,255,136,0.16)]"
+            class="web3d-tour-tooltip pointer-events-auto w-[min(420px,calc(100vw-1rem))] rounded-xl border border-green-400/40 bg-white p-4 shadow-2xl sm:rounded-2xl sm:p-5 dark:bg-darkPanel dark:shadow-[0_0_45px_rgba(0,255,136,0.16)]"
         >
             <div class="flex items-start justify-between gap-4">
                 <div>

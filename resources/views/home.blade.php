@@ -4,15 +4,15 @@
     @php
     $isMyModels = request('filter') == 'my_models';
 @endphp
-    <div class="mb-5 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+    <div id="home-content" class="mb-4 flex flex-col justify-between gap-3 sm:mb-5 lg:flex-row lg:items-end">
         <div data-tour="home-title">
             @if ($isMyModels)
-                <h2 class="text-3xl font-bold tracking-wide text-gray-900 dark:text-white">
+                <h2 class="text-xl font-bold tracking-wide text-gray-900 sm:text-3xl dark:text-white">
                     My <span class="text-green-600 dark:text-neon">Models</span>
                 </h2>
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Manage and view all your uploaded 3D creations</p>
             @else
-                <h2 class="text-3xl font-bold tracking-wide text-gray-900 dark:text-white">
+                <h2 class="text-xl font-bold tracking-wide text-gray-900 sm:text-3xl dark:text-white">
                     Explore <span class="text-green-600 dark:text-neon">Models</span>
                 </h2>
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Discover and download the latest 3D creations from the community</p>
@@ -20,7 +20,7 @@
         </div>
 
         <div class="flex flex-col gap-3 sm:flex-row lg:items-center">
-            <form action="{{ url()->current() }}" method="GET" class="flex flex-col gap-3 sm:flex-row">
+            <form action="{{ url()->current() }}" method="GET" class="grid w-full grid-cols-2 gap-2 sm:w-auto sm:flex sm:flex-row sm:gap-3">
                 @if ($isMyModels)
                     <input type="hidden" name="filter" value="my_models" />
                 @endif
@@ -37,7 +37,7 @@
                 <select
                     name="sort"
                     onchange="this.form.submit()"
-                    class="w-full cursor-pointer rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm transition-all focus:border-green-500 focus:outline-none sm:w-44 dark:border-gray-800 dark:bg-darkBg dark:text-gray-300 dark:focus:border-neon"
+                    class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm transition-all focus:border-green-500 focus:outline-none sm:w-44 sm:rounded-xl dark:border-gray-800 dark:bg-darkBg dark:text-gray-300 dark:focus:border-neon"
                 >
                     <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Latest Uploads</option>
                     <option value="top_downloads" {{ request('sort') == 'top_downloads' ? 'selected' : '' }}
@@ -50,7 +50,7 @@
                 <select
                     name="timeframe"
                     onchange="this.form.submit()"
-                    class="w-full cursor-pointer rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm transition-all focus:border-green-500 focus:outline-none sm:w-40 dark:border-gray-800 dark:bg-darkBg dark:text-gray-300 dark:focus:border-neon"
+                    class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm transition-all focus:border-green-500 focus:outline-none sm:w-40 sm:rounded-xl dark:border-gray-800 dark:bg-darkBg dark:text-gray-300 dark:focus:border-neon"
                 >
                     <option value="all_time" {{ request('timeframe') == 'all_time' ? 'selected' : '' }}
                         >All Time
@@ -67,7 +67,7 @@
             @if ($isMyModels)
                 <a
                     href="/"
-                    class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-600 shadow-sm transition-colors hover:border-green-300 hover:text-green-600 dark:border-gray-800 dark:bg-darkBg dark:text-gray-400 dark:hover:border-neon/30 dark:hover:text-neon"
+                    class="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-600 shadow-sm transition-colors hover:border-green-300 hover:text-green-600 sm:w-auto dark:border-gray-800 dark:bg-darkBg dark:text-gray-400 dark:hover:border-neon/30 dark:hover:text-neon"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
                     Back to Explore
@@ -80,15 +80,9 @@
             class="no-scrollbar flex items-center gap-2 overflow-x-auto pb-2"
             style="scrollbar-width: none; -ms-overflow-style: none"
         >
-            <style>
-                .no-scrollbar::-webkit-scrollbar {
-                    display: none;
-                }
-            </style>
-
             <a
                 href="{{ request()->fullUrlWithQuery(['category' => null]) }}"
-                class="px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 {{ !request('category') ? 'bg-green-500 text-white dark:bg-neon dark:text-black shadow-md' : 'bg-gray-100 dark:bg-darkPanel/60 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 border border-gray-200/50 dark:border-gray-800/50' }}"
+                class="px-3 py-1.5 sm:px-4 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 {{ !request('category') ? 'bg-green-500 text-white dark:bg-neon dark:text-black shadow-md' : 'bg-gray-100 dark:bg-darkPanel/60 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 border border-gray-200/50 dark:border-gray-800/50' }}"
             >
                 All Categories
             </a>
@@ -97,7 +91,7 @@
                 @continue (!is_object($cat) || !isset($cat->id, $cat->name))
                 <a
                     href="{{ request()->fullUrlWithQuery(['category' => $cat->id]) }}"
-                    class="px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 {{ request('category') == $cat->id ? 'bg-green-500 text-white dark:bg-neon dark:text-black shadow-md' : 'bg-gray-100 dark:bg-darkPanel/60 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 border border-gray-200/50 dark:border-gray-800/50' }}"
+                    class="px-3 py-1.5 sm:px-4 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 {{ request('category') == $cat->id ? 'bg-green-500 text-white dark:bg-neon dark:text-black shadow-md' : 'bg-gray-100 dark:bg-darkPanel/60 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 border border-gray-200/50 dark:border-gray-800/50' }}"
                 >
                     {{ $cat->name }}
                 </a>
@@ -124,7 +118,7 @@
                 @if (request('tag') || request('category') || request('search'))
                     <a
                         href="/"
-                        class="ml-2 flex items-center gap-0.5 text-[11px] font-bold text-red-500 transition-colors hover:text-red-600 dark:hover:text-red-400"
+                        class="flex items-center gap-0.5 text-[11px] font-bold text-red-500 transition-colors hover:text-red-600 sm:ml-2 dark:hover:text-red-400"
                     >
                         ✕ Clear Filters
                     </a>
@@ -160,18 +154,18 @@
     </a>
 </div>
 @endif --}}
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div class="home-grid grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
         @forelse ($models as $model)
             <div
                 @if ($loop->first) data-tour="model-card" @endif
                 data-model-card="{{ $model->id }}"
-                class="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:border-green-400 hover:shadow-md dark:border-gray-800 dark:bg-darkBg dark:hover:border-neon/40 dark:hover:shadow-[0_0_20px_rgba(0,255,136,0.1)]"
+                class="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:border-green-400 hover:shadow-md sm:rounded-2xl dark:border-gray-800 dark:bg-darkBg dark:hover:border-neon/40 dark:hover:shadow-[0_0_20px_rgba(0,255,136,0.1)]"
             >
                 <a
                     @if ($loop->first) data-tour="model-open" @endif
                     href="/models/{{ $model->id }}{{ $isMyModels ? '?from=my_models' : '' }}"
                     onclick="openModel('{{ $model->id }}', event)"
-                    class="relative block h-48 w-full overflow-hidden bg-gray-100 dark:bg-black"
+                    class="relative block aspect-[4/3] w-full overflow-hidden bg-gray-100 sm:aspect-auto sm:h-48 dark:bg-black"
                 >
                     <img
                         src="{{ $model->thumbnailUrl() }}"
@@ -179,36 +173,36 @@
                     />
                     @if (isset($model->category))
                         <div
-                            class="absolute top-3 right-3 rounded-md border border-gray-200 bg-white/90 px-2.5 py-1 text-[10px] font-bold tracking-widest text-gray-700 uppercase shadow-sm backdrop-blur-md dark:border-gray-700 dark:bg-black/70 dark:text-gray-300"
+                            class="absolute top-2 right-2 rounded-md border border-gray-200 bg-white/90 px-2 py-0.5 text-[9px] font-bold tracking-widest text-gray-700 uppercase shadow-sm backdrop-blur-md sm:top-3 sm:right-3 sm:px-2.5 sm:py-1 sm:text-[10px] dark:border-gray-700 dark:bg-black/70 dark:text-gray-300"
                         >
                             {{ $model->category->name }}
                         </div>
                     @endif
                 </a>
 
-                <div class="flex flex-1 flex-col p-5">
-                    <a href="/models/{{ $model->id }}{{ $isMyModels ? '?from=my_models' : '' }}" class="mb-3 block">
+                <div class="flex flex-1 flex-col p-3 sm:p-5">
+                    <a href="/models/{{ $model->id }}{{ $isMyModels ? '?from=my_models' : '' }}" class="mb-2 block sm:mb-3">
                         <h3
-                            class="truncate text-lg font-bold text-gray-800 transition-colors group-hover:text-green-600 dark:text-gray-100 dark:group-hover:text-neon"
+                            class="truncate text-base font-bold text-gray-800 transition-colors group-hover:text-green-600 sm:text-lg dark:text-gray-100 dark:group-hover:text-neon"
                             title="{{ $model->title }}"
                         >
                             {{ $model->title }}
                         </h3>
                     </a>
 
-                    <div class="mt-auto mb-4 flex items-center gap-3">
+                    <div class="mt-auto mb-3 flex items-center gap-2.5 sm:mb-4 sm:gap-3">
                         <a href="/creators/{{ $model->user->username }}" class="flex-shrink-0">
                             <img
                                 loading="lazy"
                                 src="{{ $model->user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name=' . urlencode($model->user->nickname ?? $model->user->username) . '&background=e5e7eb&color=1f2937' }}"
-                                class="h-7 w-7 rounded-full object-cover ring-2 ring-transparent transition-all group-hover:ring-green-300 dark:group-hover:ring-neon/30"
+                                class="h-6 w-6 rounded-full object-cover ring-2 ring-transparent transition-all sm:h-7 sm:w-7 group-hover:ring-green-300 dark:group-hover:ring-neon/30"
                             />
                         </a>
 
                         <div class="flex min-w-0 items-center gap-1.5">
                             <a
                                 href="/creators/{{ $model->user->username }}"
-                                class="truncate text-sm font-medium text-gray-600 transition-colors hover:text-green-600 dark:text-gray-400 dark:hover:text-gray-200"
+                                class="truncate text-xs font-medium text-gray-600 transition-colors hover:text-green-600 sm:text-sm dark:text-gray-400 dark:hover:text-gray-200"
                                 title="{{ $model->user->nickname ?? $model->user->username }}"
                             >
                                 {{ $model->user->nickname ?? $model->user->username }}
@@ -223,11 +217,11 @@
                     </div>
 
                     @if ($isMyModels && auth()->id() === $model->user_id)
-                        <div class="mb-4 grid grid-cols-2 gap-3">
+                        <div class="mb-3 grid grid-cols-2 gap-2 sm:mb-4 sm:gap-3">
                             <button
                                 type="button"
                                 onclick="openModelEditModal('edit-model-{{ $model->id }}')"
-                                class="flex items-center justify-center gap-2 rounded-lg border border-yellow-300 bg-yellow-400 px-3 py-2 text-sm font-bold text-black shadow-sm transition-all hover:bg-yellow-300"
+                                class="flex items-center justify-center gap-1.5 rounded-lg border border-yellow-300 bg-yellow-400 px-3 py-2 text-xs font-bold text-black shadow-sm transition-all hover:bg-yellow-300 sm:gap-2 sm:text-sm"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
@@ -248,7 +242,7 @@
                                 @method ('DELETE')
                                 <button
                                     type="submit"
-                                    class="flex w-full items-center justify-center gap-2 rounded-lg border border-red-700 bg-red-600 px-3 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-red-700"
+                                    class="flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-700 bg-red-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-red-700 sm:gap-2 sm:text-sm"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21H8.084a2.25 2.25 0 0 1-2.244-1.327L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
@@ -262,7 +256,7 @@
                             class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/70 p-4 backdrop-blur-md"
                         >
                             <div
-                                class="relative w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-6 shadow-xl sm:p-8 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]"
+                                class="relative max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto rounded-2xl border border-gray-200 bg-white p-5 shadow-xl sm:p-8 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]"
                             >
                                 <button
                                     type="button"
@@ -276,7 +270,9 @@
                                     @csrf
                                     @method ('PATCH')
                                     <div>
-                                        <h2 class="text-3xl font-bold tracking-wide text-gray-900 dark:text-white">
+                                        <h2
+                                            class="text-2xl font-bold tracking-wide text-gray-900 sm:text-3xl dark:text-white"
+                                        >
                                             Edit <span class="text-green-600 dark:text-neon">Model</span>
                                         </h2>
                                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Only title, description, category, and tags can be changed.</p>
@@ -335,7 +331,7 @@
                     @endif
 
                     <div
-                        class="flex items-center justify-between border-t border-gray-100 pt-4 text-xs font-semibold text-gray-500 dark:border-gray-800/80"
+                        class="flex items-center justify-between border-t border-gray-100 pt-3 text-[11px] font-semibold text-gray-500 sm:pt-4 sm:text-xs dark:border-gray-800/80"
                     >
                         <div
                             @if ($loop->first) data-tour="model-views" @endif
@@ -369,7 +365,7 @@
             </div>
         @empty
             <div
-                class="col-span-full flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white py-20 text-center shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                class="col-span-full flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-14 text-center shadow-sm sm:rounded-2xl sm:py-20 dark:border-gray-800 dark:bg-darkPanel"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mb-4 h-16 w-16 text-gray-400 dark:text-gray-600"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>
                 <p class="text-lg text-gray-500 dark:text-gray-400">No models found.</p>

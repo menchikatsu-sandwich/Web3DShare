@@ -4,7 +4,7 @@
     @php
     $displayName = $user->nickname ?? $user->username;
 @endphp
-    <div class="-m-6 min-h-[calc(100vh-73px)] bg-gray-100 lg:-m-8 dark:bg-darkBg">
+    <div class="-m-3 min-h-[calc(100dvh-65px)] bg-gray-100 sm:-m-6 lg:-m-8 dark:bg-darkBg">
         <section
             class="relative overflow-hidden border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-[#07120d]"
         >
@@ -12,15 +12,19 @@
             <div
                 class="absolute inset-0 bg-gradient-to-r from-white/95 via-white/70 to-green-50/80 dark:from-black/45 dark:via-black/15 dark:to-green-950/30"
             ></div>
-            <div class="relative flex flex-col gap-7 px-6 py-10 sm:flex-row sm:items-center lg:px-10 lg:py-12">
+            <div
+                class="relative flex flex-col gap-4 px-4 py-7 sm:flex-row sm:items-center sm:gap-7 sm:px-6 sm:py-10 lg:px-10 lg:py-12"
+            >
                 <img
                     src="{{ $user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name=' . urlencode($displayName) . '&background=111113&color=00ff88' }}"
-                    class="h-28 w-28 rounded-xl border border-gray-200 object-cover shadow-xl dark:border-white/10"
+                    class="h-20 w-20 rounded-xl border border-gray-200 object-cover shadow-xl sm:h-28 sm:w-28 dark:border-white/10"
                 />
 
                 <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-3">
-                        <h1 class="truncate text-4xl font-semibold text-gray-950 dark:text-white">
+                        <h1
+                            class="max-w-full text-2xl font-semibold break-words text-gray-950 sm:text-4xl dark:text-white"
+                        >
                             {{ $displayName }}
                         </h1>
                         @if ($user->upload_tier === 'verified')
@@ -31,9 +35,9 @@
                         @endif
                     </div>
                     <p class="mt-2 text-gray-600 dark:text-gray-300">{{ '@' . $user->username }}</p>
-                    <p class="mt-4 max-w-xl text-gray-700 dark:text-gray-300">Creator on Web3DShare sharing downloadable 3D models with the community.</p>
+                    <p class="mt-3 max-w-xl text-sm text-gray-700 sm:mt-4 sm:text-base dark:text-gray-300">Creator on Web3DShare sharing downloadable 3D models with the community.</p>
 
-                    <div class="mt-5 flex flex-wrap gap-3 text-sm">
+                    <div class="mt-4 flex flex-wrap gap-2 text-xs sm:mt-5 sm:gap-3 sm:text-sm">
                         <span
                             class="rounded-lg border border-green-200 bg-white/80 px-3 py-1.5 text-gray-900 shadow-sm dark:border-white/10 dark:bg-white/10 dark:text-white"
                             >{{ $stats['models'] }} Models</span
@@ -51,17 +55,17 @@
             </div>
         </section>
 
-        <section class="px-6 py-8 lg:px-10">
+        <section class="px-3 py-5 sm:px-6 sm:py-8 lg:px-10">
             <div class="grid grid-cols-1 items-start gap-8 xl:grid-cols-[1fr_320px]">
                 <div>
-                    <div class="mb-5 flex items-center justify-between gap-4">
+                    <div class="mb-4 flex items-center justify-between gap-4 sm:mb-5">
                         <div>
                             <h2 class="text-xl font-bold text-gray-900 dark:text-white">Models</h2>
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ $models->total() }} published models</p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <div class="creator-model-grid grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
                         @forelse ($models as $model)
                             <div
                                 class="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:border-green-400 hover:shadow-md dark:border-gray-800 dark:bg-darkPanel dark:hover:border-neon/40"
@@ -69,7 +73,7 @@
                                 <a
                                     href="/models/{{ $model->id }}"
                                     onclick="openModel('{{ $model->id }}', event)"
-                                    class="relative block h-44 w-full overflow-hidden bg-gray-100 dark:bg-black"
+                                    class="relative block aspect-[4/3] w-full overflow-hidden bg-gray-100 sm:aspect-auto sm:h-44 dark:bg-black"
                                 >
                                     <img
                                         loading="lazy"
@@ -85,7 +89,7 @@
                                     @endif
                                 </a>
 
-                                <div class="flex flex-1 flex-col p-4">
+                                <div class="flex flex-1 flex-col p-3 sm:p-4">
                                     <a
                                         href="/models/{{ $model->id }}"
                                         class="truncate font-bold text-gray-800 transition-colors hover:text-green-600 dark:text-gray-100 dark:hover:text-neon"
@@ -95,7 +99,7 @@
                                     </a>
 
                                     <div
-                                        class="mt-4 flex items-center justify-between border-t border-gray-100 pt-4 text-xs font-semibold text-gray-500 dark:border-gray-800"
+                                        class="mt-3 flex items-center justify-between border-t border-gray-100 pt-3 text-[11px] font-semibold text-gray-500 sm:mt-4 sm:pt-4 sm:text-xs dark:border-gray-800"
                                     >
                                         <span class="flex items-center gap-1.5" title="{{ $model->view_count }} Views">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
@@ -130,9 +134,9 @@
                     <div class="mt-8">{{ $models->links() }}</div>
                 </div>
 
-                <aside class="space-y-6">
+                <aside class="space-y-4 sm:space-y-6">
                     <div
-                        class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-darkPanel"
                     >
                         <h3 class="mb-4 text-xs font-bold tracking-widest text-gray-400 uppercase">About</h3>
                         <div class="space-y-4 text-sm">
@@ -152,7 +156,7 @@
                     </div>
 
                     <div
-                        class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-darkPanel"
                     >
                         <h3 class="mb-4 text-xs font-bold tracking-widest text-gray-400 uppercase">Stats</h3>
                         <div class="space-y-3 text-sm font-semibold text-gray-800 dark:text-gray-200">

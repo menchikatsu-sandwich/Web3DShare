@@ -7,7 +7,7 @@
 @section ('content')
     <div
         id="model-root"
-        class="is-full-page -m-6 flex h-[calc(100vh-73px)] w-auto flex-col bg-white lg:-m-8 dark:bg-darkPanel"
+        class="is-full-page -m-3 flex min-h-[calc(100dvh-65px)] w-auto flex-col bg-white sm:-m-6 lg:-m-8 dark:bg-darkPanel"
     >
         @include ('model.partial', [
         'model' => $model,

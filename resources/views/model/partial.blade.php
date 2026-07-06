@@ -5,11 +5,11 @@
 
 <div
     data-model-shell="{{ $model->id }}"
-    class="flex h-full min-h-0 w-full flex-col bg-white text-gray-800 lg:flex-row dark:bg-darkPanel dark:text-gray-200"
+    class="flex h-full min-h-0 w-full flex-col overflow-y-auto bg-white text-gray-800 lg:flex-row lg:overflow-hidden dark:bg-darkPanel dark:text-gray-200"
 >
-    <div class="flex min-h-0 flex-1 flex-col overflow-x-hidden">
+    <div class="order-1 flex min-h-0 flex-1 flex-col overflow-x-hidden">
         <div
-            class="flex flex-shrink-0 items-center justify-between gap-3 border-b border-gray-100 bg-white px-4 py-4 sm:px-6 lg:px-8 dark:border-gray-800 dark:bg-darkPanel"
+            class="flex flex-shrink-0 items-center justify-between gap-3 border-b border-gray-100 bg-white px-4 py-3 sm:px-6 sm:py-4 lg:px-8 dark:border-gray-800 dark:bg-darkPanel"
         >
             <a
                 href="/"
@@ -22,7 +22,7 @@
                 Back to Explore
             </a>
 
-            <div class="ml-auto flex items-center gap-2" data-tour="viewer-top-actions">
+            <div class="ml-auto flex min-w-0 items-center gap-2" data-tour="viewer-top-actions">
                 <details class="relative">
                     <summary
                         class="flex cursor-pointer list-none items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-500 shadow-sm transition-all hover:border-red-300 hover:text-red-500 dark:border-gray-800 dark:bg-darkBg dark:text-gray-400"
@@ -76,19 +76,31 @@
                 <button
                     type="button"
                     onclick="copyModelUrl('{{ url('/models/' . $model->id) }}', this)"
-                    class="flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 font-semibold text-white shadow-sm transition-all hover:bg-green-600 dark:bg-neon dark:text-black dark:hover:bg-[#00cc6a]"
+                    class="flex items-center gap-2 rounded-lg bg-green-500 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-green-600 sm:px-4 sm:text-base dark:bg-neon dark:text-black dark:hover:bg-[#00cc6a]"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="h-4 w-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 19c1.5-5.5 5.5-8.5 11-8.5V5l6 6-6 6v-5.5C10.5 11.5 6.8 14 4 19z" />
                     </svg>
                     <span class="share-text">Share</span>
                 </button>
+
+                <button
+                    id="close-modal-btn"
+                    type="button"
+                    onclick="closeTop()"
+                    class="model-modal-close-btn rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-500"
+                    title="Close"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
         </div>
 
         <div
             data-tour="viewer-stage"
-            class="group relative h-[46vh] min-h-[320px] w-full flex-shrink-0 bg-gray-100 lg:h-[58vh] dark:bg-black"
+            class="group relative h-[42vh] min-h-[260px] w-full flex-shrink-0 bg-gray-100 sm:min-h-[320px] lg:h-[58vh] dark:bg-black"
         >
             <model-viewer
                 src="{{ $model->modelUrl() }}"
@@ -100,7 +112,7 @@
             ></model-viewer>
         </div>
 
-        <div class="flex flex-col gap-6 p-6 lg:p-8">
+        <div class="flex flex-col gap-6 p-4 sm:p-6 lg:p-8">
             <div class="flex flex-col gap-5">
                 <div class="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
                     <div class="min-w-0">
@@ -116,7 +128,7 @@
                         </div>
                         <h1
                             data-tour="viewer-title"
-                            class="text-3xl leading-tight font-bold text-gray-900 dark:text-white"
+                            class="text-2xl leading-tight font-bold break-words text-gray-900 sm:text-3xl dark:text-white"
                         >
                             {{ $model->title }}
                         </h1>
@@ -144,13 +156,21 @@
                         </div>
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-3 lg:justify-end" data-tour="viewer-actions">
-                        <form method="POST" action="/models/{{ $model->id }}/star" data-ajax-star>
+                    <div
+                        class="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center lg:justify-end"
+                        data-tour="viewer-actions"
+                    >
+                        <form
+                            method="POST"
+                            action="/models/{{ $model->id }}/star"
+                            data-ajax-star
+                            class="min-w-0 sm:w-auto"
+                        >
                             @csrf
                             <button
                                 data-star-button
                                 data-starred="{{ $hasStarred ? 'true' : 'false' }}"
-                                class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-darkBg border border-gray-200 dark:border-gray-800 {{ $hasStarred ? 'text-yellow-500 border-yellow-300 dark:text-yellow-400' : 'text-gray-700 dark:text-gray-300' }} font-semibold rounded-lg hover:text-yellow-500 hover:border-yellow-300 dark:hover:text-yellow-400 transition-all shadow-sm"
+                                class="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-semibold shadow-sm transition-all hover:border-yellow-300 hover:text-yellow-500 sm:w-auto sm:px-4 sm:text-base dark:border-gray-800 dark:bg-darkBg dark:hover:text-yellow-400 {{ $hasStarred ? 'text-yellow-500 border-yellow-300 dark:text-yellow-400' : 'text-gray-700 dark:text-gray-300' }}"
                             >
                                 <svg
                                     data-star-icon
@@ -171,7 +191,7 @@
                         <a
                             href="/models/{{ $model->id }}/download"
                             data-ajax-download
-                            class="flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 font-semibold text-white shadow-sm transition-all hover:bg-green-600 dark:bg-neon dark:text-black dark:hover:bg-[#00cc6a]"
+                            class="flex h-11 min-w-0 items-center justify-center gap-2 rounded-lg bg-green-500 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-green-600 sm:w-auto sm:px-4 sm:text-base dark:bg-neon dark:text-black dark:hover:bg-[#00cc6a]"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -180,11 +200,14 @@
                         </a>
 
                         @if ($isManageContext)
-                            <div data-tour="viewer-owner-actions" class="flex flex-wrap items-center gap-3">
+                            <div
+                                data-tour="viewer-owner-actions"
+                                class="col-span-2 grid grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-wrap sm:items-center"
+                            >
                                 <button
                                     type="button"
                                     onclick="openViewerEditModal()"
-                                    class="flex items-center gap-2 rounded-lg border border-yellow-300 bg-yellow-400 px-4 py-2 font-semibold text-black shadow-sm transition-all hover:bg-yellow-300"
+                                    class="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-yellow-300 bg-yellow-400 px-3 py-2 text-sm font-semibold text-black shadow-sm transition-all hover:bg-yellow-300 sm:w-auto sm:px-4 sm:text-base"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
@@ -205,7 +228,7 @@
                                     @method ('DELETE')
                                     <button
                                         type="submit"
-                                        class="flex items-center gap-2 rounded-lg border border-red-700 bg-red-600 px-4 py-2 font-semibold text-white shadow-sm transition-all hover:bg-red-700"
+                                        class="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-red-700 bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-red-700 sm:w-auto sm:px-4 sm:text-base"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21H8.084a2.25 2.25 0 0 1-2.244-1.327L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
@@ -230,7 +253,7 @@
                                     @method ('DELETE')
                                     <button
                                         type="submit"
-                                        class="flex items-center gap-2 rounded-xl border border-red-200 bg-red-100 px-6 py-3 font-bold text-red-600 shadow-sm transition-all duration-300 hover:border-red-600 hover:bg-red-600 hover:text-white hover:shadow-red-500/20 active:scale-95 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-500 dark:hover:border-red-600 dark:hover:bg-red-600 dark:hover:text-white"
+                                        class="col-span-2 flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-100 px-3 py-2 text-sm font-bold text-red-600 shadow-sm transition-all duration-300 hover:border-red-600 hover:bg-red-600 hover:text-white hover:shadow-red-500/20 active:scale-95 sm:w-auto sm:px-4 sm:text-base dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-500 dark:hover:border-red-600 dark:hover:bg-red-600 dark:hover:text-white"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -243,7 +266,9 @@
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-gray-100 bg-gray-50 p-5 dark:border-gray-800 dark:bg-darkBg/50">
+                <div
+                    class="rounded-xl border border-gray-100 bg-gray-50 p-4 sm:p-5 dark:border-gray-800 dark:bg-darkBg/50"
+                >
                     <div>
                         <h3 class="mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">About</h3>
                         <p class="text-sm leading-relaxed whitespace-pre-wrap text-gray-700 dark:text-gray-300">{{ $model->description ?? 'No description available for this model.' }}</p>
@@ -357,41 +382,30 @@
     @if (!$isFromPanel)
         <div
             data-tour="viewer-recommendations"
-            class="relative flex w-full flex-shrink-0 flex-col border-l border-gray-200 bg-gray-50 lg:w-80 dark:border-gray-800 dark:bg-[#0c0c0e]"
+            class="order-2 relative flex w-full flex-shrink-0 flex-col border-t border-gray-200 bg-gray-50 lg:w-80 lg:border-t-0 lg:border-l dark:border-gray-800 dark:bg-[#0c0c0e]"
         >
             <div
-                class="z-10 flex items-center justify-between border-b border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-[#0c0c0e]"
+                class="z-10 flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-[#0c0c0e]"
             >
                 <h3 class="text-xs font-bold tracking-widest text-gray-500 uppercase">More Like This</h3>
-
-                <div class="flex items-center gap-2">
-                    <button
-                        id="close-modal-btn"
-                        onclick="closeTop()"
-                        class="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-500"
-                        title="Close"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
             </div>
 
-            <div class="flex-1 space-y-4 overflow-y-auto p-4">
+            <div class="grid gap-4 p-4 sm:grid-cols-2 lg:block lg:flex-1 lg:space-y-4 lg:overflow-y-auto">
                 @forelse ($recommendations as $rec)
                     <a
                         href="/models/{{ $rec->id }}"
                         onclick="handleModelClick('{{ $rec->id }}', event)"
-                        class="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:border-green-400 hover:shadow-md dark:border-gray-800 dark:bg-darkPanel dark:hover:border-neon/40"
+                        class="group flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:border-green-400 hover:shadow-md lg:rounded-xl dark:border-gray-800 dark:bg-darkPanel dark:hover:border-neon/40"
                     >
-                        <div class="relative h-32 w-full overflow-hidden bg-gray-200 dark:bg-black">
+                        <div
+                            class="relative aspect-[16/9] w-full overflow-hidden bg-gray-200 lg:aspect-auto lg:h-32 dark:bg-black"
+                        >
                             <img
                                 src="{{ $rec->thumbnailUrl() }}"
                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                         </div>
-                        <div class="p-3 text-center">
+                        <div class="p-3">
                             <p class="truncate text-sm font-semibold text-gray-800 transition-colors group-hover:text-green-600 dark:text-gray-200 dark:group-hover:text-neon">{{ $rec->title }}</p>
                             <p class="mt-1 truncate text-[10px] font-bold tracking-wider text-gray-400 uppercase">{{ $rec->category->name ?? 'Category' }}</p>
                         </div>
@@ -409,7 +423,7 @@
             class="fixed inset-0 z-[140] hidden items-center justify-center bg-black/70 p-4 backdrop-blur-md"
         >
             <div
-                class="relative w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-6 shadow-xl sm:p-8 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]"
+                class="relative max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto rounded-2xl border border-gray-200 bg-white p-5 shadow-xl sm:p-8 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]"
                 onclick="event.stopPropagation()"
             >
                 <button
@@ -424,7 +438,7 @@
                     @csrf
                     @method ('PATCH')
                     <div>
-                        <h2 class="text-3xl font-bold tracking-wide text-gray-900 dark:text-white">
+                        <h2 class="text-2xl font-bold tracking-wide text-gray-900 sm:text-3xl dark:text-white">
                             Edit <span class="text-green-600 dark:text-neon">Model</span>
                         </h2>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">The GLB file cannot be replaced here. Delete and upload again if the model file changes.</p>

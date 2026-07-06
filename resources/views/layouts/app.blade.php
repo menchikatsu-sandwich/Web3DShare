@@ -42,6 +42,24 @@
             border-right-width: 0 !important;
         }
 
+        @media (max-width: 1023px) {
+            #sidebar {
+                transform: translateX(-100%);
+            }
+
+            #sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            #sidebar.collapsed {
+                width: min(18rem, calc(100vw - 2rem)) !important;
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+                opacity: 1;
+                border-right-width: 1px !important;
+            }
+        }
+
         @keyframes fadeInUpModal {
             from {
                 opacity: 0;
@@ -109,22 +127,30 @@
 
     <div class="flex min-h-screen flex-col">
         <nav
-            class="sticky top-0 z-50 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 shadow-sm transition-colors duration-300 dark:border-neon/10 dark:bg-darkPanel"
+            class="sticky top-0 z-50 flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 bg-white px-3 py-2.5 shadow-sm transition-colors duration-300 sm:gap-3 sm:px-6 sm:py-4 dark:border-neon/10 dark:bg-darkPanel"
         >
-            <div class="flex items-center gap-6">
+            <div class="flex min-w-0 items-center gap-3 sm:gap-6">
                 <button
                     onclick="toggleSidebar()"
                     class="rounded-lg p-2 text-gray-600 transition hover:bg-gray-100 hover:text-green-600 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-neon"
+                    aria-label="Toggle navigation"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                     </svg>
                 </button>
-                <a href="/" data-tour="brand">
-                    <h1 class="text-2xl font-bold tracking-wide text-green-600 dark:text-neon">Web3DShare</h1>
+                <a href="/" class="min-w-0" data-tour="brand">
+                    <h1 class="truncate text-lg font-bold tracking-wide text-green-600 sm:text-2xl dark:text-neon">
+                        Web3DShare
+                    </h1>
                 </a>
-                <div class="ml-4 hidden sm:block">
-                    <form action="/" method="GET" class="relative hidden max-w-md flex-1 sm:block" data-tour="search">
+                <div class="ml-2 hidden md:block lg:ml-4">
+                    <form
+                        action="/"
+                        method="GET"
+                        class="relative hidden w-[min(34vw,28rem)] flex-1 md:block"
+                        data-tour="search"
+                    >
                         @if (request('category'))
                             <input type="hidden" name="category" value="{{ request('category') }}" />
                         @endif
@@ -157,15 +183,15 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-6">
+            <div class="flex shrink-0 items-center gap-2 sm:gap-6">
                 <button
                     id="theme-toggle"
-                    class="relative inline-flex h-7 w-14 items-center rounded-full bg-gray-300 transition-colors duration-300 focus:ring-2 focus:ring-green-500 focus:outline-none dark:bg-gray-700 dark:focus:ring-neon"
+                    class="relative inline-flex h-6 w-12 items-center rounded-full bg-gray-300 transition-colors duration-300 focus:ring-2 focus:ring-green-500 focus:outline-none sm:h-7 sm:w-14 dark:bg-gray-700 dark:focus:ring-neon"
                 >
                     <span class="sr-only">Toggle dark mode</span>
                     <span
                         id="theme-toggle-circle"
-                        class="flex inline-block h-5 w-5 translate-x-1 transform items-center justify-center rounded-full bg-white shadow-md transition-transform duration-300 dark:translate-x-8 dark:bg-darkBg"
+                        class="flex inline-block h-[18px] w-[18px] translate-x-1 transform items-center justify-center rounded-full bg-white shadow-md transition-transform duration-300 sm:h-5 sm:w-5 dark:translate-x-6 sm:dark:translate-x-8 dark:bg-darkBg"
                     >
                         <svg id="theme-toggle-light-icon" class="h-3.5 w-3.5 text-yellow-500 dark:hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
@@ -182,18 +208,18 @@
                             <img
                                 src="{{ auth()->user()->profileImageUrl() }}"
                                 onclick="toggleMenu()"
-                                class="h-11 w-11 cursor-pointer rounded-full object-cover ring-2 ring-green-500 ring-offset-2 ring-offset-white transition-all dark:ring-neon dark:ring-offset-darkPanel"
+                                class="h-9 w-9 cursor-pointer rounded-full object-cover ring-2 ring-green-500 ring-offset-2 ring-offset-white transition-all sm:h-11 sm:w-11 dark:ring-neon dark:ring-offset-darkPanel"
                             />
                         @else
                             <img
                                 src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->username) }}&background=f3f4f6&color=09090b"
                                 onclick="toggleMenu()"
-                                class="block h-11 w-11 cursor-pointer rounded-full object-cover ring-2 ring-green-500 ring-offset-2 ring-offset-white transition-all dark:hidden"
+                                class="block h-9 w-9 cursor-pointer rounded-full object-cover ring-2 ring-green-500 ring-offset-2 ring-offset-white transition-all sm:h-11 sm:w-11 dark:hidden"
                             />
                             <img
                                 src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->username) }}&background=111113&color=00ff88"
                                 onclick="toggleMenu()"
-                                class="hidden h-11 w-11 cursor-pointer rounded-full object-cover ring-2 ring-neon ring-offset-2 ring-offset-darkPanel transition-all dark:block"
+                                class="hidden h-9 w-9 cursor-pointer rounded-full object-cover ring-2 ring-neon ring-offset-2 ring-offset-darkPanel transition-all sm:h-11 sm:w-11 dark:block"
                             />
                         @endif
                         <div
@@ -233,7 +259,7 @@
                         </div>
                     </div>
                 @else
-                    <div class="flex items-center gap-4 text-sm font-medium" data-tour="auth-actions">
+                    <div class="flex items-center gap-2 text-sm font-medium sm:gap-4" data-tour="auth-actions">
                         <a
                             href="/login"
                             class="text-gray-600 transition hover:text-green-600 dark:text-gray-300 dark:hover:text-neon"
@@ -241,19 +267,59 @@
                         >
                         <a
                             href="/register"
-                            class="rounded-lg bg-green-500 px-5 py-2.5 font-semibold text-white shadow-sm transition-all hover:bg-green-600 dark:bg-neon dark:text-black dark:hover:bg-[#00cc6a]"
+                            class="rounded-lg bg-green-500 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-green-600 sm:px-5 sm:py-2.5 dark:bg-neon dark:text-black dark:hover:bg-[#00cc6a]"
                             >Join Free</a
                         >
                     </div>
                 @endauth
             </div>
+
+            <form action="/" method="GET" class="order-3 w-full md:hidden" data-tour="search">
+                @if (request('category'))
+                    <input type="hidden" name="category" value="{{ request('category') }}" />
+                @endif
+                @if (request('tag'))
+                    <input type="hidden" name="tag" value="{{ request('tag') }}" />
+                @endif
+                @if (request('sort'))
+                    <input type="hidden" name="sort" value="{{ request('sort') }}" />
+                @endif
+                @if (request('timeframe'))
+                    <input type="hidden" name="timeframe" value="{{ request('timeframe') }}" />
+                @endif
+                @if (request('filter'))
+                    <input type="hidden" name="filter" value="{{ request('filter') }}" />
+                @endif
+
+                <div class="relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Search models, creators, or tags..."
+                        class="block w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pr-3 pl-9 text-sm text-gray-900 placeholder-gray-400 transition-all focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none dark:border-gray-800 dark:bg-darkBg dark:text-gray-100 dark:focus:border-neon"
+                    />
+                </div>
+            </form>
         </nav>
 
-        <div class="flex flex-1 overflow-hidden">
+        <div class="relative flex flex-1 overflow-x-hidden">
             @auth
+                <button
+                    id="sidebar-backdrop"
+                    type="button"
+                    onclick="toggleSidebar(false)"
+                    class="fixed inset-0 z-[70] hidden bg-black/50 backdrop-blur-sm lg:hidden"
+                    aria-label="Close navigation"
+                ></button>
                 <aside
                     id="sidebar"
-                    class="flex w-72 flex-shrink-0 flex-col overflow-hidden border-r border-gray-200 bg-white px-6 py-6 whitespace-nowrap shadow-sm transition-all duration-300 dark:border-neon/10 dark:bg-darkPanel dark:shadow-none"
+                    class="fixed inset-y-0 left-0 z-[80] flex w-[min(18rem,calc(100vw-2rem))] flex-shrink-0 flex-col overflow-hidden border-r border-gray-200 bg-white px-4 py-5 whitespace-nowrap shadow-xl transition-all duration-300 sm:px-6 sm:py-6 lg:static lg:w-72 lg:translate-x-0 lg:shadow-sm dark:border-neon/10 dark:bg-darkPanel dark:shadow-none"
                 >
                     <div
                         class="mb-8 rounded-xl border border-green-300 bg-green-100 p-3 text-center text-xs font-semibold tracking-widest text-green-700 uppercase shadow-inner dark:border-neon/20 dark:bg-neon/5 dark:text-neon"
@@ -295,7 +361,7 @@
                 </aside>
             @endauth
 
-            <main class="flex flex-1 flex-col overflow-y-auto p-6 lg:p-8">
+            <main class="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto p-3 sm:p-6 lg:p-8">
                 <div class="flex-1">
                     @yield ('content')
                 </div>
@@ -314,8 +380,28 @@
     <script>
         function toggleSidebar() {
             const s = document.getElementById('sidebar');
-            if (s) s.classList.toggle('collapsed');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (!s) return;
+
+            if (window.matchMedia('(max-width: 1023px)').matches) {
+                const shouldOpen = arguments.length ? arguments[0] : !s.classList.contains('mobile-open');
+                s.classList.toggle('mobile-open', shouldOpen);
+                if (backdrop) backdrop.classList.toggle('hidden', !shouldOpen);
+                document.body.style.overflow = shouldOpen ? 'hidden' : '';
+                return;
+            }
+
+            s.classList.toggle('collapsed');
         }
+
+        window.addEventListener('resize', function () {
+            if (!window.matchMedia('(min-width: 1024px)').matches) return;
+            const s = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (s) s.classList.remove('mobile-open');
+            if (backdrop) backdrop.classList.add('hidden');
+            document.body.style.overflow = '';
+        });
 
         function toggleMenu() {
             document.getElementById('menu').classList.toggle('hidden');
@@ -469,7 +555,7 @@
                 document.body.appendChild(wrapper);
             }
             wrapper.innerHTML = `
-        <div class="relative w-full max-w-[1400px] h-[90vh] bg-white dark:bg-darkPanel rounded-2xl flex items-center justify-center" 
+        <div class="relative w-full max-w-[1400px] h-[calc(100dvh-1rem)] sm:h-[90vh] bg-white dark:bg-darkPanel rounded-xl sm:rounded-2xl flex items-center justify-center" 
              onclick="event.stopPropagation()">
             <div class="w-12 h-12 border-4 border-neon border-t-transparent rounded-full animate-spin"></div>
         </div>`;
@@ -485,7 +571,7 @@
                 wrapper.onclick = closeAll;
                 document.body.appendChild(wrapper);
             }
-            wrapper.innerHTML = `<div class="relative w-full max-w-[1400px] h-[90vh] sm:h-[85vh] bg-white dark:bg-darkPanel rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-modal-up flex flex-col" onclick="event.stopPropagation()">${html}</div>`;
+            wrapper.innerHTML = `<div class="relative w-full max-w-[1400px] h-[calc(100dvh-1rem)] sm:h-[85vh] bg-white dark:bg-darkPanel rounded-xl sm:rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-modal-up flex flex-col" onclick="event.stopPropagation()">${html}</div>`;
             document.body.style.overflow = 'hidden';
             modalOpen = true;
         }

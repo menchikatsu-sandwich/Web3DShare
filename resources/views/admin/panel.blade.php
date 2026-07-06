@@ -39,71 +39,71 @@
             }
         }
     </style>
-    <div class="flex flex-col items-start gap-8 lg:flex-row">
+    <div class="flex flex-col items-start gap-4 lg:flex-row lg:gap-8">
         <div
-            class="sticky top-24 w-full flex-shrink-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-md transition-colors duration-300 lg:w-72 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_30px_rgba(0,255,136,0.05)]"
+            class="w-full flex-shrink-0 rounded-xl border border-gray-200 bg-white p-2 shadow-md transition-colors duration-300 lg:sticky lg:top-24 lg:w-72 lg:rounded-2xl lg:p-6 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_30px_rgba(0,255,136,0.05)]"
         >
-            <h2 class="mb-4 ml-2 text-xs font-bold tracking-widest text-gray-500 uppercase">Control Panel</h2>
-            <ul class="space-y-2 text-sm font-medium">
+            <h2 class="mb-3 ml-2 hidden text-xs font-bold tracking-widest text-gray-500 uppercase lg:block">Control Panel</h2>
+            <ul class="no-scrollbar flex gap-2 overflow-x-auto text-sm font-medium lg:block lg:space-y-2 lg:overflow-visible">
                 <li>
                     <button
                         onclick="changeTab('dashboard', this)"
-                        class="tab-btn flex w-full items-center gap-3 rounded-xl px-4 py-3 text-gray-600 transition-all hover:bg-green-50 hover:text-green-600 dark:text-gray-400 dark:hover:bg-neon/5 dark:hover:text-neon"
+                        class="tab-btn flex w-max shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-gray-600 transition-all hover:bg-green-50 hover:text-green-600 lg:w-full lg:gap-3 lg:rounded-xl lg:px-4 lg:py-3 dark:text-gray-400 dark:hover:bg-neon/5 dark:hover:text-neon"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
                         </svg>
-                        >Dashboard
+                        Dashboard
                     </button>
                 </li>
                 <li>
                     <button
                         onclick="changeTab('models', this)"
-                        class="tab-btn flex w-full items-center gap-3 rounded-xl px-4 py-3 text-gray-600 transition-all hover:bg-green-50 hover:text-green-600 dark:text-gray-400 dark:hover:bg-neon/5 dark:hover:text-neon"
+                        class="tab-btn flex w-max shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-gray-600 transition-all hover:bg-green-50 hover:text-green-600 lg:w-full lg:gap-3 lg:rounded-xl lg:px-4 lg:py-3 dark:text-gray-400 dark:hover:bg-neon/5 dark:hover:text-neon"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>
-                        >Manage Models
+                        Manage Models
                     </button>
                 </li>
                 <li>
                     <button
                         onclick="changeTab('reports', this)"
-                        class="tab-btn flex w-full items-center gap-3 rounded-xl px-4 py-3 text-gray-600 transition-all hover:bg-green-50 hover:text-green-600 dark:text-gray-400 dark:hover:bg-neon/5 dark:hover:text-neon"
+                        class="tab-btn flex w-max shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-gray-600 transition-all hover:bg-green-50 hover:text-green-600 lg:w-full lg:gap-3 lg:rounded-xl lg:px-4 lg:py-3 dark:text-gray-400 dark:hover:bg-neon/5 dark:hover:text-neon"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                        >Reports
+                        Reports
                     </button>
                 </li>
                 <li>
                     <button
                         onclick="changeTab('verify', this)"
-                        class="tab-btn flex w-full items-center gap-3 rounded-xl px-4 py-3 text-gray-600 transition-all hover:bg-green-50 hover:text-green-600 dark:text-gray-400 dark:hover:bg-neon/5 dark:hover:text-neon"
+                        class="tab-btn flex w-max shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-gray-600 transition-all hover:bg-green-50 hover:text-green-600 lg:w-full lg:gap-3 lg:rounded-xl lg:px-4 lg:py-3 dark:text-gray-400 dark:hover:bg-neon/5 dark:hover:text-neon"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
-                        >Verifications
+                        Verifications
                     </button>
                 </li>
                 <li>
                     <button
                         onclick="changeTab('category', this)"
-                        class="tab-btn flex w-full items-center gap-3 rounded-xl px-4 py-3 text-gray-600 transition-all hover:bg-green-50 hover:text-green-600 dark:text-gray-400 dark:hover:bg-neon/5 dark:hover:text-neon"
+                        class="tab-btn flex w-max shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-gray-600 transition-all hover:bg-green-50 hover:text-green-600 lg:w-full lg:gap-3 lg:rounded-xl lg:px-4 lg:py-3 dark:text-gray-400 dark:hover:bg-neon/5 dark:hover:text-neon"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
                         </svg>
-                        >Categories
+                        Categories
                     </button>
                 </li>
                 @can ('admin')
                     <li>
                         <button
                             onclick="changeTab('users', this)"
-                            class="tab-btn flex w-full items-center gap-3 rounded-xl px-4 py-3 text-gray-600 transition-all hover:bg-green-50 hover:text-green-600 dark:text-gray-400 dark:hover:bg-neon/5 dark:hover:text-neon"
+                            class="tab-btn flex w-max shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-gray-600 transition-all hover:bg-green-50 hover:text-green-600 lg:w-full lg:gap-3 lg:rounded-xl lg:px-4 lg:py-3 dark:text-gray-400 dark:hover:bg-neon/5 dark:hover:text-neon"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
-                            >Users Control
+                            Users Control
                         </button>
                     </li>
                 @endcan
@@ -111,14 +111,14 @@
         </div>
 
         <div
-            class="min-h-[600px] w-full flex-1 rounded-2xl border border-gray-200 bg-white p-6 shadow-md transition-colors duration-300 lg:p-8 dark:border-neon/10 dark:bg-darkPanel dark:shadow-none"
+            class="min-h-[520px] w-full flex-1 rounded-xl border border-gray-200 bg-white p-4 shadow-md transition-colors duration-300 sm:p-6 lg:min-h-[600px] lg:rounded-2xl lg:p-8 dark:border-neon/10 dark:bg-darkPanel dark:shadow-none"
         >
             <div id="dashboard" class="tab-content space-y-6">
                 <div
-                    class="flex flex-col justify-between gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-end dark:border-gray-800"
+                    class="flex flex-col justify-between gap-3 border-b border-gray-200 pb-5 sm:flex-row sm:items-end sm:pb-6 dark:border-gray-800"
                 >
                     <div>
-                        <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
+                        <h2 class="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
                             Overview <span class="text-green-600 dark:text-neon">Statistics</span>
                         </h2>
                         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">A live operational snapshot of the Web3DShare community.</p>
@@ -129,20 +129,20 @@
                     >
                 </div>
 
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
                     @foreach ([['Published models', $stats['models']], ['Community members', $stats['users']], ['Open reports', $stats['reports']], ['Verification queue', $stats['verify']]] as [$label, $value])
                         <div
-                            class="rounded-lg border border-gray-200 bg-gray-50 p-5 transition-colors hover:border-green-400 dark:border-gray-800 dark:bg-darkBg dark:hover:border-neon/50"
+                            class="rounded-lg border border-gray-200 bg-gray-50 p-4 transition-colors hover:border-green-400 sm:p-5 dark:border-gray-800 dark:bg-darkBg dark:hover:border-neon/50"
                         >
                             <p class="text-xs font-bold tracking-widest text-gray-500 uppercase dark:text-gray-400">{{ $label }}</p>
-                            <p class="mt-3 text-4xl font-bold text-green-600 dark:text-neon">{{ $value }}</p>
+                            <p class="mt-2 text-3xl font-bold text-green-600 sm:mt-3 sm:text-4xl dark:text-neon">{{ $value }}</p>
                         </div>
                     @endforeach
                 </div>
 
                 <div class="grid gap-6 xl:grid-cols-3">
                     <section
-                        class="flex flex-col rounded-lg border border-gray-200 bg-gray-50 p-6 xl:col-span-2 dark:border-gray-800 dark:bg-darkBg"
+                        class="flex flex-col rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-6 xl:col-span-2 dark:border-gray-800 dark:bg-darkBg"
                     >
                         <div class="flex items-center justify-between gap-4">
                             <div>
@@ -162,12 +162,12 @@
 
                         @if ($dashboard['category_distribution']->isNotEmpty())
                             <div
-                                class="mt-8 flex flex-1 items-end gap-3 border-b border-gray-200 pb-3 dark:border-gray-800"
-                                style="height: 320px"
+                                class="mt-6 flex flex-1 items-end gap-2 overflow-x-auto border-b border-gray-200 pb-3 sm:mt-8 sm:gap-3 dark:border-gray-800"
+                                style="height: clamp(220px, 52vw, 320px)"
                             >
                                 @foreach ($dashboard['category_distribution'] as $category)
                                     <div
-                                        class="group flex min-w-0 flex-1 flex-col justify-end gap-3 text-center"
+                                        class="group flex min-w-[56px] flex-1 flex-col justify-end gap-2 text-center sm:min-w-0 sm:gap-3"
                                         title="{{ $category->name }}"
                                     >
                                         <div
@@ -203,7 +203,7 @@
                     </section>
 
                     <section
-                        class="rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-800 dark:bg-darkBg"
+                        class="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-6 dark:border-gray-800 dark:bg-darkBg"
                     >
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">Moderation queue</h3>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Items that need staff attention.</p>
@@ -242,7 +242,7 @@
                     </section>
 
                     <section
-                        class="rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-800 dark:bg-darkBg"
+                        class="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-6 dark:border-gray-800 dark:bg-darkBg"
                     >
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">Creator and staff access</h3>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Access status across {{ $dashboard['tiers']['total'] }} accounts.</p>
@@ -299,7 +299,7 @@
                     </section>
 
                     <section
-                        class="rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-800 dark:bg-darkBg"
+                        class="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-6 dark:border-gray-800 dark:bg-darkBg"
                     >
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">Lifetime engagement</h3>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Total interactions across all models.</p>
@@ -324,10 +324,10 @@
                     </section>
 
                     <section
-                        class="rounded-lg border border-gray-200 bg-gray-50 p-6 xl:col-span-3 dark:border-gray-800 dark:bg-darkBg"
+                        class="rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-6 xl:col-span-3 dark:border-gray-800 dark:bg-darkBg"
                     >
                         <div
-                            class="flex items-center justify-between gap-4 border-b border-gray-200 pb-4 dark:border-gray-800"
+                            class="flex flex-col items-start justify-between gap-3 border-b border-gray-200 pb-4 sm:flex-row sm:items-center sm:gap-4 dark:border-gray-800"
                         >
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">Most viewed models</h3>
@@ -336,7 +336,7 @@
                             <button
                                 type="button"
                                 onclick="changeTab('models', document.querySelector('button[onclick*=\'models\']'))"
-                                class="rounded-lg bg-green-100 px-4 py-2 text-sm font-bold text-green-700 transition-colors hover:bg-green-200 dark:bg-neon/10 dark:text-neon dark:hover:bg-neon/20"
+                                class="w-full rounded-lg bg-green-100 px-4 py-2 text-sm font-bold text-green-700 transition-colors hover:bg-green-200 sm:w-auto dark:bg-neon/10 dark:text-neon dark:hover:bg-neon/20"
                             >
                                 Manage models
                             </button>
@@ -373,7 +373,7 @@
             </div>
 
             <div id="models" class="tab-content">
-                <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 class="mb-5 text-xl font-bold text-gray-900 sm:mb-6 sm:text-2xl dark:text-white">
                     Manage <span class="text-green-600 dark:text-neon">Models</span>
                 </h2>
 
@@ -387,7 +387,7 @@
                     />
                 </div>
 
-                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="modelsGrid">
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6" id="modelsGrid">
                     @foreach ($models as $m)
                         <div
                             class="model-item group overflow-hidden rounded-xl border border-gray-200 bg-gray-50 p-3 shadow-sm transition-colors hover:border-green-300 dark:border-gray-800 dark:bg-darkBg dark:hover:border-neon/30"
@@ -450,9 +450,9 @@
             </div>
 
             <div id="reports" class="tab-content">
-                <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <div class="mb-5 flex flex-col justify-between gap-3 sm:mb-6 sm:flex-row sm:items-center">
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        <h2 class="text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
                             User <span class="text-green-600 dark:text-neon">Reports</span>
                         </h2>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Manage and moderate reported 3D models.</p>
@@ -460,13 +460,13 @@
 
                     <!-- TAB FILTER SYSTEM -->
                     <div
-                        class="inline-flex rounded-xl border border-gray-800 bg-black/40 p-1 shadow-inner backdrop-blur-sm"
+                        class="grid w-full grid-cols-2 rounded-xl border border-gray-800 bg-black/40 p-1 shadow-inner backdrop-blur-sm sm:inline-flex sm:w-auto"
                     >
                         <button
                             type="button"
                             onclick="filterReports('ongoing')"
                             id="tab-ongoing"
-                            class="report-tab-btn flex items-center gap-2 rounded-lg border border-transparent px-4 py-2 text-xs font-bold tracking-wider uppercase transition-all duration-300"
+                            class="report-tab-btn flex min-w-0 items-center justify-center gap-1.5 rounded-lg border border-transparent px-2 py-2 text-center text-[10px] font-bold tracking-wider uppercase transition-all duration-300 sm:gap-2 sm:px-4 sm:text-xs"
                         >
                             <span>Pending & On Going</span>
                             <span
@@ -479,7 +479,7 @@
                             type="button"
                             onclick="filterReports('resolved')"
                             id="tab-resolved"
-                            class="report-tab-btn flex items-center gap-2 rounded-lg border border-transparent px-4 py-2 text-xs font-bold tracking-wider uppercase transition-all duration-300"
+                            class="report-tab-btn flex min-w-0 items-center justify-center gap-1.5 rounded-lg border border-transparent px-2 py-2 text-center text-[10px] font-bold tracking-wider uppercase transition-all duration-300 sm:gap-2 sm:px-4 sm:text-xs"
                         >
                             <span>Resolved</span>
                             <span
@@ -514,7 +514,7 @@
                         @endphp
                         <div
                             data-report-group="{{ $group }}"
-                            class="report-card rounded-xl border border-gray-200 bg-gray-50 p-5 shadow-sm transition-all duration-200 dark:border-gray-800 dark:bg-darkBg"
+                            class="report-card rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm transition-all duration-200 sm:p-5 dark:border-gray-800 dark:bg-darkBg"
                         >
                             <div class="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
                                 <div class="min-w-0 flex-1">
@@ -602,7 +602,7 @@
                                 </div>
 
                                 <div
-                                    class="flex flex-shrink-0 flex-col justify-end gap-2 sm:flex-row lg:w-44 lg:flex-col"
+                                    class="flex w-full flex-shrink-0 flex-col justify-end gap-2 sm:flex-row lg:w-44 lg:flex-col"
                                 >
                                     @if ($modelIsAvailable)
                                         <a
@@ -679,13 +679,13 @@
             </div>
 
             <div id="verify" class="tab-content">
-                <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 class="mb-5 text-xl font-bold text-gray-900 sm:mb-6 sm:text-2xl dark:text-white">
                     Verification <span class="text-green-600 dark:text-neon">Requests</span>
                 </h2>
                 <div class="space-y-3">
                     @forelse ($requests as $req)
                         <div
-                            class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50 p-5 shadow-sm md:flex-row md:items-center dark:border-gray-800 dark:bg-darkBg"
+                            class="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm sm:p-5 md:flex-row md:items-center dark:border-gray-800 dark:bg-darkBg"
                         >
                             <div class="mb-4 md:mb-0">
                                 <p class="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
@@ -697,11 +697,11 @@
                                 </p>
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Note: "{{ $req->note }}"</p>
                             </div>
-                            <div class="flex gap-3">
+                            <div class="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
                                 <form method="POST" action="/verify/{{ $req->id }}/approve">
                                     @csrf
                                     <button
-                                        class="rounded-lg border border-green-300 bg-green-100 px-5 py-2 text-sm font-semibold text-green-700 transition-colors hover:bg-green-600 hover:text-white dark:border-green-500/20 dark:bg-green-500/10 dark:text-neon dark:hover:text-black"
+                                        class="w-full rounded-lg border border-green-300 bg-green-100 px-5 py-2 text-sm font-semibold text-green-700 transition-colors hover:bg-green-600 hover:text-white dark:border-green-500/20 dark:bg-green-500/10 dark:text-neon dark:hover:text-black"
                                     >
                                         Approve
                                     </button>
@@ -709,7 +709,7 @@
                                 <form method="POST" action="/verify/{{ $req->id }}/reject">
                                     @csrf
                                     <button
-                                        class="rounded-lg border border-red-200 bg-red-100 px-5 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-600 hover:text-white dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-500"
+                                        class="w-full rounded-lg border border-red-200 bg-red-100 px-5 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-600 hover:text-white dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-500"
                                     >
                                         Reject
                                     </button>
@@ -723,13 +723,13 @@
             </div>
 
             <div id="category" class="tab-content">
-                <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 class="mb-5 text-xl font-bold text-gray-900 sm:mb-6 sm:text-2xl dark:text-white">
                     Manage <span class="text-green-600 dark:text-neon">Categories</span>
                 </h2>
                 <form
                     method="POST"
                     action="/admin/category"
-                    class="mb-8 flex gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm dark:border-gray-800 dark:bg-darkBg"
+                    class="mb-6 flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm sm:mb-8 sm:flex-row dark:border-gray-800 dark:bg-darkBg"
                 >
                     @csrf
                     <input
@@ -748,7 +748,7 @@
                     @foreach ($categories as $c)
                         @continue (!is_object($c) || !isset($c->id, $c->name))
                         <div
-                            class="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm transition-colors hover:border-green-300 dark:border-gray-800 dark:bg-darkBg dark:hover:border-neon/20"
+                            class="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm transition-colors hover:border-green-300 dark:border-gray-800 dark:bg-darkBg dark:hover:border-neon/20"
                         >
                             <p class="font-medium text-gray-800 dark:text-gray-200">{{ $c->name }}</p>
                             <form method="POST" action="/admin/category/{{ $c->id }}">
@@ -824,12 +824,12 @@
                                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $u->models_count }} models · {{ number_format($u->models_sum_download_count ?? 0) }} downloads · Joined {{ $u->created_at?->format('M j, Y') ?? 'Unknown' }}</p>
                                     </div>
                                 </div>
-                                <div class="flex flex-wrap gap-2">
+                                <div class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
                                     @if ($u->role === 'user')
-                                        <form method="POST" action="/admin/promote/{{ $u->id }}">
+                                        <form method="POST" action="/admin/promote/{{ $u->id }}" class="min-w-0">
                                             @csrf
                                             <button
-                                                class="flex min-w-28 justify-center rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-600 hover:text-white dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:bg-blue-600 dark:hover:text-white"
+                                    class="flex w-full min-w-28 justify-center rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-600 hover:text-white sm:w-auto dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:bg-blue-600 dark:hover:text-white"
                                             >
                                                 Promote
                                             </button>
@@ -837,10 +837,10 @@
                                     @endif
 
                                     @if ($u->role === 'moderator')
-                                        <form method="POST" action="/admin/demote/{{ $u->id }}">
+                                        <form method="POST" action="/admin/demote/{{ $u->id }}" class="min-w-0">
                                             @csrf
                                             <button
-                                                class="flex min-w-28 justify-center rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm font-semibold text-yellow-700 transition-colors hover:bg-yellow-400 hover:text-black dark:border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400 dark:hover:bg-yellow-400 dark:hover:text-black"
+                                    class="flex w-full min-w-28 justify-center rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm font-semibold text-yellow-700 transition-colors hover:bg-yellow-400 hover:text-black sm:w-auto dark:border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400 dark:hover:bg-yellow-400 dark:hover:text-black"
                                             >
                                                 Demote
                                             </button>
@@ -851,6 +851,7 @@
                                         <form
                                             method="POST"
                                             action="/admin/delete-user/{{ $u->id }}"
+                                            class="min-w-0"
                                             onsubmit="return confirmFormSubmission(this);"
                                             data-confirm-title="Delete {{ $u->username }}?"
                                             data-confirm-message="This permanently deletes the account and its uploaded models. This action cannot be undone."
@@ -859,7 +860,7 @@
                                             @csrf
                                             @method ('DELETE')
                                             <button
-                                                class="flex min-w-28 justify-center rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white"
+                                                class="flex w-full min-w-28 justify-center rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white sm:w-auto dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white"
                                             >
                                                 Delete user
                                             </button>

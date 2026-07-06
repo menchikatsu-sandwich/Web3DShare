@@ -6,11 +6,11 @@
 
 @section ('content')
     <div
-        class="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/60 p-4 pt-10 pb-10 backdrop-blur-md"
+        class="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/60 p-2 pt-4 pb-4 backdrop-blur-md sm:p-4 sm:pt-10 sm:pb-10"
     >
         <div
             data-tour="upload-panel"
-            class="relative w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 shadow-xl transition-colors duration-300 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]"
+            class="relative max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto rounded-xl border border-gray-200 bg-white p-4 shadow-xl transition-colors duration-300 sm:rounded-2xl sm:p-8 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]"
         >
             <a
                 href="/"
@@ -23,12 +23,12 @@
                 method="POST"
                 action="/models"
                 enctype="multipart/form-data"
-                class="flex flex-col gap-5"
+                class="flex flex-col gap-4 sm:gap-5"
                 id="uploadForm"
             >
                 @csrf
-                <div class="mb-4">
-                    <h2 class="text-3xl font-bold tracking-wide text-gray-900 dark:text-white">
+                <div class="mb-2 sm:mb-4">
+                    <h2 class="text-2xl font-bold tracking-wide text-gray-900 sm:text-3xl dark:text-white">
                         Upload <span class="text-green-600 dark:text-neon">Model</span>
                     </h2>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Share your 3D creation with the world</p>
@@ -37,7 +37,7 @@
                 @if ($hasUnlimitedUploads)
                     <div
                         data-tour="upload-limit"
-                        class="flex items-center justify-between gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-800 dark:border-neon/20 dark:bg-neon/10 dark:text-neon"
+                        class="flex flex-col gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-800 sm:flex-row sm:items-center sm:justify-between dark:border-neon/20 dark:bg-neon/10 dark:text-neon"
                     >
                         <div>
                             <p class="text-sm font-semibold">{{ $isStaff ? ucfirst(auth()->user()->role).' staff account' : 'Verified uploader' }}</p>
@@ -169,12 +169,12 @@
                         id="modelInput"
                         accept=".glb"
                         required
-                        class="block w-full cursor-pointer rounded-xl border border-gray-300 bg-gray-50 text-sm text-gray-500 transition-all file:mr-4 file:rounded-xl file:border-0 file:bg-green-100 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-green-700 hover:file:bg-green-200 dark:border-gray-800 dark:bg-darkBg dark:text-gray-400 dark:file:bg-neon/10 dark:file:text-neon dark:hover:file:bg-neon/20"
+                        class="block w-full cursor-pointer rounded-xl border border-gray-300 bg-gray-50 text-xs text-gray-500 transition-all file:mr-2 file:rounded-lg file:border-0 file:bg-green-100 file:px-3 file:py-2.5 file:text-xs file:font-semibold file:text-green-700 hover:file:bg-green-200 sm:text-sm sm:file:mr-4 sm:file:rounded-xl sm:file:px-4 sm:file:text-sm dark:border-gray-800 dark:bg-darkBg dark:text-gray-400 dark:file:bg-neon/10 dark:file:text-neon dark:hover:file:bg-neon/20"
                     />
 
                     <div
                         id="modelPreviewContainer"
-                        class="relative mt-3 hidden h-64 w-full overflow-hidden rounded-xl border border-gray-300 bg-gray-100 dark:border-neon/20 dark:bg-black/50"
+                        class="relative mt-3 hidden h-48 w-full overflow-hidden rounded-xl border border-gray-300 bg-gray-100 sm:h-64 dark:border-neon/20 dark:bg-black/50"
                     >
                         <model-viewer
                             id="modelViewer"
@@ -198,7 +198,7 @@
                         id="thumbInput"
                         accept="image/*"
                         required
-                        class="block w-full cursor-pointer rounded-xl border border-gray-300 bg-gray-50 text-sm text-gray-500 transition-all file:mr-4 file:rounded-xl file:border-0 file:bg-green-100 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-green-700 hover:file:bg-green-200 dark:border-gray-800 dark:bg-darkBg dark:text-gray-400 dark:file:bg-neon/10 dark:file:text-neon dark:hover:file:bg-neon/20"
+                        class="block w-full cursor-pointer rounded-xl border border-gray-300 bg-gray-50 text-xs text-gray-500 transition-all file:mr-2 file:rounded-lg file:border-0 file:bg-green-100 file:px-3 file:py-2.5 file:text-xs file:font-semibold file:text-green-700 hover:file:bg-green-200 sm:text-sm sm:file:mr-4 sm:file:rounded-xl sm:file:px-4 sm:file:text-sm dark:border-gray-800 dark:bg-darkBg dark:text-gray-400 dark:file:bg-neon/10 dark:file:text-neon dark:hover:file:bg-neon/20"
                     />
 
                     <div

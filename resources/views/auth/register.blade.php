@@ -1,9 +1,11 @@
 @extends ('layouts.app')
 
 @section ('content')
-    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-md">
+    <div
+        class="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/60 p-2 pt-4 pb-4 backdrop-blur-md sm:items-center sm:p-4"
+    >
         <div
-            class="relative w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-xl transition-colors duration-300 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]"
+            class="relative max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-xl border border-gray-200 bg-white p-5 shadow-xl transition-colors duration-300 sm:rounded-2xl sm:p-8 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]"
         >
             <a href="/" class="absolute top-4 right-4 text-gray-400 transition-colors hover:text-neon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -12,7 +14,7 @@
             <form method="POST" action="/register" class="flex flex-col gap-5" id="register-form">
                 @csrf
                 <div class="mb-2">
-                    <h2 class="text-3xl font-bold tracking-wide text-gray-900 dark:text-white">
+                    <h2 class="text-2xl font-bold tracking-wide text-gray-900 sm:text-3xl dark:text-white">
                         Regis<span class="text-neon">ter</span>
                     </h2>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Join the Web3DShare community</p>

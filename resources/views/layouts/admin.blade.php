@@ -97,12 +97,12 @@
 
     <div class="flex min-h-screen flex-col">
         <nav
-            class="sticky top-0 z-50 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 shadow-sm transition-colors duration-300 dark:border-neon/10 dark:bg-darkPanel"
+            class="sticky top-0 z-50 flex items-center justify-between gap-2 border-b border-gray-200 bg-white px-3 py-2.5 shadow-sm transition-colors duration-300 sm:gap-3 sm:px-6 sm:py-4 dark:border-neon/10 dark:bg-darkPanel"
         >
-            <div class="flex items-center gap-6">
-                <a href="/" class="group flex items-center gap-2">
+            <div class="flex min-w-0 items-center gap-3 sm:gap-6">
+                <a href="/" class="group flex min-w-0 items-center gap-2">
                     <h1
-                        class="text-2xl font-bold tracking-wide text-green-600 transition-opacity group-hover:opacity-80 dark:text-neon"
+                        class="truncate text-lg font-bold tracking-wide text-green-600 transition-opacity group-hover:opacity-80 sm:text-2xl dark:text-neon"
                     >
                         Web3DShare
                     </h1>
@@ -113,15 +113,15 @@
                 </a>
             </div>
 
-            <div class="flex items-center gap-6">
+            <div class="flex shrink-0 items-center gap-3 sm:gap-6">
                 <button
                     id="theme-toggle"
-                    class="relative inline-flex h-7 w-14 items-center rounded-full bg-gray-300 transition-colors duration-300 focus:ring-2 focus:ring-green-500 focus:outline-none dark:bg-gray-700 dark:focus:ring-neon"
+                    class="relative inline-flex h-6 w-12 items-center rounded-full bg-gray-300 transition-colors duration-300 focus:ring-2 focus:ring-green-500 focus:outline-none sm:h-7 sm:w-14 dark:bg-gray-700 dark:focus:ring-neon"
                 >
                     <span class="sr-only">Toggle dark mode</span>
                     <span
                         id="theme-toggle-circle"
-                        class="flex inline-block h-5 w-5 translate-x-1 transform items-center justify-center rounded-full bg-white shadow-md transition-transform duration-300 dark:translate-x-8 dark:bg-darkBg"
+                        class="flex inline-block h-[18px] w-[18px] translate-x-1 transform items-center justify-center rounded-full bg-white shadow-md transition-transform duration-300 sm:h-5 sm:w-5 dark:translate-x-6 sm:dark:translate-x-8 dark:bg-darkBg"
                     >
                         <svg id="theme-toggle-light-icon" class="h-3.5 w-3.5 text-yellow-500 dark:hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
                         <svg id="theme-toggle-dark-icon" class="hidden h-3.5 w-3.5 text-neon dark:block" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
@@ -134,18 +134,18 @@
                             <img
                                 src="{{ auth()->user()->profileImageUrl() }}"
                                 onclick="toggleMenu()"
-                                class="h-11 w-11 cursor-pointer rounded-full object-cover ring-2 ring-red-500 ring-offset-2 ring-offset-white transition-all dark:ring-offset-darkPanel"
+                                class="h-9 w-9 cursor-pointer rounded-full object-cover ring-2 ring-red-500 ring-offset-2 ring-offset-white transition-all sm:h-11 sm:w-11 dark:ring-offset-darkPanel"
                             />
                         @else
                             <img
                                 src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->username) }}&background=e5e7eb&color=1f2937"
                                 onclick="toggleMenu()"
-                                class="block h-11 w-11 cursor-pointer rounded-full object-cover ring-2 ring-red-500 ring-offset-2 ring-offset-white transition-all dark:hidden"
+                                class="block h-9 w-9 cursor-pointer rounded-full object-cover ring-2 ring-red-500 ring-offset-2 ring-offset-white transition-all sm:h-11 sm:w-11 dark:hidden"
                             />
                             <img
                                 src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->username) }}&background=111113&color=00ff88"
                                 onclick="toggleMenu()"
-                                class="hidden h-11 w-11 cursor-pointer rounded-full object-cover ring-2 ring-red-500 ring-offset-2 ring-offset-darkPanel transition-all dark:block"
+                                class="hidden h-9 w-9 cursor-pointer rounded-full object-cover ring-2 ring-red-500 ring-offset-2 ring-offset-darkPanel transition-all sm:h-11 sm:w-11 dark:block"
                             />
                         @endif
 
@@ -172,7 +172,7 @@
             </div>
         </nav>
 
-        <main class="flex-1 p-6 lg:p-8">
+        <main class="min-w-0 flex-1 overflow-x-hidden p-3 sm:p-6 lg:p-8">
             @yield ('content')
         </main>
     </div>
@@ -303,7 +303,7 @@
                 document.body.appendChild(wrapper);
             }
             wrapper.innerHTML = `
-        <div class="relative w-full max-w-[1400px] h-[90vh] bg-white dark:bg-darkPanel rounded-2xl flex items-center justify-center" 
+        <div class="relative w-full max-w-[1400px] h-[calc(100dvh-1rem)] sm:h-[90vh] bg-white dark:bg-darkPanel rounded-xl sm:rounded-2xl flex items-center justify-center" 
              onclick="event.stopPropagation()">
             <div class="w-12 h-12 border-4 border-neon border-t-transparent rounded-full animate-spin"></div>
         </div>`;
@@ -319,7 +319,7 @@
                 wrapper.onclick = closeAll;
                 document.body.appendChild(wrapper);
             }
-            wrapper.innerHTML = `<div class="relative w-full max-w-[1400px] h-[90vh] sm:h-[85vh] bg-white dark:bg-darkPanel rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-modal-up flex flex-col" onclick="event.stopPropagation()">${html}</div>`;
+            wrapper.innerHTML = `<div class="relative w-full max-w-[1400px] h-[calc(100dvh-1rem)] sm:h-[85vh] bg-white dark:bg-darkPanel rounded-xl sm:rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-modal-up flex flex-col" onclick="event.stopPropagation()">${html}</div>`;
             document.body.style.overflow = 'hidden';
             modalOpen = true;
         }

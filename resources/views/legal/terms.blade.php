@@ -1,11 +1,11 @@
 @extends ('layouts.app')
 
 @section ('content')
-    <div class="-m-6 min-h-[calc(100vh-73px)] bg-gray-100 lg:-m-8 dark:bg-darkBg">
-        <section class="border-b border-gray-200 bg-white px-6 py-10 lg:px-10 dark:border-gray-800 dark:bg-darkPanel">
+    <div class="-m-3 min-h-[calc(100vh-73px)] bg-gray-100 sm:-m-6 lg:-m-8 dark:bg-darkBg">
+        <section class="border-b border-gray-200 bg-white px-4 py-8 sm:px-6 sm:py-10 lg:px-10 dark:border-gray-800 dark:bg-darkPanel">
             <div class="mx-auto max-w-5xl">
                 <p class="mb-3 text-xs font-bold tracking-widest text-green-600 uppercase dark:text-neon">Web3DShare Legal Terms</p>
-                <h1 class="text-4xl leading-tight font-bold text-gray-950 lg:text-5xl dark:text-white">
+                <h1 class="text-3xl leading-tight font-bold text-gray-950 sm:text-4xl lg:text-5xl dark:text-white">
                     EULA, Rules of Access, and Terms of Agreement
                 </h1>
                 <p class="mt-4 max-w-3xl leading-relaxed text-gray-600 dark:text-gray-400">These terms govern access to Web3DShare, including accounts, uploads, downloads, model pages, comments, reports, moderation tools, and any related community features. By creating an account, uploading content, browsing models, or using any feature of this website, you agree to follow these terms.</p>
@@ -13,7 +13,7 @@
             </div>
         </section>
 
-        <section class="px-6 py-10 lg:px-10">
+        <section class="px-3 py-6 sm:px-6 sm:py-10 lg:px-10">
             <div class="mx-auto grid max-w-5xl grid-cols-1 items-start gap-8 lg:grid-cols-[260px_1fr]">
                 <aside
                     class="sticky top-24 hidden rounded-xl border border-gray-200 bg-white p-5 shadow-sm lg:block dark:border-gray-800 dark:bg-darkPanel"
@@ -33,16 +33,16 @@
 
                 <article class="space-y-6 text-gray-700 dark:text-gray-300">
                     <div
-                        class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-darkPanel"
                     >
                         <p class="text-sm leading-relaxed">This page is written to clearly describe Web3DShare's operating rules. It is not a substitute for advice from a licensed legal professional. If any part of these terms is unclear, the safest interpretation is the interpretation chosen by Web3DShare administrators and developers for the protection, stability, and continuity of the website.</p>
                     </div>
 
                     <section
                         id="agreement"
-                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-darkPanel"
                     >
-                        <h2 class="mb-4 text-2xl font-bold text-gray-950 dark:text-white">
+                        <h2 class="mb-4 text-xl font-bold text-gray-950 sm:text-2xl dark:text-white">
                             1. Acceptance of Agreement
                         </h2>
                         <div class="space-y-4 leading-relaxed">
@@ -54,9 +54,9 @@
 
                     <section
                         id="ownership"
-                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-darkPanel"
                     >
-                        <h2 class="mb-4 text-2xl font-bold text-gray-950 dark:text-white">
+                        <h2 class="mb-4 text-xl font-bold text-gray-950 sm:text-2xl dark:text-white">
                             2. Website Ownership and Administrative Authority
                         </h2>
                         <div class="space-y-4 leading-relaxed">
@@ -69,9 +69,9 @@
 
                     <section
                         id="accounts"
-                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-darkPanel"
                     >
-                        <h2 class="mb-4 text-2xl font-bold text-gray-950 dark:text-white">3. Accounts and Identity</h2>
+                        <h2 class="mb-4 text-xl font-bold text-gray-950 sm:text-2xl dark:text-white">3. Accounts and Identity</h2>
                         <div class="space-y-4 leading-relaxed">
                             <p>You are responsible for the accuracy of the information you provide during registration and for maintaining the confidentiality of your account credentials. You may not impersonate another person, misrepresent your identity, use a misleading username, or create an account for abusive, deceptive, automated, or harmful purposes.</p>
                             <p>Web3DShare may restrict usernames, profile images, creator names, descriptions, comments, or other account details if they are confusing, offensive, misleading, infringing, spam-like, or otherwise unsuitable for the community.</p>
@@ -81,9 +81,9 @@
 
                     <section
                         id="uploads"
-                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-darkPanel"
                     >
-                        <h2 class="mb-4 text-2xl font-bold text-gray-950 dark:text-white">
+                        <h2 class="mb-4 text-xl font-bold text-gray-950 sm:text-2xl dark:text-white">
                             4. Uploads, Models, and Content License
                         </h2>
                         <div class="space-y-4 leading-relaxed">
@@ -96,9 +96,9 @@
 
                     <section
                         id="conduct"
-                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-darkPanel"
                     >
-                        <h2 class="mb-4 text-2xl font-bold text-gray-950 dark:text-white">5. Community Conduct</h2>
+                        <h2 class="mb-4 text-xl font-bold text-gray-950 sm:text-2xl dark:text-white">5. Community Conduct</h2>
                         <div class="space-y-4 leading-relaxed">
                             <p>You agree not to harass other users, post abusive comments, spam reports, manipulate stars or views, attack the website, upload repeated junk content, bypass limits, scrape aggressively, reverse engineer protected systems, or interfere with other people's use of the platform.</p>
                             <p>Reports must be submitted in good faith. A report is a request for review, not a guarantee that administrators will take the action requested by the reporter. False, malicious, repetitive, or weaponized reports may lead to account restrictions.</p>
@@ -108,9 +108,9 @@
 
                     <section
                         id="moderation"
-                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-darkPanel"
                     >
-                        <h2 class="mb-4 text-2xl font-bold text-gray-950 dark:text-white">
+                        <h2 class="mb-4 text-xl font-bold text-gray-950 sm:text-2xl dark:text-white">
                             6. Moderation and Enforcement
                         </h2>
                         <div class="space-y-4 leading-relaxed">
@@ -122,9 +122,9 @@
 
                     <section
                         id="downloads"
-                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-darkPanel"
                     >
-                        <h2 class="mb-4 text-2xl font-bold text-gray-950 dark:text-white">
+                        <h2 class="mb-4 text-xl font-bold text-gray-950 sm:text-2xl dark:text-white">
                             7. Downloads and Third-Party Use
                         </h2>
                         <div class="space-y-4 leading-relaxed">
@@ -136,9 +136,9 @@
 
                     <section
                         id="security"
-                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-darkPanel"
                     >
-                        <h2 class="mb-4 text-2xl font-bold text-gray-950 dark:text-white">
+                        <h2 class="mb-4 text-xl font-bold text-gray-950 sm:text-2xl dark:text-white">
                             8. Security, Availability, and Data
                         </h2>
                         <div class="space-y-4 leading-relaxed">
@@ -150,9 +150,9 @@
 
                     <section
                         id="termination"
-                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                        class="scroll-mt-24 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-darkPanel"
                     >
-                        <h2 class="mb-4 text-2xl font-bold text-gray-950 dark:text-white">
+                        <h2 class="mb-4 text-xl font-bold text-gray-950 sm:text-2xl dark:text-white">
                             9. Suspension, Removal, and Termination
                         </h2>
                         <div class="space-y-4 leading-relaxed">
@@ -163,9 +163,9 @@
                     </section>
 
                     <section
-                        class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-darkPanel"
+                        class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-800 dark:bg-darkPanel"
                     >
-                        <h2 class="mb-4 text-2xl font-bold text-gray-950 dark:text-white">10. Final Statement</h2>
+                        <h2 class="mb-4 text-xl font-bold text-gray-950 sm:text-2xl dark:text-white">10. Final Statement</h2>
                         <div class="space-y-4 leading-relaxed">
                             <p>Web3DShare exists as a website controlled and maintained by its administrators and developers. Users are welcome to participate only under the permissions, limits, rules, and decisions set by those administrators and developers.</p>
                             <p>If any part of these terms is found unenforceable, the remaining sections remain in effect. The administrators and developers may interpret, enforce, revise, or replace these terms as needed to protect the website and keep the service usable.</p>

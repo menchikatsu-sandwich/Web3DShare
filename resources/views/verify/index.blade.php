@@ -1,10 +1,12 @@
 @extends ('layouts.app')
 
 @section ('content')
-    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-md">
+    <div
+        class="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/60 p-2 pt-4 pb-4 backdrop-blur-md sm:p-4 sm:pt-8 sm:pb-8"
+    >
         <div
             data-tour="verify-panel"
-            class="relative w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-8 shadow-xl transition-colors duration-300 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]"
+            class="relative max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto rounded-xl border border-gray-200 bg-white p-5 shadow-xl transition-colors duration-300 sm:rounded-2xl sm:p-8 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]"
         >
             <a href="/" class="absolute top-4 right-4 text-gray-400 transition-colors hover:text-neon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6">
@@ -13,13 +15,13 @@
             </a>
 
             @if (auth()->user()->isStaff())
-                <div class="flex flex-col items-center py-8 text-center">
+                <div class="flex flex-col items-center py-6 text-center sm:py-8">
                     <div class="mb-6 rounded-full bg-blue-100 p-5 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-16 w-16">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9A2.25 2.25 0 0 1 5.25 16.5v-9A2.25 2.25 0 0 1 7.5 5.25h9a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25ZM9 9.75h6m-6 3h6" />
                         </svg>
                     </div>
-                    <h2 class="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
+                    <h2 class="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
                         Staff Access Is <span class="text-blue-600 dark:text-blue-400">Already Active</span>
                     </h2>
                     <p class="max-w-sm text-gray-500 dark:text-gray-400">Your {{ auth()->user()->role }} account already has unlimited uploads and staff access. A verified creator request is not needed.</p>
@@ -32,7 +34,7 @@
                     </a>
                 </div>
             @elseif (auth()->user()->upload_tier === 'verified')
-                <div class="flex flex-col items-center py-8 text-center">
+                <div class="flex flex-col items-center py-6 text-center sm:py-8">
                     <div
                         class="mb-6 animate-bounce rounded-full bg-green-100 p-5 text-green-600 dark:bg-neon/10 dark:text-neon"
                     >
@@ -40,7 +42,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                         </svg>
                     </div>
-                    <h2 class="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
+                    <h2 class="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
                         You're Already <span class="text-neon">Verified</span>!
                     </h2>
                     <p class="max-w-sm text-gray-500 dark:text-gray-400">Your account is already verified. The official creator badge is active on your profile.</p>
@@ -53,7 +55,7 @@
                     </a>
                 </div>
             @elseif ($pendingRequest)
-                <div class="flex flex-col items-center py-8 text-center">
+                <div class="flex flex-col items-center py-6 text-center sm:py-8">
                     <div
                         class="mb-6 rounded-full bg-yellow-100 p-5 text-yellow-600 dark:bg-yellow-500/10 dark:text-yellow-400"
                     >
@@ -61,7 +63,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
                         </svg>
                     </div>
-                    <h2 class="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
+                    <h2 class="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
                         Verification <span class="text-yellow-600 dark:text-yellow-400">Pending</span>
                     </h2>
                     <p class="max-w-sm text-gray-500 dark:text-gray-400">Your request is waiting for admin or moderator review. You can submit a new request after this one is approved or rejected.</p>
@@ -83,17 +85,17 @@
                 </div>
             @else
                 {{-- FORM REQUEST JIKA BELUM VERIFIED --}}
-                <form method="POST" action="/verify-request" class="flex flex-col gap-6">
+                <form method="POST" action="/verify-request" class="flex flex-col gap-5 sm:gap-6">
                     @csrf
 
-                    <div class="mb-2 flex items-center gap-4">
+                    <div class="mb-1 flex items-start gap-3 sm:mb-2 sm:items-center sm:gap-4">
                         <div class="rounded-full bg-green-100 p-3 text-green-600 dark:bg-neon/10 dark:text-neon">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-8 w-8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                             </svg>
                         </div>
                         <div>
-                            <h2 class="text-3xl font-bold tracking-wide text-gray-900 dark:text-white">
+                            <h2 class="text-2xl font-bold tracking-wide text-gray-900 sm:text-3xl dark:text-white">
                                 Request <span class="text-neon">Verified</span>
                             </h2>
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get the official badge for your profile</p>

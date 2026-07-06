@@ -1,9 +1,9 @@
 <div
     data-comment-node="{{ $comment->id }}"
     data-parent-id="{{ $comment->parent_id }}"
-    class="block w-full relative {{ $comment->parent_id ? 'mt-4 pl-6 before:absolute before:left-0 before:top-[-16px] before:w-4 before:h-[34px] before:border-l-2 before:border-b-2 before:border-gray-150 dark:before:border-gray-800/60 before:rounded-bl-xl' : 'border-b border-gray-150 dark:border-gray-800/60 pb-6 last:border-0 pt-3.5' }}"
+    class="block w-full relative {{ $comment->parent_id ? 'mt-3 pl-4 sm:mt-4 sm:pl-6 before:absolute before:left-0 before:top-[-16px] before:w-3 sm:before:w-4 before:h-[32px] sm:before:h-[34px] before:border-l-2 before:border-b-2 before:border-gray-150 dark:before:border-gray-800/60 before:rounded-bl-xl' : 'border-b border-gray-150 dark:border-gray-800/60 pb-5 sm:pb-6 last:border-0 pt-3.5' }}"
 >
-    <div class="flex w-full items-start gap-4 bg-transparent">
+    <div class="flex w-full items-start gap-3 bg-transparent sm:gap-4">
         
         <div class="flex-shrink-0 pt-0.5">
             <img
@@ -14,7 +14,7 @@
 
         <div class="min-w-0 flex-1 flex flex-col justify-start">
             
-            <div class="flex h-4 items-center gap-2 mb-1.5">
+            <div class="mb-1.5 flex min-h-4 flex-wrap items-center gap-x-2 gap-y-1">
                 <span class="truncate text-[13px] font-bold text-gray-900 dark:text-gray-200 leading-none">
                     {{ $comment->user->nickname ?? $comment->user->username }}
                 </span>
@@ -27,7 +27,7 @@
                 {{ $comment->body }}
             </p>
 
-            <div class="mt-1.5 mb-2 flex items-center gap-4" data-comment-actions="{{ $comment->id }}">
+            <div class="mt-1.5 mb-2 flex flex-wrap items-center gap-x-4 gap-y-2" data-comment-actions="{{ $comment->id }}">
                 @auth
                     <button
                         type="button"
@@ -120,7 +120,7 @@
 
     <div
         id="replies-container-{{ $comment->id }}"
-        class="mt-2 ml-5 sm:ml-6 hidden space-y-2 pl-2 transition-all relative"
+        class="mt-2 ml-3 hidden space-y-2 pl-1 transition-all relative sm:ml-6 sm:pl-2"
     >
         @foreach ($allComments->where('parent_id', $comment->id) as $subComment)
             @include('model.comment-item', ['comment' => $subComment, 'allComments' => $allComments, 'modelId' => $modelId])

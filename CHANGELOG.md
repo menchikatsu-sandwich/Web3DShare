@@ -27,3 +27,7 @@ All notable changes to Web3DShare will be documented in this file.
 
 - Fixed `app/Http/Controllers/LayoutTemplate.php` to render admin pages, model modals, and upload verification forms consistently.
 - Theme switcher bug-fixed; light / dark mode stable across all page templates.
+
+### Responsive for Mobile
+
+- Adjusting the views page to auto layout on mobile device.

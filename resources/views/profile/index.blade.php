@@ -1,9 +1,11 @@
 @extends ('layouts.app')
 
 @section ('content')
-    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-md">
+    <div
+        class="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/60 p-2 pt-4 pb-4 backdrop-blur-md sm:items-center sm:p-4"
+    >
         <div
-            class="relative w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-8 shadow-xl transition-colors duration-300 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]"
+            class="relative max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto rounded-xl border border-gray-200 bg-white p-5 shadow-xl transition-colors duration-300 sm:rounded-2xl sm:p-8 dark:border-neon/20 dark:bg-darkPanel dark:shadow-[0_0_40px_rgba(0,255,136,0.1)]"
         >
             <a
                 href="/"
@@ -15,18 +17,18 @@
             <form method="POST" action="/profile" enctype="multipart/form-data" class="flex flex-col gap-6">
                 @csrf
                 <div class="mb-2">
-                    <h2 class="text-3xl font-bold tracking-wide text-gray-900 dark:text-white">
+                    <h2 class="text-2xl font-bold tracking-wide text-gray-900 sm:text-3xl dark:text-white">
                         Edit <span class="text-green-600 dark:text-neon">Profile</span>
                     </h2>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Update your personal information</p>
                 </div>
 
-                <div class="my-2 flex justify-center">
+                <div class="my-1 flex justify-center sm:my-2">
                     <label class="group relative cursor-pointer">
                         <img
                             id="profileImagePreview"
                             src="{{ $user->profileImageUrl() ?? 'https://ui-avatars.com/api/?name=User&background=e5e7eb&color=1f2937' }}"
-                            class="h-28 w-28 rounded-full object-cover ring-2 ring-green-500 ring-offset-4 ring-offset-white transition-all dark:ring-neon dark:ring-offset-darkPanel"
+                            class="h-24 w-24 rounded-full object-cover ring-2 ring-green-500 ring-offset-4 ring-offset-white transition-all sm:h-28 sm:w-28 dark:ring-neon dark:ring-offset-darkPanel"
                         />
                         <div
                             class="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
