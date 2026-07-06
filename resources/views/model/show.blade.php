@@ -5,28 +5,28 @@
 @endpush
 
 @section ('content')
+    <!-- Hapus batasan tinggi di mobile, pastikan lg:h-[] ada untuk mengunci versi PC -->
     <div
         id="model-root"
-        class="is-full-page -m-3 flex min-h-[calc(100dvh-65px)] w-auto flex-col bg-white sm:-m-6 lg:-m-8 dark:bg-darkPanel"
+        class="is-full-page -m-3 flex min-h-screen w-auto flex-col bg-white sm:-m-6 lg:-m-8 lg:h-[calc(100dvh-65px)] dark:bg-darkPanel"
     >
         @include ('model.partial', [
-        'model' => $model,
-        'recommendations' => $recommendations,
-        'categories' => $categories,
-        'isManageContext' => $isManageContext,
-        'authorModelCount' => $authorModelCount,
-        'hasStarred' => $hasStarred,
-    ])
+            'model' => $model,
+            'recommendations' => $recommendations,
+            'categories' => $categories,
+            'isManageContext' => $isManageContext,
+            'authorModelCount' => $authorModelCount,
+            'hasStarred' => $hasStarred,
+        ])
     </div>
     <style>
         .is-full-page #close-modal-btn {
             display: none !important;
         }
 
-        /* Munculkan tombol Back to Explore (flex karena dia butuh align-items-center) */
+        /* Munculkan tombol Back to Explore */
         .is-full-page #back-to-explore-btn {
             display: flex !important;
         }
     </style>
-
 @endsection

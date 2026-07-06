@@ -3,11 +3,13 @@
     $hasStarred = $hasStarred ?? false;
 @endphp
 
+<!-- PARENT WRAPPER: Mobile natural flow, PC lock height (lg:h-full lg:overflow-hidden) -->
 <div
     data-model-shell="{{ $model->id }}"
-    class="flex h-full min-h-0 w-full flex-col overflow-y-auto bg-white text-gray-800 lg:flex-row lg:overflow-hidden dark:bg-darkPanel dark:text-gray-200"
+    class="flex w-full flex-col bg-white text-gray-800 lg:h-full lg:flex-row lg:overflow-hidden dark:bg-darkPanel dark:text-gray-200"
 >
-    <div class="order-1 flex min-h-0 flex-1 flex-col overflow-x-hidden">
+    <!-- LEFT COLUMN (Main Content): Mobile natural, PC scroll mandiri (lg:overflow-y-auto) -->
+    <div class="order-1 flex w-full flex-col lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
         <div
             class="flex flex-shrink-0 items-center justify-between gap-3 border-b border-gray-100 bg-white px-4 py-3 sm:px-6 sm:py-4 lg:px-8 dark:border-gray-800 dark:bg-darkPanel"
         >
@@ -380,29 +382,31 @@
     @endphp
 
     @if (!$isFromPanel)
+        <!-- RIGHT COLUMN (More Like This): Mobile natural, PC fixed width + scroll mandiri -->
         <div
             data-tour="viewer-recommendations"
-            class="order-2 relative flex w-full flex-shrink-0 flex-col border-t border-gray-200 bg-gray-50 lg:w-80 lg:border-t-0 lg:border-l dark:border-gray-800 dark:bg-[#0c0c0e]"
+            class="order-2 flex w-full flex-col border-t border-gray-200 bg-gray-50 lg:w-80 lg:flex-shrink-0 lg:overflow-y-auto lg:border-t-0 lg:border-l dark:border-gray-800 dark:bg-[#0c0c0e]"
         >
             <div
-                class="z-10 flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-[#0c0c0e]"
+                class="flex flex-shrink-0 items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3 lg:sticky lg:top-0 lg:z-10 dark:border-gray-800 dark:bg-[#0c0c0e]"
             >
                 <h3 class="text-xs font-bold tracking-widest text-gray-500 uppercase">More Like This</h3>
             </div>
 
-            <div class="grid gap-4 p-4 sm:grid-cols-2 lg:block lg:flex-1 lg:space-y-4 lg:overflow-y-auto">
+            <!-- PERBAIKAN: grid-cols-1 akan memaksa isinya melar 100% -->
+            <div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-1">
                 @forelse ($recommendations as $rec)
+                    <!-- PERBAIKAN: Pakai "block w-full" agar card mengambil lebar penuh -->
                     <a
                         href="/models/{{ $rec->id }}"
                         onclick="handleModelClick('{{ $rec->id }}', event)"
-                        class="group flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:border-green-400 hover:shadow-md lg:rounded-xl dark:border-gray-800 dark:bg-darkPanel dark:hover:border-neon/40"
+                        class="group block w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:border-green-400 hover:shadow-md lg:rounded-xl dark:border-gray-800 dark:bg-darkPanel dark:hover:border-neon/40"
                     >
-                        <div
-                            class="relative aspect-[16/9] w-full overflow-hidden bg-gray-200 lg:aspect-auto lg:h-32 dark:bg-black"
-                        >
+                        <!-- PERBAIKAN: aspect-[16/9] akan membuat gambar selalu proporsional dan melar full -->
+                        <div class="relative w-full aspect-[16/9] overflow-hidden bg-gray-200 dark:bg-black">
                             <img
                                 src="{{ $rec->thumbnailUrl() }}"
-                                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                         </div>
                         <div class="p-3">

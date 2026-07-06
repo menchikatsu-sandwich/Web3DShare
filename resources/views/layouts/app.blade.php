@@ -465,12 +465,18 @@
         async function openModel(id, event) {
             if (event) event.preventDefault();
 
-            // Capture the current filter state when opening from Home.
             if (!modalOpen) {
                 activeFilters = window.location.search || '';
             }
 
             const url = modelUrl(id);
+
+            // BYPASS MODAL DI LAYAR HP (Lebar < 1024px)
+            // Jadi pengguna mobile langsung dilempar ke halaman /models/{id}
+            if (window.innerWidth < 1024) {
+                window.location.href = url;
+                return;
+            }
 
             // Opening another model while a modal is already stacked.
             if (modalOpen && history.state) {
