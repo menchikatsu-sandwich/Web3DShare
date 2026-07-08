@@ -110,6 +110,13 @@
             audience === 'user'
                 ? 'web3dshare_tour_done_user_' + userId + '_' + version
                 : 'web3dshare_tour_done_guest_' + version;
+        // Separate "done" flag for the My Models continuation mini-tour, so it can be
+        // tracked independently from the main tour (it is only triggered once, right
+        // after a user's first successful upload).
+        const continuationDoneKey = 'web3dshare_tour_myModels_done_user_' + userId + '_' + version;
+        // Set by the upload page right before redirecting to "/" after a successful
+        // upload. Read once here and removed immediately.
+        const justUploadedKey = 'web3dshare_just_uploaded_' + version;
 
         const welcome = root.querySelector('[data-tour-welcome]');
         const stage = root.querySelector('[data-tour-stage]');
@@ -209,6 +216,42 @@
             },
             {
                 route: '/',
+                target: '[data-tour="model-open"]',
+                title: 'Now open a model',
+                body: 'Let us peek inside the viewer before we continue. Click Next and the tour will open the first model on this page.',
+                nextLabel: 'Open model',
+                action: 'open-first-model',
+            },
+            {
+                target: '[data-tour="viewer-stage"]',
+                title: 'This is the model viewer',
+                body: 'This area loads the 3D file. You can rotate, zoom, and inspect the model directly in the browser.',
+            },
+            {
+                target: '[data-tour="viewer-top-actions"]',
+                title: 'Share and report',
+                body: 'Share copies the model link. Report lets you flag a model that has a problem for our moderation team to review.',
+            },
+            {
+                target: '[data-tour="viewer-actions"]',
+                title: 'Star and download',
+                body: 'Star the model to save it for later, and use Download to grab the file. Both are ready to use right away since you are logged in.',
+            },
+            {
+                target: '[data-tour="viewer-comments"]',
+                title: 'Comments and discussion',
+                body: 'As a logged-in user, you can join model discussions through comments. Keep comments constructive so moderation stays clean.',
+            },
+            {
+                target: '[data-tour="viewer-top-actions"]',
+                title: 'Back to the dashboard',
+                body: 'That covers the viewer. Click Next to close it and head back to the dashboard, then we will continue with uploading your own model.',
+                nextLabel: 'Back to dashboard',
+                action: 'navigate',
+                href: '/',
+            },
+            {
+                route: '/',
                 target: '[data-tour="sidebar-upload"]',
                 title: 'Upload model',
                 body: 'The Upload menu is used to submit a .glb file, thumbnail, category, tags, and description. Let us open it briefly.',
@@ -250,35 +293,40 @@
                 route: '/?filter=my_models',
                 target: '[data-tour="sidebar-my-models"]',
                 title: 'My Models',
-                body: 'This menu shows your own models. Edit and delete actions appear here.',
-            },
-            {
-                route: '/?filter=my_models',
-                target: '[data-tour="model-card"]',
-                title: 'Manage card',
-                body: 'Inside My Models, each card has Edit and Delete buttons. Edit only changes the title, description, category, and tags.',
-            },
-            {
-                route: '/?filter=my_models',
-                target: '[data-tour="model-open"]',
-                title: 'Open a model from My Models',
-                body: 'Click Next to open the viewer in management mode. Owner actions only appear when the viewer is opened from My Models.',
-                nextLabel: 'Open model',
-                action: 'open-first-model',
-            },
-            {
-                target: '[data-tour="viewer-owner-actions"]',
-                title: 'Owner actions in the viewer',
-                body: 'If the viewer is opened from My Models and the model belongs to you, Edit and Delete also appear inside the viewer.',
-            },
-            {
-                target: '[data-tour="viewer-comments"]',
-                title: 'Comments and discussion',
-                body: 'As a logged-in user, you can join model discussions through comments. Keep comments constructive so moderation stays clean.',
+                body: 'This menu shows your own models. Once you upload your first model, come back here to manage it. Edit and Delete actions appear on the card, and we will walk you through them as soon as your first model is live.',
             },
         ];
 
-        const steps = isAuth ? userSteps : guestSteps;
+        // Mini follow-up tour triggered once, automatically, right after a user's
+        // first successful upload (see justUploadedKey below). It only covers the
+        // owner-only actions (Edit/Delete) that require an actual owned model to
+        // exist, so it can never render against an empty My Models list.
+        const continuationSteps = isAuth
+            ? [
+                  {
+                      route: '/?filter=my_models',
+                      target: '[data-tour="model-card"]',
+                      title: 'Nice, your first model is live!',
+                      body: 'This is your model card inside My Models. Edit and Delete actions live right here.',
+                  },
+                  {
+                      route: '/?filter=my_models',
+                      target: '[data-tour="model-open"]',
+                      title: 'Open it in manage mode',
+                      body: 'Click Next to open the viewer in management mode. Owner actions only appear when the viewer is opened from My Models.',
+                      nextLabel: 'Open model',
+                      action: 'open-first-model',
+                  },
+                  {
+                      target: '[data-tour="viewer-owner-actions"]',
+                      title: 'Owner actions in the viewer',
+                      body: 'If the viewer is opened from My Models and the model belongs to you, Edit and Delete also appear inside the viewer.',
+                  },
+              ]
+            : [];
+
+        let tourMode = 'main';
+        let steps = isAuth ? userSteps : guestSteps;
         let currentIndex = 0;
         let activeTarget = null;
         let resizeHandler = null;
@@ -320,7 +368,7 @@
         }
 
         function saveActive(index) {
-            sessionStorage.setItem(activeKey, JSON.stringify({ audience, index }));
+            sessionStorage.setItem(activeKey, JSON.stringify({ audience, mode: tourMode, index }));
         }
 
         function readActive() {
@@ -362,13 +410,27 @@
 
         function finish(markDone = true) {
             renderToken += 1;
-            if (markDone) setDone();
+            if (markDone) {
+                if (tourMode === 'continuation') {
+                    localStorage.setItem(continuationDoneKey, '1');
+                } else {
+                    setDone();
+                }
+            }
             clearActive();
             cleanupListeners();
             hideWelcome();
             hideStage();
             root.classList.add('hidden');
             activeTarget = null;
+            tourMode = 'main';
+        }
+
+        function startContinuationTour() {
+            tourMode = 'continuation';
+            steps = continuationSteps;
+            currentIndex = 0;
+            renderStep(0);
         }
 
         function cleanupListeners() {
@@ -767,6 +829,8 @@
         }
 
         root.querySelector('[data-tour-start]').addEventListener('click', () => {
+            tourMode = 'main';
+            steps = isAuth ? userSteps : guestSteps;
             hideWelcome();
             renderStep(0);
         });
@@ -785,6 +849,8 @@
 
         window.Web3DTour = {
             restart() {
+                tourMode = 'main';
+                steps = isAuth ? userSteps : guestSteps;
                 localStorage.removeItem(doneKey);
                 clearActive();
                 showWelcome();
@@ -795,16 +861,34 @@
         setTimeout(() => {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('tour') === '1') {
+                tourMode = 'main';
+                steps = isAuth ? userSteps : guestSteps;
                 localStorage.removeItem(doneKey);
                 clearActive();
                 showWelcome();
                 return;
             }
 
+            // Resume whichever tour (main or the My Models continuation) was in
+            // progress before the last page navigation.
             const active = readActive();
             if (active) {
+                tourMode = active.mode === 'continuation' ? 'continuation' : 'main';
+                steps = tourMode === 'continuation' ? continuationSteps : isAuth ? userSteps : guestSteps;
                 renderStep(active.index);
                 return;
+            }
+
+            // The upload page sets this flag right before redirecting here after a
+            // successful upload. Show the My Models continuation once, automatically,
+            // instead of waiting for the user to find Edit/Delete on their own.
+            const justUploaded = sessionStorage.getItem(justUploadedKey);
+            if (justUploaded) {
+                sessionStorage.removeItem(justUploadedKey);
+                if (isAuth && continuationSteps.length && !localStorage.getItem(continuationDoneKey)) {
+                    startContinuationTour();
+                    return;
+                }
             }
 
             if (

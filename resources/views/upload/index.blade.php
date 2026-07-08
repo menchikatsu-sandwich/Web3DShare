@@ -279,6 +279,11 @@
                         );
                     }
 
+                    // Tell the onboarding tour a model was just uploaded successfully so
+                    // it can trigger the My Models continuation guide on the next page.
+                    // Key must match `justUploadedKey` in components/onboarding-tour.blade.php.
+                    sessionStorage.setItem('web3dshare_just_uploaded_v2', '1');
+
                     window.location.href = '/';
                 } catch (err) {
                     uploadError.textContent = err.message;
